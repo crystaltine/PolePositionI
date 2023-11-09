@@ -1,0 +1,12 @@
+.app-body {
+  background-color: rgb(139, 139, 139);
+}
+
+.game-bg {
+  position: absolute;
+  left: 0;
+  top: 0;
+  background-color: rgb(91, 203, 255);
+  width: 100%;
+  height: 100%;
+}

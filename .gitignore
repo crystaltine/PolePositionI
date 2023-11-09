@@ -1,24 +1,27 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
-/client/node_modules
-/client/.pnp
-/client/.pnp.js
+/client_react/node_modules
+/client_react/.pnp
+/client_react/.pnp.js
 
 # testing
-/client/coverage
+/client_react/coverage
 
 # production
-/client/build
+/client_react/build
 
 # misc
-/client/.DS_Store
-/client/.env.local
-/client/.env.development.local
-/client/.env.test.local
-/client/.env.production.local
-/client/package-lock.json
+/client_react/.DS_Store
+/client_react/.env.local
+/client_react/.env.development.local
+/client_react/.env.test.local
+/client_react/.env.production.local
+/client_react/package-lock.json
 
-/client/npm-debug.log*
-/client/yarn-debug.log*
-/client/yarn-error.log*
+/client_react/npm-debug.log*
+/client_react/yarn-debug.log*
+/client_react/yarn-error.log*
+
+/client_two/node_modules
+/client_two/package-lock.json
