@@ -24,6 +24,15 @@ while running:
     #white screen works, apparently screen.fill(white) is only step 1, update() below or the flip() implements changes onto display
     pygame.display.update()
 
+    #key numbers for keydowbs binary onkeyevent -> send to server
+    #up: 00
+    #down: 01
+    #left: 10
+    #right: 11
+
+    #keydown: 1##
+    #keyup: 0##
+
    
 pygame.quit
 sys.exit()
