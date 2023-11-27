@@ -1,30 +1,29 @@
-import pygame, sys
-from pygame.locals import*
-from user import User
-from enemy import Enemy
-
-
+import pygame
+import sys
 pygame.init()
-clock = pygame.time.Clock()
+
 running = True
-	
+   
 WHITE = (255, 255, 255)
 
-DISPLAYSURF = pygame.display.set_mode((300,300))
-DISPLAYSURF.fill(WHITE)
+screen = pygame.display.set_mode([300,300])
+screen.fill(WHITE)
 pygame.display.set_caption("Game")
 
 FPS = pygame.time.Clock()
-FPS.tick(24)
 #player = User(Sprite) insert sprite later
 
+#call object instances outside the loop
 while running:
-    for event in pygame.event.get():              
-        if event.type == QUIT:
-            running = false
-    DISPLAYSURF.fill()
-    #player.update()
+    FPS.tick(24) #moved timer into loop
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+   
+   
+    #white screen works, apparently screen.fill(white) is only step 1, update() below or the flip() implements changes onto display
+    pygame.display.update()
 
-    
+   
 pygame.quit
 sys.exit()
