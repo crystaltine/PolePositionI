@@ -1,5 +1,4 @@
 import pygame
-import sys
 pygame.init()
 
 running = True
@@ -25,11 +24,13 @@ while running:
     screen.blit(grass, (0, 400))
     screen.blit(mtns, (0, 200))
     for event in pygame.event.get():
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_LEFT:
+                pygame.draw.circle(screen, (255, 0, 0), (random.randint(0, width), random.randint(0, height)), radius)
+                
+
         if event.type == pygame.QUIT:
             running = False
-   
-   
-    #white screen works, apparently screen.fill(white) is only step 1, update() below or the flip() implements changes onto display
     pygame.display.update()
 
     #key numbers for keydowbs binary onkeyevent -> send to server
