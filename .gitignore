@@ -3,27 +3,32 @@
 __pycache__
 
 # dependencies
-/client_react/node_modules
-/client_react/.pnp
-/client_react/.pnp.js
+**/node_modules
+**/.pnp
+**/.pnp.js
 
 # testing
-/client_react/coverage
+**/coverage
 
 # production
-/client_react/build
+**/build
 
 # misc
-/client_react/.DS_Store
-/client_react/.env.local
-/client_react/.env.development.local
-/client_react/.env.test.local
-/client_react/.env.production.local
-/client_react/package-lock.json
+**/.DS_Store
+**/.env.local
+**/.env.development.local
+**/.env.test.local
+**/.env.production.local
+**/package-lock.json
 
-/client_react/npm-debug.log*
-/client_react/yarn-debug.log*
-/client_react/yarn-error.log*
+**/npm-debug.log*
+**/yarn-debug.log*
+**/yarn-error.log*
 
-/client_two/node_modules
-/client_two/package-lock.json
+**/node_modules
+**/package-lock.json
+
+old/
+
+/server/node_modules
+/server/package-lock.json
