@@ -12,23 +12,7 @@ class User(pygame.sprite.Sprite):
 
     def update():
         #general stuff and display speed and other variables
-        event = pygame.event()
-        keypress = None
-        if event.type = pygame.KEYDOWN:
-            keypress = 1
-        if event.type = pygame.KEYUP:
-            keypress = 0
-
-        #working on keyinpuyt use this future me https://stackoverflow.com/questions/16044229/how-to-get-keyboard-input-in-pygame 
-
-        #if key[K_UP]
-        #    keypress = 00
-        #if key[K_DOWN]
-        #    keypress = 00
-        #if key[K_LEFT]
-        #    keypress = 00
-        #if key[K_DOWN]
-        #    keypress = 00
+        
         pass
 
     def get_speed():
