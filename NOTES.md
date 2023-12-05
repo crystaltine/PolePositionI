@@ -2,11 +2,15 @@
 
 ## Tickrates
 CLIENT:
+
 client keypress -> send to server immediately
+
 client calc rate: 24/s (fps)
 
 SERVER:
+
 server physics tickrate: 24/s
+
 server broadcast rate: 1/s (every 24th tick)
 
 ## Architecture
