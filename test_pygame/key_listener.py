@@ -53,6 +53,13 @@ def send_packet(keyid: int, keydown: bool) -> None:
     Creates and sends a keyinfo packet to the server.
     Each packet should have a payload size of 3 bits.
     """
-    print(f"[debug - send_packet] keyid={keyid}, keydown={keydown}")
     res = sock.send(bytes([keyid | (keydown << 3)]))
-    print(f"[debug - send_packet] sent {res} bytes")
+
+def recv_packet() -> None:
+    """
+    Receives a packet from the server.
+    Each packet should have a payload size of 3 bits.
+    """
+    print("Trying to receive data: ")
+    data = sock.recvfrom(8)
+    print(f"server->client: {data}")

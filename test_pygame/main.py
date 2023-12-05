@@ -1,6 +1,6 @@
 import pygame
 import sys
-from key_listener import capture_keypress_loop
+from key_listener import capture_keypress_loop, recv_packet
 pygame.init()
 
 running = True
@@ -21,9 +21,9 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+            break
 
     pygame.display.update()
-
    
 pygame.quit()
 sys.exit()
