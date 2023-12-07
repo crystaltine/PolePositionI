@@ -4,11 +4,15 @@ pygame.init()
 
 running = True
    
-WHITE = (255, 255, 255)
+SKY = (97, 120, 232)
 
-screen = pygame.display.set_mode([300,300])
-screen.fill(WHITE)
+width = pygame.display.get_desktop_sizes()[0][0]
+height = pygame.display.get_desktop_sizes()[0][1]
+
+screen = pygame.display.set_mode([width,height])
+screen.fill(SKY)
 pygame.display.set_caption("Game")
+size = pygame.display.get_desktop_sizes()
 
 FPS = pygame.time.Clock()
 #player = User(Sprite) insert sprite later
