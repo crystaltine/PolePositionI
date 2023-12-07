@@ -2,7 +2,9 @@ import socket
 from key_decoder import decode_packet
 from time import sleep
 import threading
-from packet_distr import broadcast_mainloop
+from mainloop import broadcast_mainloop
+
+from flask import Flask, CORS
 
 TICK_SPEED = 24
 TICKS_PER_BROADCAST = 24
