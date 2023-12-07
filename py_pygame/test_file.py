@@ -1,5 +1,6 @@
 import pygame
 import sys
+import random
 pygame.init()
 
 running = True
@@ -25,10 +26,7 @@ while running:
     screen.blit(grass, (0, 400))
     screen.blit(mtns, (0, 200))
     for event in pygame.event.get():
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_LEFT:
-                pygame.draw.circle(screen, (255, 0, 0), (random.randint(0, width), random.randint(0, height)), radius)
-                
+        
 
         if event.type == pygame.QUIT:
             running = False
@@ -44,5 +42,5 @@ while running:
     #keyup: 0##
 
    
-pygame.quit
+pygame.quit()
 sys.exit()
