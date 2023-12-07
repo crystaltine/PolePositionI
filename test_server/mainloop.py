@@ -1,8 +1,8 @@
 import socket
 from time import sleep
-from server import sock, TICK_SPEED, TICKS_PER_BROADCAST
+from CONSTANTS import TICK_SPEED, TICKS_PER_BROADCAST, PORT, HOST
 
-def broadcast_mainloop(packet: bytes, addresses: list) -> None:
+def broadcast_mainloop(sock: socket.socket, packet: bytes, addresses: list) -> None:
     """
     Sends the specified packet to all specified addresses.
     Likely usage will be to send a packet to both (or multiple) clients connected to a room
