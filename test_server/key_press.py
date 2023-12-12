@@ -9,8 +9,10 @@ class Player:
     def __init__(self):
         self.x = 0 
         self.y = 0
-        self.velocity = 0 
-        self.acceleration = 0 
+        self.x_velocity = 0 
+        self.y_velocity = 0 
+        self.x_acceleration = 0 
+        self.y_acceleration = 0 
         self.angle = 0 
 #something to bring up to the team, how will we cover going off the track, will we allow them to go on the grass? what does that mean for my physics calculations?
     def num_processing(self, direction: int,  down: bool):
@@ -31,7 +33,7 @@ class Player:
         else:
             #if the key is up and the key pressed was either forwards or backwards, default the acceleration to be something slightly negative to simulate air resistance 
             if direction == 0 or direction == 1:
-                self.accerlation = -2
+                self.x_accerlation = -2
         
 
 
@@ -54,13 +56,14 @@ class Player:
         """
         #setting acceleration based on the boolean and the velocity
         if not accelerate:
-            self.acceleration = -10
+            self.x_acceleration = -10
         else:
-            self.accerlation = math.sqrt(100 - self.velocity)
+            self.x_accerlation = math.sqrt(100 - self.velocity)
+        
     
     def update(self):
-        self.velocity += self.acceleration
-        self.x += self.velocity
+        self.x_velocity += self.x_acceleration
+        self.x += self.x_velocity
     
 
         
