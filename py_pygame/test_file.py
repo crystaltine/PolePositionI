@@ -19,17 +19,15 @@ pygame.display.set_caption("Game")
 grass = pygame.image.load('grasse.png')
 grass = pygame.transform.scale(grass, (int(width), int(2 * height/3)))
 mtns = pygame.image.load('mtns.png')
+mtns = pygame.transform.scale(mtns, (width*2, height/5))
 FPS = pygame.time.Clock()
 #player = User(Sprite) insert sprite later
 
 #call object instances outside the loop
 while running:
     FPS.tick(24) #moved timer into loop
-
-    capture_keypress_loop()
-
-    screen.blit(grass, (0, 400))
-    screen.blit(mtns, (0, 200))
+    screen.blit(grass, (0, 2*height/5))
+    screen.blit(mtns, (0, height/5))
     for event in pygame.event.get():
         
 
