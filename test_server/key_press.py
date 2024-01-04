@@ -1,10 +1,7 @@
-import math 
+import math
+
+
 class Player:
-    self.x
-    self.y
-    self.velocity
-    self.acceleration
-    self.angle
 
     def __init__(self):
         self.x = 0 

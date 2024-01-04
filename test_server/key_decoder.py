@@ -25,4 +25,4 @@ def decode_packet(data: int) -> str:
     keyid = data % 4
     keydown = data // 4
 
-    return f"Key update received!\x1b[34m {keymap[keyid]}\x1b[33m {'down' if keydown else 'up'}\x1b[0m"
+    return (keyid, keydown)
