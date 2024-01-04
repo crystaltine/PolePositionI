@@ -22,6 +22,17 @@ mtns = pygame.image.load('mtns.png')
 mtns = pygame.transform.scale(mtns, (width*2, height/5))
 FPS = pygame.time.Clock()
 #player = User(Sprite) insert sprite later
+def start_screen(time: bool):
+    displayStart = True 
+    while running and displayStart:
+        x,y = pygame.mouse.get_pos() 
+        screen.fill(0,0,0)
+        startButton = pygame.Rect(100,200, 50,50)
+        if startButton.collidepoint(x,y):
+            displayStart = False 
+
+            
+
 
 #call object instances outside the loop
 while running:
@@ -29,10 +40,12 @@ while running:
     screen.blit(grass, (0, 2*height/5))
     screen.blit(mtns, (0, height/5))
     for event in pygame.event.get():
-        
-
         if event.type == pygame.QUIT:
             running = False
+        # escape button works 
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+            running = False
+            
     pygame.display.update()
 
     #key numbers for keydowbs binary onkeyevent -> send to server
