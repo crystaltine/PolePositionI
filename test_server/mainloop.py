@@ -1,10 +1,11 @@
 import socket
 from time import sleep
-from client import Room
+from client import Room, Client
+from typing import Dict
 
 from CONSTANTS import HOST, PORT, TICK_SPEED, TICKS_PER_BROADCAST
 
-def broadcast_mainloop(sock: socket.socket, rooms: dict, connected_clients) -> None:
+def broadcast_mainloop(sock: socket.socket, rooms: Dict[int, Room], connected_clients: Dict[str, Client]) -> None:
     """
     Sends the specified packet to all specified addresses.
     Likely usage will be to send a packet to both (or multiple) clients connected to a room
@@ -29,13 +30,13 @@ def broadcast_mainloop(sock: socket.socket, rooms: dict, connected_clients) -> N
         if counter == TICKS_PER_BROADCAST:
             counter = 0
             
-            for item in connected_clients.values():
-                print(f"\x1b[36mConnected Client: {item }\x1b[0m")  
-            
             # FOR EACH ROOM, DO STUFF!!!
             for room in rooms.values():
-                room: Room
-                print(f"broadcasting to room: id={room.id}")
-                room.broadcast_all(sock, bytes("Hello from a server that doesn't work!",encoding="utf-8"))
-            print("--------------------------------------------------------------")
+                
+                num_connected = room.num_connected()
+                if num_connected == 0:
+                    print(f"\x1b[31mNot broadcasting to room {room.id} because it has no connected clients.\x1b[0m")
+                else:
+                    print(f"Broadcasting to {num_connected} sockets in room {room.id}") 
+                    room.broadcast_all(f"[Server] You are in room: {room.id} with {num_connected-1} other players connected.") 
                             

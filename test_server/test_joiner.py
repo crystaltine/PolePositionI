@@ -16,8 +16,8 @@ client_id = res.decode('utf-8')
 print(f">>> Client id: \x1b[33m{client_id}\x1b[0m")
 
 sleep(3)
-res = httpx.get(f"http://localhost:{HPORT}/createroom/{client_id}")
-print(f"Create room response: {res.json()}")
+res = httpx.get(f"http://localhost:{HPORT}/joinroom/{client_id}/0")
+print(f"Join room response: {res.json()}")
 
 def recv_messages():
     while True:
