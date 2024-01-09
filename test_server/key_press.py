@@ -10,6 +10,7 @@ class Player:
         self.y_velocity = 0 
         self.x_acceleration = 0 
         self.y_acceleration = 0 
+        self.angle_acceleration = 0
         self.angle = 0 
 #something to bring up to the team, how will we cover going off the track, will we allow them to go on the grass? what does that mean for my physics calculations?
     def num_processing(self, direction: int,  down: bool):
@@ -20,12 +21,17 @@ class Player:
         for both x and y there has to be a velocity and acceleration 
         i might also need to store an angular veloctiy or some number that relates to how much they're turning 
         """
-        #implementation for the left and right arrow keys to be added later 
+        #conditional passes if a key is pressed down
         if down:
+            #0 and 1 would indicate acceleration forward and backwards
             if direction == 0:
+                #corresponding call to the accerlation method to update the speed
                 player1.acceleration(True)
             elif direction == 1:
                 player1.acceleration(False)
+            elif direction == 2:
+                player1.set_angle()
+
             player1.update()
         else:
             #if the key is up and the key pressed was either forwards or backwards, default the acceleration to be something slightly negative to simulate air resistance 
@@ -35,7 +41,7 @@ class Player:
 
 
 
-    def angular_acceleration(self,):
+    def set_angle(self, right: bool):
         """
         method based on speed that determines how fast the user is able to turn
         implementation is similar to driving in most games. Don't want to implement losing traction, just limiting how much you can turn based on the velocity of user. 
