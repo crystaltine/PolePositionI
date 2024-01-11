@@ -21,15 +21,14 @@ grass = pygame.transform.scale(grass, (int(width), int(2 * height/3)))
 mtns = pygame.image.load('mtns.png')
 mtns = pygame.transform.scale(mtns, (width*2, height/5))
 FPS = pygame.time.Clock()
-#player = User(Sprite) insert sprite later
-def start_screen(time: bool):
-    displayStart = True 
-    while running and displayStart:
-        x,y = pygame.mouse.get_pos() 
-        screen.fill(0,0,0)
-        startButton = pygame.Rect(100,200, 50,50)
-        if startButton.collidepoint(x,y):
-            displayStart = False 
+# player = User(Sprite) insert sprite later
+# def start_screen(displayStart: bool):
+#     screen.fill((0,0,0))
+#     while running and displayStart:
+#         x,y = pygame.mouse.get_pos() 
+#         startButton = pygame.Rect(100,200, 50,50)
+#         if startButton.collidepoint(x,y):
+#             displayStart = False 
 
             
 
@@ -37,6 +36,7 @@ def start_screen(time: bool):
 #call object instances outside the loop
 while running:
     FPS.tick(24) #moved timer into loop
+    # start_screen(True)
     screen.blit(grass, (0, 2*height/5))
     screen.blit(mtns, (0, height/5))
     for event in pygame.event.get():
