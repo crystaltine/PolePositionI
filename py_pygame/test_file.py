@@ -9,8 +9,8 @@ running = True
    
 SKY = (97, 120, 232)
 
-width = 1920 # pygame.display.get_desktop_sizes()[0][0]
-height = 1080 # pygame.display.get_desktop_sizes()[0][1]
+width = pygame.display.get_desktop_sizes()[0][0]
+height = pygame.display.get_desktop_sizes()[0][1]
 
 screen = pygame.display.set_mode([width,height])
 screen.fill(SKY)
