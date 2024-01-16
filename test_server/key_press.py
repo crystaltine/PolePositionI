@@ -36,20 +36,15 @@ class Player:
                 #right now the method header has a boolean on if the angle change is to be right or not this might be changed but that is why False is passed in since 2 is left
             elif direction == 2:
                 player1.set_angle()
-                player1.up = False
-            else:
-                player1.set_angle(True)
                 player1.up = True
+            else:
+                player1.set_angle()
+                player1.up = False
         else:
             #if the key is up and the key pressed was either forwards or backwards, default the acceleration to be something slightly negative to simulate air resistance 
             if direction == 0 or direction == 1:
-<<<<<<< HEAD
-                self.x_acceleration = -2
-            elif direction == 2 or direction == 2:
-=======
                 self.x_accerlation = -2
             elif direction == 2 or direction == 3:
->>>>>>> 4f59a6945cf34251eaa66a614d3303b52cad47af
                 self.angle_acceleration = 0
         player1.update()
         
@@ -79,11 +74,7 @@ class Player:
         if not accelerate:
             self.acceleration = -10
         else:
-<<<<<<< HEAD
-            self.x_acceleration = math.sqrt(100 - self.velocity)
-=======
             self.acceleration = math.sqrt(100 - self.velocity)
->>>>>>> 8487b1d0e9aac0673938eb52692935ed3e6ba3a7
         
     #update function that is called numerous times a second to update the car's position, velocities, and accelerations
     #this has to be changed based on where the car is on the position. When driving in a indy 500 esque track, after taking the first turn the car is now pointed in the opposite
@@ -101,14 +92,14 @@ class Player:
         #If the car is at an angle, up is not None
         if self.up is not None:
             #have to set angle and x velocity 
-            self.angle += self.angle_acceleration
+            self.angle = math.abs(self.angle + self.angle_acceleration)
             self.x_velocity = self.velocity * math.cos(self.angle)
             if self.up:
                 self.y_velocity += self.velocity * math.sin(self.angle)
             else:
                 self.y_velocity -= self.velocity * math.sin(self.angle)
         self.x += self.x_velocity
-<<<<<<< HEAD
+        self.y += self.y_velocity 
     
     def get_physics_data(self) -> list:
         """
@@ -118,9 +109,5 @@ class Player:
         Should be sent to client side.
         """
         return [self.x, self.y, self.x_velocity, self.y_velocity, self.x_acceleration, self.y_acceleration]
-=======
-        self.y += self.y_velocity     
-
->>>>>>> 8487b1d0e9aac0673938eb52692935ed3e6ba3a7
         
         
