@@ -121,6 +121,10 @@ sock.listen()
 print(f"Socket server listening on {HOST}:{PORT}")
 
 def accept_socket(): 
+    """
+    This handles the initial handshake between the client and the server.
+    Registers the socket and assigns a client id to the connection.
+    """
     while True:
         conn, address = sock.accept()
         print(f"\x1b[36mConnection established\x1b[0m from: \x1b[33m{address}\x1b[0m")

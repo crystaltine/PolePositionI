@@ -1,8 +1,8 @@
 from socket import socket
 from typing import List
-
+from key_decoder import decode_packet
 from key_press import Player
-
+import array
 
 class Client:
     """
@@ -24,6 +24,12 @@ class Client:
 
     def update_player(self):
         self.player.update()
+        
+    def begin_receiving_data(self):
+        while True:
+            keydata = int.from_bytes(self.sock.recv(4), 'big')
+            print(f"\x1b[34mClient \x1b[33m{self.id}\x1b[0m: Received data \x1b[33m{keydata}\x1b[0m")
+            self.update_player_keys(*decode_packet(keydata))
 
     def update_player_keys(self, keyID: int, down: bool):
         """
@@ -39,6 +45,12 @@ class Client:
         Returns `True` if the socket is still open and the message was sent, `False` if otherwise.
         """
         try:
+            
+            # Handle list[float] case, which will be the main use of this function
+            if type(msg) == list:
+                self.sock.send(array.array("d", msg))
+                return True
+            
             # Encode if string, else just construct bytes
             self.sock.send(bytes(msg, 'utf-8') if type(msg) == str else bytes(msg))
             return True
@@ -73,6 +85,36 @@ class Room:
 
     def remove_client(self, client: Client):
         self.clients.remove(client)
+        
+    def update_if_started(self) -> bool:
+        """
+        If the game is started, updates the physics of all players in the room using their current velocity and acceleration.
+        
+        If game not started yet, do nothing.
+        
+        Returns whether or not updates were made.
+        """
+        
+        if not self.started: return False
+        
+        for client in self.clients:
+            client.update_player()
+        return True
+    
+    def broadcast_physics(self) -> None:
+        """
+        If game not started yet, do nothing.
+        
+        Otherwise, for each socket, send the client their current, updated physics data.
+        
+        It is assumed that this function will be called inside a tickloop, 
+        currently intended for use only in `./mainloop.py` and running once per second.
+        
+        Returns whether or not data was sent.
+        """
+        if not self.started: return False
+        for client in self.clients:
+            client.send_msg(client.player.get_physics_data())
 
     def broadcast_all(self, data):
         """

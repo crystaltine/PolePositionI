@@ -23,8 +23,8 @@ def broadcast_mainloop(sock: socket.socket, rooms: Dict[int, Room], connected_cl
     while True:
         sleep(1 / TICK_SPEED)
 
-        # TICK CLIENT DATA FOR EVERY ROOM (physics stuff)
-        # print(f"Server Tick. Counter: {counter}")
+        for room in rooms.values():
+            room.update_if_started()
 
         counter += 1    
         if counter == TICKS_PER_BROADCAST:
@@ -37,6 +37,7 @@ def broadcast_mainloop(sock: socket.socket, rooms: Dict[int, Room], connected_cl
                 if num_connected == 0:
                     print(f"\x1b[31mNot broadcasting to room {room.id} because it has no connected clients.\x1b[0m")
                 else:
-                    print(f"Broadcasting to {num_connected} sockets in room {room.id}") 
-                    room.broadcast_all(f"[Server] You are in room: {room.id} with {num_connected-1} other players connected.") 
+                    print(f"Room {room.id} has {num_connected} connections, and started={room.started}") 
+                    # room.broadcast_all(f"[Server] You are in room: {room.id} with {num_connected-1} other players connected.") 
+                    room.broadcast_physics()
                             

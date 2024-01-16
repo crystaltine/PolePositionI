@@ -23,9 +23,9 @@ class Button():
         self.onePress = onePress
 
         self.fillColors = {
-            'normal': '#ffffff',
-            'hover': '#666666',
-            'pressed': '#333333',
+            'normal': pygame.Color(255, 255, 255),
+            'hover': pygame.Color(190, 190, 190),
+            'pressed': pygame.Color(150, 150, 150)
         }
 
         self.buttonSurface = pygame.Surface((self.width, self.height))
@@ -45,7 +45,7 @@ class Button():
         if self.buttonRect.collidepoint(mousePos):
             self.buttonSurface.fill(self.fillColors['hover'])
 
-            if pygame.mouse.get_pressed(num_buttons=3)[0]:
+            if pygame.mouse.get_pressed(3)[0]:
                 self.buttonSurface.fill(self.fillColors['pressed'])
 
                 if self.onePress:
@@ -64,11 +64,13 @@ class Button():
         ])
         screen.blit(self.buttonSurface, self.buttonRect)
 
-def myFunction():
-    print('Button Pressed')
+def myFunction(printstr):
+    def printfunc():
+        print(f'Button Pressed: {printstr}')
+    return printfunc
 
-customButton = Button(30, 30, 400, 100, 'Button One (onePress)', myFunction)
-customButton = Button(30, 140, 400, 100, 'Button Two (multiPress)', myFunction, True)
+customButton = Button(30, 30, 400, 100, 'Button One (onePress)', myFunction("1"))
+customButton = Button(30, 140, 400, 100, 'Button Two (multiPress)', myFunction("2"), True)
 
 # Game loop.
 while True:

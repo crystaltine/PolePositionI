@@ -40,12 +40,9 @@ class Player:
         else:
             #if the key is up and the key pressed was either forwards or backwards, default the acceleration to be something slightly negative to simulate air resistance 
             if direction == 0 or direction == 1:
-                self.x_accerlation = -2
+                self.x_acceleration = -2
             elif direction == 2 or direction == 2:
                 self.angle_acceleration = 0
-        
-
-
 
     def set_angle(self, right: bool):
         """
@@ -68,12 +65,20 @@ class Player:
         if not accelerate:
             self.x_acceleration = -10
         else:
-            self.x_accerlation = math.sqrt(100 - self.velocity)
+            self.x_acceleration = math.sqrt(100 - self.velocity)
         
     #have to think about how you change the y as well based on the angle 
     def update(self):
         self.x_velocity += self.x_acceleration
         self.x += self.x_velocity
     
-
+    def get_physics_data(self) -> list:
+        """
+        Returns a six-element list:
+        `[pos_x, pos_y, vel_x, vel_y, acc_x, acc_y]`
+        
+        Should be sent to client side.
+        """
+        return [self.x, self.y, self.x_velocity, self.y_velocity, self.x_acceleration, self.y_acceleration]
+        
         
