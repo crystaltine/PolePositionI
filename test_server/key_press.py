@@ -43,8 +43,13 @@ class Player:
         else:
             #if the key is up and the key pressed was either forwards or backwards, default the acceleration to be something slightly negative to simulate air resistance 
             if direction == 0 or direction == 1:
+<<<<<<< HEAD
                 self.x_acceleration = -2
             elif direction == 2 or direction == 2:
+=======
+                self.x_accerlation = -2
+            elif direction == 2 or direction == 3:
+>>>>>>> 4f59a6945cf34251eaa66a614d3303b52cad47af
                 self.angle_acceleration = 0
         player1.update()
         
