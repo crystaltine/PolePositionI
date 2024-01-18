@@ -1,5 +1,53 @@
 import pygame
 import sys
+class Button():
+    def __init__(self, x, y, width, height, buttonText='Button', onclickFunction=None):
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.onclickFunction = onclickFunction
+        
+
+        self.fillColors = {
+            'normal': pygame.Color(255, 255, 255),
+            'hover': pygame.Color(190, 190, 190),
+            'pressed': pygame.Color(150, 150, 150)
+        }
+
+        self.buttonSurface = pygame.Surface((self.width, self.height))
+        self.buttonRect = pygame.Rect(self.x, self.y, self.width, self.height)
+
+        self.buttonSurf = font.render(buttonText, True, (20, 20, 20))
+
+        self.alreadyPressed = False
+
+        objects.append(self)
+
+    def process(self):
+
+        mousePos = pygame.mouse.get_pos()
+        
+        self.buttonSurface.fill(self.fillColors['normal'])
+        if self.buttonRect.collidepoint(mousePos):
+            self.buttonSurface.fill(self.fillColors['hover'])
+
+            if pygame.mouse.get_pressed(3)[0]:
+                self.buttonSurface.fill(self.fillColors['pressed'])
+
+
+                if not self.alreadyPressed:
+                    self.onclickFunction()
+                    self.alreadyPressed = True
+
+            else:
+                self.alreadyPressed = False
+
+        self.buttonSurface.blit(self.buttonSurf, [
+            self.buttonRect.width/2 - self.buttonSurf.get_rect().width/2,
+            self.buttonRect.height/2 - self.buttonSurf.get_rect().height/2
+        ])
+        screen.blit(self.buttonSurface, self.buttonRect)
 
 pygame.init()
 
@@ -8,32 +56,28 @@ running = True
 SKY = (97, 120, 232)
 BLACK = (0,0,0)
 
-width = pygame.display.get_desktop_sizes()[0][0]
-height = pygame.display.get_desktop_sizes()[0][1]
-
+width = 640
+height = 480
+objects = []
 screen = pygame.display.set_mode([width,height])
 screen.fill(SKY)
 pygame.display.set_caption("Game")
-# size = pygame.display.get_desktop_sizes()
+
 font = pygame.font.Font('freesansbold.ttf', 32)
 grass = pygame.image.load('grasse.png')
 grass = pygame.transform.scale(grass, (int(width), int(2 * height/3)))
 mtns = pygame.image.load('mtns.png')
 mtns = pygame.transform.scale(mtns, (width*2, height/5))
-#FPS = pygame.time.Clock()
-#FPS.tick(24) #moved timer into loop 
-# player = User(Sprite) insert sprite later
+
 
 menu_text = font.render('Start playing asp_3', True, BLACK)
 menu_rect = menu_text.get_rect(center=(640,260))    #does rect take center as parameter     
 
-def main_menu(): # start screen 
-    while running: 
-        mouse_pos = pygame.mouse.get_pos()
-        screen.fill("white")
-        
 
         
+
+def print_hello():
+    print("hello")
             
 
 def play(): # game screen
@@ -47,6 +91,8 @@ def play(): # game screen
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+        for object in objects:
+            object.process()
             
         pygame.display.update()
 
@@ -59,5 +105,16 @@ def play(): # game screen
         #keydown: 1##
         #keyup: 0##
 
-   
+
+Button(30, 30, 400, 100, 'Button One (onePress)', print_hello)   
 play()
+
+
+
+
+
+
+
+
+
+
