@@ -1,7 +1,5 @@
 import pygame
 import sys
-import random
-from key_listener import capture_keypress_loop
 
 pygame.init()
 
@@ -47,10 +45,8 @@ def play(): # game screen
         screen.blit(mtns, (0, height/5))
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                running = False
-            # escape button works 
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                running = False
+                pygame.quit()
+                sys.exit()
             
         pygame.display.update()
 
@@ -64,5 +60,4 @@ def play(): # game screen
         #keyup: 0##
 
    
-pygame.quit()
-sys.exit()
+play()
