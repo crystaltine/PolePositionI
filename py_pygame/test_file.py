@@ -1,54 +1,6 @@
 import pygame
 import sys
-class Button():
-    def __init__(self, x, y, width, height, buttonText='Button', onclickFunction=None):
-        self.x = x
-        self.y = y
-        self.width = width
-        self.height = height
-        self.onclickFunction = onclickFunction
-        
-
-        self.fillColors = {
-            'normal': pygame.Color(255, 255, 255),
-            'hover': pygame.Color(190, 190, 190),
-            'pressed': pygame.Color(150, 150, 150)
-        }
-
-        self.buttonSurface = pygame.Surface((self.width, self.height))
-        self.buttonRect = pygame.Rect(self.x, self.y, self.width, self.height)
-
-        self.buttonSurf = font.render(buttonText, True, (20, 20, 20))
-
-        self.alreadyPressed = False
-
-        objects.append(self)
-
-    def process(self):
-
-        mousePos = pygame.mouse.get_pos()
-        
-        self.buttonSurface.fill(self.fillColors['normal'])
-        if self.buttonRect.collidepoint(mousePos):
-            self.buttonSurface.fill(self.fillColors['hover'])
-
-            if pygame.mouse.get_pressed(3)[0]:
-                self.buttonSurface.fill(self.fillColors['pressed'])
-
-
-                if not self.alreadyPressed:
-                    self.onclickFunction()
-                    self.alreadyPressed = True
-
-            else:
-                self.alreadyPressed = False
-
-        self.buttonSurface.blit(self.buttonSurf, [
-            self.buttonRect.width/2 - self.buttonSurf.get_rect().width/2,
-            self.buttonRect.height/2 - self.buttonSurf.get_rect().height/2
-        ])
-        screen.blit(self.buttonSurface, self.buttonRect)
-
+from button import Button
 pygame.init()
 
 running = True
@@ -58,7 +10,6 @@ BLACK = (0,0,0)
 
 width = 640
 height = 480
-objects = []
 screen = pygame.display.set_mode([width,height])
 screen.fill(SKY)
 pygame.display.set_caption("Game")
@@ -80,20 +31,27 @@ def print_hello():
     print("hello")
             
 
-def play(): # game screen
+def start_menu(): # game screen
 #call object instances outside the loop
     while running:
-        
-        # start_screen(True)
+        mouse_pos = pygame.mouse.get_pos()
         screen.blit(grass, (0, 2*height/5))
         screen.blit(mtns, (0, height/5))
+
+
+        PLAY_BUTTON = Button(pos=(300,200), text_input="PLAY", font=font, base_color="#d7fcd4", hovering_color="White", image=pygame.image.load("assets/Play Rect.png"))
+
+        PLAY_BUTTON.changeColor(mouse_pos)
+        PLAY_BUTTON.update(screen)
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-        for object in objects:
-            object.process()
-            
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if PLAY_BUTTON.checkForInput(mouse_pos):
+                    print("lol")
+        
         pygame.display.update()
 
         #key numbers for keydowbs binary onkeyevent -> send to server
@@ -105,9 +63,7 @@ def play(): # game screen
         #keydown: 1##
         #keyup: 0##
 
-
-Button(30, 30, 400, 100, 'Button One (onePress)', print_hello)   
-play()
+start_menu()
 
 
 
