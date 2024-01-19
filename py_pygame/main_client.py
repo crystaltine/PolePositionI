@@ -27,8 +27,7 @@ menu_rect = menu_text.get_rect(center=(640,260))    #does rect take center as pa
 
         
 
-def print_hello():
-    print("hello")
+
             
 
 def start_menu(): # game screen
@@ -61,11 +60,15 @@ def start_menu(): # game screen
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if PLAY_SINGLEPLAYER_BUTTON.checkForInput(mouse_pos):
-                    movement_debug()
+                    game()
+                if START_MULTIPLAYER_BUTTON.checkForInput(mouse_pos):
+                    create_room()
+                if JOIN_MULTIPLAYER_BUTTON.checkForInput(mouse_pos):
+                    join_room()
         
         pygame.display.update()
 
-def movement_debug():
+def game():
     while True:
         screen.blit(grass, (0, 2*height/5))
         screen.blit(mtns, (0, height/5))
