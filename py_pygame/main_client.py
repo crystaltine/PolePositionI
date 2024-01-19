@@ -21,11 +21,6 @@ mtns = pygame.image.load('mtns.png')
 mtns = pygame.transform.scale(mtns, (width*2, height/5))
 
 
-menu_text = font.render('Start playing asp_3', True, BLACK)
-menu_rect = menu_text.get_rect(center=(640,260))    #does rect take center as parameter     
-
-
-        
 
 
             
@@ -68,6 +63,9 @@ def start_menu(): # game screen
         
         pygame.display.update()
 
+
+
+
 def game():
     while True:
         screen.blit(grass, (0, 2*height/5))
@@ -77,6 +75,29 @@ def game():
                     pygame.quit()
                     sys.exit()
         pygame.display.update()
+
+def create_room():
+    while True:
+        screen.blit(grass, (0, 2*height/5))
+        screen.blit(mtns, (0, height/5))
+        for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+        pygame.display.update()
+
+def join_room():
+    while True:
+        screen.blit(grass, (0, 2*height/5))
+        screen.blit(mtns, (0, height/5))
+        for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+        pygame.display.update()
+
+
+
 
         #key numbers for keydowbs binary onkeyevent -> send to server
         #up: 00
