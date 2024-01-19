@@ -2,7 +2,6 @@ import pygame
 import sys
 from key_listener import SocketManager
 import socket
-import httpx
 import threading
 sys.path.append('C:\\Users\\s-msheng\\cs\\asp_3\\test_server\\')
 
