@@ -1,9 +1,10 @@
 import pygame
 import sys
-from key_listener import SocketManager
+from game.request_manager import SocketManager
 import socket
 import threading
 sys.path.append('C:\\Users\\s-msheng\\cs\\asp_3\\server\\lib')
+# ^^^ IMPORTANT: DEVELOPMENT ONLY
 
 HOST, SPORT, HPORT = "localhost", 3999, 4000
 
