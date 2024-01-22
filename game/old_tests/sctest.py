@@ -1,6 +1,6 @@
 import pygame
 import sys
-from game.request_manager import SocketManager
+from game.requests_handler import SocketManager
 import socket
 import threading
 sys.path.append('C:\\Users\\s-msheng\\cs\\asp_3\\server\\lib')

@@ -35,8 +35,14 @@ class SocketManager:
     - Sending packets to server containing that key data
     - Listening for physics data from server side
     """
-
+    
     def __init__(self):
+        """
+        Simply creates a pointer to this future object.
+        """
+        return
+    
+    def connect(self):
         """
         Creates a socket connection with the server.
         """
