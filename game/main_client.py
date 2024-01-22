@@ -6,26 +6,27 @@ from elements.button import Button
 from elements.input import Input
 
 from request_manager import SocketManager, HTTPManager
-from CONSTANTS import FONT, BUTTON_LARGE, BUTTON_MEDIUM
+from CONSTANTS import (
+    SKY_RGB, BLACK,
+    WIDTH, HEIGHT,
+    FONT_SIZES, FONT_TINY, BUTTON_LARGE, BUTTON_MEDIUM, 
+    MAIN_MENU_BOTTOM_LEFT_TEXT, MAIN_MENU_BOTTOM_RIGHT_TEXT
+)
 
 #pygame.init() - initialized in CONSTANTS.py
 
 running = True
 in_game = False
-   
-SKY = (97, 120, 232)
-BLACK = (0,0,0)
 
-width = 1200
-height = 720
-screen = pygame.display.set_mode([width,height])
-screen.fill(SKY)
+
+screen = pygame.display.set_mode([WIDTH,HEIGHT])
+screen.fill(SKY_RGB)
 pygame.display.set_caption("Game")
 
 grass = pygame.image.load('./game/assets/grasse.png')
-grass = pygame.transform.scale(grass, (int(width), int(2 * height/3)))
-mtns = pygame.image.load('./game/assets/mtns.png')
-mtns = pygame.transform.scale(mtns, (width*2, height/5))
+grass = pygame.transform.scale(grass, (int(WIDTH), int(2 * HEIGHT/3)))
+mtns = pygame.image.load('./game/assets/mountains_img.png')
+mtns = pygame.transform.scale(mtns, (WIDTH*2, HEIGHT/5))
 
 logo_img = pygame.image.load('./game/assets/logo.png')
 
@@ -36,17 +37,24 @@ JOIN_MULTIPLAYER_INPUT = Input(x=340, y=480, w=240, h=60, text="")
 JOIN_MULTIPLAYER_BUTTON = Button(pos=(600, 480), display_text="JOIN GAME", base_color="#ffffff", hovering_color="#96faff", image=BUTTON_MEDIUM)
 
 SETTINGS_BUTTON = Button(pos=(340,560), display_text="SETTINGS", base_color="#ffffff", hovering_color="#96faff", image=BUTTON_MEDIUM)
-QUIT_BUTTON = Button(pos=(600,560), display_text="QUIT GAME", base_color="#ffffff", hovering_color="#96faff", image=BUTTON_MEDIUM)
+QUIT_BUTTON = Button(pos=(600,560), display_text="QUIT", base_color="#ffffff", hovering_color="#96faff", image=BUTTON_MEDIUM)
 # Initiate connections with server
 socket_man = SocketManager()
 http_man = HTTPManager(socket_man.client_id)
 
 def start_menu(): # game screen
 #call object instances outside the loop
+
+    text_bottom_left = FONT_TINY.render(MAIN_MENU_BOTTOM_LEFT_TEXT, True, (0, 0, 0))
+    text_bottom_right = FONT_TINY.render(MAIN_MENU_BOTTOM_RIGHT_TEXT, True, (0, 0, 0))
+
     while running:
         mouse_pos = pygame.mouse.get_pos()
-        screen.blit(grass, (0, 2*height/5))
-        screen.blit(mtns, (0, height/5))
+        screen.blit(grass, (0, 2*HEIGHT/5))
+        screen.blit(mtns, (0, HEIGHT/5))
+        
+        screen.blit(text_bottom_left, (20, HEIGHT - FONT_SIZES["tiny"] - 20))
+        screen.blit(text_bottom_right, (WIDTH - text_bottom_right.get_width() - 20, HEIGHT - FONT_SIZES["tiny"] - 20))
         
         # logo is 800x300, center it at (200, 50)
         screen.blit(logo_img, (200, 50))
@@ -74,7 +82,7 @@ def start_menu(): # game screen
                 sys.exit()
                 
             # Handle button clicks
-            if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1: # LEFT CLICKS ONLY!!!
                 if CREATE_GAME_BUTTON.is_hovering(mouse_pos):
                     res = http_man.create_room()
                     
@@ -108,8 +116,8 @@ def start_menu(): # game screen
 
 def game():
     while True:
-        screen.blit(grass, (0, 2*height/5))
-        screen.blit(mtns, (0, height/5))
+        screen.blit(grass, (0, 2*HEIGHT/5))
+        screen.blit(mtns, (0, HEIGHT/5))
         for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
@@ -118,8 +126,8 @@ def game():
 
 def create_room():
     while True:
-        screen.blit(grass, (0, 2*height/5))
-        screen.blit(mtns, (0, height/5))
+        screen.blit(grass, (0, 2*HEIGHT/5))
+        screen.blit(mtns, (0, HEIGHT/5))
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -128,8 +136,8 @@ def create_room():
 
 def join_room():
     while True:
-        screen.blit(grass, (0, 2*height/5))
-        screen.blit(mtns, (0, height/5))
+        screen.blit(grass, (0, 2*HEIGHT/5))
+        screen.blit(mtns, (0, HEIGHT/5))
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()

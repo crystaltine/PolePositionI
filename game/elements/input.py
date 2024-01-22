@@ -1,5 +1,5 @@
 import pygame
-from CONSTANTS import COLOR_ACTIVE, COLOR_INACTIVE, FONT, FONT_SIZE
+from CONSTANTS import COLOR_ACTIVE, COLOR_INACTIVE, FONT_MEDIUM, FONT_SIZES
 
 class Input:
     """
@@ -19,7 +19,7 @@ class Input:
         self.rect = pygame.Rect(x, y, w, h)
         self.color = COLOR_INACTIVE
         self.text = text
-        self.txt_surface = FONT.render("ROOM ID...", True, (100, 100, 100))
+        self.txt_surface = FONT_MEDIUM.render("ROOM ID...", True, (100, 100, 100))
         self.active = False
 
     def handle_event(self, event):
@@ -42,9 +42,9 @@ class Input:
                 
                 # if no text, render a faded placeholder text
                 if self.text == '':
-                    self.txt_surface = FONT.render("ROOM ID...", True, (100, 100, 100))
+                    self.txt_surface = FONT_MEDIUM.render("ROOM ID...", True, (100, 100, 100))
                 else:
-                    self.txt_surface = FONT.render(self.text, True, self.color)
+                    self.txt_surface = FONT_MEDIUM.render(self.text, True, self.color)
 
     def update(self):
         # Resize the box if the text is too long.
@@ -53,6 +53,6 @@ class Input:
 
     def draw(self, screen):
         # Blit the text. Make sure to center it.
-        screen.blit(self.txt_surface, (self.rect.x+10, self.rect.y + (self.rect.h/2 - FONT_SIZE/2 - 5)))
+        screen.blit(self.txt_surface, (self.rect.x+10, self.rect.y + (self.rect.h/2 - FONT_SIZES["medium"]/2 - 5)))
         # Blit the rect.
         pygame.draw.rect(screen, self.color, self.rect, 2)

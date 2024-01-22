@@ -1,5 +1,5 @@
 from pygame import Surface
-from CONSTANTS import FONT
+from CONSTANTS import FONT_MEDIUM
 
 #From 
 class Button():
@@ -23,7 +23,7 @@ class Button():
 		self.y_pos = pos[1]
 		self.base_color, self.hovering_color = base_color, hovering_color
 		self.display_text = display_text
-		self.text = FONT.render(self.display_text, True, self.base_color)
+		self.text = FONT_MEDIUM.render(self.display_text, True, self.base_color)
 		if self.image is None:
 			self.image = self.text
 		
@@ -46,6 +46,6 @@ class Button():
 
 	def changeColor(self, position):
 		if position[0] in range(self.rect.left, self.rect.right) and position[1] in range(self.rect.top, self.rect.bottom):
-			self.text = FONT.render(self.display_text, True, self.hovering_color)
+			self.text = FONT_MEDIUM.render(self.display_text, True, self.hovering_color)
 		else:
-			self.text = FONT.render(self.display_text, True, self.base_color)
+			self.text = FONT_MEDIUM.render(self.display_text, True, self.base_color)
