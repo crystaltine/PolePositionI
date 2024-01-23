@@ -9,12 +9,7 @@ def start_program():
     (Main menu or connecting... screen)
     """
 
-    try:
-        GameManager.socket_man.connect()
-    except ConnectionRefusedError:
-        cant_connect()
-
-    GameManager.http_man = HTTPManager(GameManager.socket_man.client_id)
+ 
     
     # All is good, send to title screen!
     main_menu()
