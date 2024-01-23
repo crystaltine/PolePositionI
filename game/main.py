@@ -11,9 +11,9 @@ def start_program():
     """
 
     # TEST:
-    # waiting_room()
+    waiting_room()
     
-    main_menu()
+    # main_menu()
 
 if __name__ == "__main__":
     start_program()
