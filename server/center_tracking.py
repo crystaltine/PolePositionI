@@ -18,7 +18,8 @@ class Center:
 
     #method that will change the y coordinate for center based where the turns are
     def update_center(self, player_x, player_y):
-        pass
+        self.center_x = self.all_center_coordinates(player_x)[0]
+        self.center_y = self.all_center_coordinates(player_x)[1]
 
     #method that calculates the distance from the user to the center of the track
     def distances_to_center(self, player_x, player_y) -> list:
@@ -45,6 +46,16 @@ class Center:
 
     #method that sees if the user is too far from the track and needs to be blown up
     def too_far(self, player_x, player_y) -> bool:
+        #loop through all distances
+        for x in self.distances:
+            #just looking for one distance that is close enough to account for overshoot
+            #50 is an arbitrary number right now that can be adjusted if too generous/limiting
+            if x < 50:
+                #one distance to center is close enough, can end function and return
+                return False
+        #if entire loop has gone through and didn't hit the return that means all distances are too far away and True is returned
+        return True
+        
         
 
 #lower = 10 upper = 20, range is 10 
