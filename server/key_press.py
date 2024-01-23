@@ -107,5 +107,6 @@ class Player:
         Should be sent to client side.
         """
         return [self.x, self.y, self.x_velocity, self.y_velocity, self.x_acceleration, self.y_acceleration]
-        
+    
+    
         
