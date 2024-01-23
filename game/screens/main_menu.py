@@ -3,8 +3,10 @@ import sys
 
 from game_manager import GameManager
 
-def main_menu(): # game screen
-#call object instances outside the loop
+def main_menu():
+    """
+    Creates and mounts the main menu on screen.
+    """
 
     while True:
         mouse_pos = pygame.mouse.get_pos()

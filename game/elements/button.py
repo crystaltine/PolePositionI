@@ -1,4 +1,4 @@
-from pygame import Surface
+from pygame import Surface, Color
 from CONSTANTS import FONT_MEDIUM
 
 #From 
@@ -21,7 +21,7 @@ class Button():
 		self.image = image
 		self.x_pos = pos[0]
 		self.y_pos = pos[1]
-		self.base_color, self.hovering_color = base_color, hovering_color
+		self.base_color, self.hovering_color = Color(base_color), Color(hovering_color)
 		self.display_text = display_text
 		self.text = FONT_MEDIUM.render(self.display_text, True, self.base_color)
 		if self.image is None:

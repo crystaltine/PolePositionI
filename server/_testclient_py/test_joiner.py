@@ -1,7 +1,3 @@
-import sys
-sys.path.append('C:\\Users\\s-msheng\\cs\\asp_3\\server\\lib')
-# ^^^ IMPORTANT: DEVELOPMENT ONLY
-
 import socket
 import threading
 from time import sleep

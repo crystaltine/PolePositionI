@@ -4,7 +4,7 @@ from CONSTANTS import *
 from elements.button import Button
 from elements.input import Input
 
-from requests_handler import SocketManager, HTTPManager
+from requests_handler import SocketManager
 
 class GameManager:
     """
@@ -16,6 +16,7 @@ class GameManager:
     # Initiate connections with server
     socket_man = SocketManager()
     http_man = None
+    """ Will be set externally """
     
     # main assets
     screen = pygame.display.set_mode([WIDTH,HEIGHT])
@@ -25,7 +26,7 @@ class GameManager:
     grass = pygame.transform.scale(grass, (int(WIDTH), int(2 * HEIGHT/3)))
     
     mtns = pygame.image.load('./game/assets/mountains_img.png')
-    mtns = pygame.transform.scale(mtns, (WIDTH*2, HEIGHT/5))
+    mtns = pygame.transform.scale(mtns, (WIDTH*2, HEIGHT//5))
     
     logo_img = pygame.image.load('./game/assets/logo.png')
 
@@ -47,8 +48,8 @@ class GameManager:
         """
         Draws non-animated grass and mountains on the screen.
         """
-        GameManager.screen.blit(GameManager.grass, (0, 2*HEIGHT/5))
-        GameManager.screen.blit(GameManager.mtns, (0, HEIGHT/5))
+        GameManager.screen.blit(GameManager.grass, (0, 2*HEIGHT//5))
+        GameManager.screen.blit(GameManager.mtns, (0, HEIGHT//5))
         
     @staticmethod
     def draw_logo(posx = 200, posy = 50, scale = 1):

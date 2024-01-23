@@ -2,9 +2,6 @@ import pygame
 import sys
 from game.requests_handler import SocketManager
 import socket
-import threading
-sys.path.append('C:\\Users\\s-msheng\\cs\\asp_3\\server\\lib')
-# ^^^ IMPORTANT: DEVELOPMENT ONLY
 
 HOST, SPORT, HPORT = "localhost", 3999, 4000
 

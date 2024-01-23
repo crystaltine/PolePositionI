@@ -1,8 +1,4 @@
-import sys
-sys.path.append('C:\\Users\\s-msheng\\cs\\asp_3\\server\\lib')
-# ^^^ IMPORTANT: DEVELOPMENT ONLY
-
-from lib.flask import Flask, request
+from flask import Flask
 
 app = Flask(__name__)
 

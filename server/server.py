@@ -1,8 +1,3 @@
-import sys
-
-sys.path.append('C:\\Users\\s-msheng\\cs\\asp_3\\server\\lib')
-# ^^^ IMPORTANT: DEVELOPMENT ONLY
-
 import socket
 import typing
 import threading
@@ -12,8 +7,8 @@ from uuid import uuid4
 from client import Client, Player, Room
 from CONSTANTS import HOST, PORT, TICK_SPEED, TICKS_PER_BROADCAST
 from key_decoder import decode_packet
-from lib import flask
-from lib.flask_cors import CORS
+import flask
+from flask_cors import CORS
 from mainloop import broadcast_mainloop
 
 app = flask.Flask(__name__)

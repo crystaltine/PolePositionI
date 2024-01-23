@@ -1,6 +1,7 @@
 from game_manager import GameManager
 from screens.cant_connect import cant_connect
 from screens.main_menu import main_menu
+from screens.waiting_room import waiting_room
 from requests_handler import HTTPManager
 
 def start_program():
