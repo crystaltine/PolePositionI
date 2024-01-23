@@ -10,9 +10,9 @@ def start_program():
     (Main menu or connecting... screen)
     """
 
- 
+    # TEST:
+    # waiting_room()
     
-    # All is good, send to title screen!
     main_menu()
 
 if __name__ == "__main__":

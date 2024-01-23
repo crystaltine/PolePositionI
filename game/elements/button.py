@@ -11,10 +11,12 @@ class Button():
   
 		`display_text` is the text to be displayed on the button.
   
-		`base_color`: color of the text normally
-		`hovering_color`: color of text on hover
+		`base_color`: color of the text normally (hex string such as #ffffff)
+		`hovering_color`: color of text on hover (hex string such as #96faff)
   
 		`image`: image to be displayed as the background of the button. If `None`, then the button will be a solid color.
+		
+		### For `image`, it is suggested to use the constants `BUTTON_MEDIUM` and `BUTTON_LARGE`
   
 		@see - https://github.com/baraltech/Menu-System-PyGame/blob/main/button.py
     	"""
