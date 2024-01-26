@@ -10,7 +10,6 @@ from server.client_room import Client, Player, Room
 from CONSTANTS import HOST, PORT, TICK_SPEED, TICKS_PER_BROADCAST
 from key_decoder import decode_packet
 import flask
-from flask_cors import CORS
 from mainloop import broadcast_mainloop
 
 app = flask.Flask(__name__)
