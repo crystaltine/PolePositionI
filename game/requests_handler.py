@@ -93,6 +93,16 @@ class SocketManager:
         keydata = keyid | (keydown << 2)
         print(f"Creating&sending packet with keyid={keyid}, keydown={keydown}")
         self.socket.send(keydata.to_bytes(4, 'big'))
+        
+    def send_event(self, event_name: str) -> None:
+        """
+        Sends an event to the server.
+        
+        ### Event names:
+        - `start_game`
+        - `leave_room`
+        """
+        self.socket.send(event_name.encode('utf-8'))
 
     def recv_packet(self):
         """

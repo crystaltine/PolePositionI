@@ -4,7 +4,7 @@ from CONSTANTS import FONT_MEDIUM
 #From 
 class Button():
     
-	def __init__(self, pos: tuple, display_text: str, base_color, hovering_color, image: Surface = None):
+	def __init__(self, pos: tuple, display_text: str, base_color, hovering_color, image: Surface = None, disabled=False):
 		"""
 		`pos` should be a tuple that indicates the (x, y) position of the TOP LEFT corner of the button.
 		Refer to `CONSTANTS.py` for button image size. At the time of writing, buttons are 240x60 pixels.
@@ -21,11 +21,19 @@ class Button():
 		@see - https://github.com/baraltech/Menu-System-PyGame/blob/main/button.py
     	"""
 		self.image = image
+		# use srcalpha to allow transparency
+		if self.image is not None:
+			self.image = self.image.convert_alpha()
+			self.image.set_alpha(255 if not disabled else 100)
 		self.x_pos = pos[0]
 		self.y_pos = pos[1]
+		self.disabled = disabled
 		self.base_color, self.hovering_color = Color(base_color), Color(hovering_color)
 		self.display_text = display_text
-		self.text = FONT_MEDIUM.render(self.display_text, True, self.base_color)
+  
+		self.text = FONT_MEDIUM.render(self.display_text, True, self.base_color).convert_alpha()
+		self.text.set_alpha(255 if not disabled else 100)
+
 		if self.image is None:
 			self.image = self.text
 		
@@ -38,8 +46,9 @@ class Button():
 			screen.blit(self.image, self.rect)
 		screen.blit(self.text, self.text_rect)
 
-	def is_hovering(self, position):
+	def is_hovering(self, position):     
 		return (
+			not self.disabled and # disabled buttons cannot be hovered and thus not clicked
 			position[0] > self.rect.left and 
 			position[0] < self.rect.right and 
 			position[1] > self.rect.top and 
@@ -47,7 +56,9 @@ class Button():
 		)
 
 	def changeColor(self, position):
-		if position[0] in range(self.rect.left, self.rect.right) and position[1] in range(self.rect.top, self.rect.bottom):
+		if self.is_hovering(position):
+			# we actually don't care about disabled or not since disabled buttons cannot be hovered
 			self.text = FONT_MEDIUM.render(self.display_text, True, self.hovering_color)
 		else:
-			self.text = FONT_MEDIUM.render(self.display_text, True, self.base_color)
+			self.text = FONT_MEDIUM.render(self.display_text, True, self.base_color).convert_alpha()
+			self.text.set_alpha(255 if not self.disabled else 100)

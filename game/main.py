@@ -10,9 +10,28 @@ def start_program():
     (Main menu or connecting... screen)
     """
 
-    # TEST:
-    waiting_room()
+    ################## vvv TESTS vvv ##################
     
+    # TODO - this should be obtained from server upon joining a room
+    game_details = {
+        "map": "Touch Grass",
+        "map_preview_file": "touch_grass.png",
+        "track_length": 3500,
+        "wr_time": 47.23,
+        "pb_time": 56.12,
+    }
+    game_started = waiting_room(game_details, False)
+    
+    # INFO: game_started will be FALSE if we should return to main menu, and TRUE if the game should start.
+    
+    if game_started:
+        # TODO - start game
+        pass
+    else:
+        main_menu() 
+    ################## ^^^ TESTS ^^^ ##################
+    
+    # MAIN:
     # main_menu()
 
 if __name__ == "__main__":

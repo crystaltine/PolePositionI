@@ -26,7 +26,7 @@ class GameManager:
     grass = pygame.transform.scale(grass, (int(WIDTH), int(2 * HEIGHT/3)))
     
     mtns = pygame.image.load('./game/assets/mountains_img.png')
-    mtns = pygame.transform.scale(mtns, (WIDTH*2, HEIGHT//5))
+    mtns = pygame.transform.scale(mtns, (WIDTH*2, HEIGHT-grass.get_height()))
     
     logo_img = pygame.image.load('./game/assets/logo.png')
 
@@ -48,13 +48,15 @@ class GameManager:
         """
         Draws non-animated grass and mountains on the screen.
         """
-        GameManager.screen.blit(GameManager.grass, (0, 2*HEIGHT//5))
-        GameManager.screen.blit(GameManager.mtns, (0, HEIGHT//5))
+        GameManager.screen.blit(GameManager.grass, (0, HEIGHT - GameManager.grass.get_height()))
+        GameManager.screen.blit(GameManager.mtns, (0, 0))
         
     @staticmethod
     def draw_logo(posx = 200, posy = 50, scale = 1):
         """
         Draws the logo on the screen, with customizable position and scale. posx and posy are the top left corner of the logo.
+        
+        For reference, the original logo is 800x300 pixels.
         """
         scaled_logo = GameManager.logo_img
         if scale != 1:

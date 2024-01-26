@@ -2,8 +2,8 @@ import pygame
 from elements.waiting_lobby_player import waiting_lobby_player
 
 BLIT_LOCS = [
-    (16, 140), (232, 140), (448, 140), (664, 140),
-    (16, 580), (232, 580), (448, 580), (664, 580),
+    (36, 130), (252, 130), (468, 130), (684, 130),
+    (36, 380), (252, 380), (468, 380), (684, 380),
 ]
 
 class WaitingRoomMainPanel:
@@ -15,7 +15,7 @@ class WaitingRoomMainPanel:
     """
     
     def __init__(self):
-        self.surface = pygame.surface.Surface((880, 720), pygame.SRCALPHA)
+        self.surface = pygame.surface.Surface((920, 720), pygame.SRCALPHA)
         
         self.players = [] # list of dicts {"username": str, "color": str, "is_host": bool, "component": Surface}
         
@@ -37,15 +37,14 @@ class WaitingRoomMainPanel:
         """
         Removes a player from the screen.
         Returns true if the specified username was found and removed, false otherwise
+        
+        ### Important:
+        The entire screen must be re-drawn after this function is called.
         """
         
         for player_obj in self.players:
             if player_obj["username"] == username:
                 self.players.remove(player_obj)
-                
-                # Remove the component
-                player_obj["component"].set_alpha(0)
-                
                 return True
             
         return False
@@ -57,7 +56,7 @@ class WaitingRoomMainPanel:
         Returns the `Surface` component that can be used in other elements.
         """
         
-        self.surface = pygame.surface.Surface((880, 720), pygame.SRCALPHA)
+        self.surface = pygame.surface.Surface((920, 720), pygame.SRCALPHA)
         
         index = 0
         for player_obj in self.players:
