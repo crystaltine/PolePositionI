@@ -1,11 +1,11 @@
-import socket
+from socket_wrapper import PSocket
 from time import sleep
-from client import Room, Client
+from server.client_room import Room, Client
 from typing import Dict
 
 from CONSTANTS import HOST, PORT, TICK_SPEED, TICKS_PER_BROADCAST
 
-def broadcast_mainloop(sock: socket.socket, rooms: Dict[int, Room], connected_clients: Dict[str, Client]) -> None:
+def broadcast_mainloop(sock: PSocket, rooms: Dict[int, Room], connected_clients: Dict[str, Client]) -> None:
     """
     Sends the specified packet to all specified addresses.
     Likely usage will be to send a packet to both (or multiple) clients connected to a room
@@ -13,7 +13,7 @@ def broadcast_mainloop(sock: socket.socket, rooms: Dict[int, Room], connected_cl
     Args:
     addresses: list of addresses to send to
     packet: data to send
-    sock: socket object running on server
+    sock: PSocket object running on server
     """
 
     # Run stuff here

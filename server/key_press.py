@@ -2,7 +2,8 @@ import math
 
 class Player:
 
-    def __init__(self):
+    def __init__(self, username: str = None):
+        self.username = username
         self.x = 0 
         self.y = 0
         self.velocity = 0

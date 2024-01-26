@@ -4,7 +4,7 @@ from CONSTANTS import *
 from elements.button import Button
 from elements.input import Input
 
-from requests_handler import SocketManager
+from requests_handler import SocketManager, HTTPManager
 
 class GameManager:
     """
@@ -13,9 +13,13 @@ class GameManager:
     Will implement functions that allow for quick display management.
     """
     
+    # used solely for waiting room event callbacks. See game/screens/waiting_room.py for more info.
+    waiting_room_game_started = False
+    waiting_room_leave_game = False
+    
     # Initiate connections with server
     socket_man = SocketManager()
-    http_man = None
+    http_man: None | HTTPManager = None
     """ Will be set externally """
     
     # main assets

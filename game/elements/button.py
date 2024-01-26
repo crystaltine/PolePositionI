@@ -3,7 +3,7 @@ from CONSTANTS import FONT_MEDIUM
 
 #From 
 class Button():
-    
+	
 	def __init__(self, pos: tuple, display_text: str, base_color, hovering_color, image: Surface = None, disabled=False):
 		"""
 		`pos` should be a tuple that indicates the (x, y) position of the TOP LEFT corner of the button.
@@ -19,7 +19,7 @@ class Button():
 		### For `image`, it is suggested to use the constants `BUTTON_MEDIUM` and `BUTTON_LARGE`
   
 		@see - https://github.com/baraltech/Menu-System-PyGame/blob/main/button.py
-    	"""
+		"""
 		self.image = image
 		# use srcalpha to allow transparency
 		if self.image is not None:
@@ -40,6 +40,16 @@ class Button():
 		# let rect's top left be x_pos, y_pos
 		self.rect = self.image.get_rect(topleft=(self.x_pos, self.y_pos))
 		self.text_rect = self.text.get_rect(center=self.rect.center)
+  
+	def update_text(self, screen):
+		"""
+		Call this instead of `update` if you want to update the text of the button.
+		"""
+		self.text = FONT_MEDIUM.render(self.display_text, True, self.base_color).convert_alpha()
+		self.text.set_alpha(255 if not self.disabled else 100)
+		self.text_rect = self.text.get_rect(center=self.rect.center)
+  
+		self.update(screen)
 
 	def update(self, screen):
 		if self.image is not None:

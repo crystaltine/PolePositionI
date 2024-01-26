@@ -1,8 +1,12 @@
 from socket import socket
+import array
 from typing import List
+
+from socket_wrapper import PSocket
 from key_decoder import decode_packet
 from key_press import Player
-import array
+from game_map import GameMap
+from CONSTANTS import CAR_COLORS
 
 class Client:
     """
@@ -14,7 +18,7 @@ class Client:
     - The ID of the room they are currently connected to
     - A `key_press.Player` object that stores data about the player, like pos, vel, and acc
     """
-    def __init__(self, sock: socket, host: str = None, port: int = None, id: str = None, room: int = None):
+    def __init__(self, sock: PSocket, host: str = None, port: int = None, id: str = None, room: int = None):
         self.sock = sock
         self.address = (host, port)
         self.id = id
@@ -39,7 +43,7 @@ class Client:
         self.player.num_processing(keyID, down)
         print(f"\x1b[35mPLAYER UPDATING! keyID={keyID}, down={down}")
         
-    def send_msg(self, msg) -> bool:
+    def send_msg(self, data, event_name: str = None) -> bool:
         """
         Send a message payload to this Client's registered socket.
         
@@ -47,13 +51,13 @@ class Client:
         """
         try:
             
-            # Handle list[float] case, which will be the main use of this function
-            if type(msg) == list:
-                self.sock.send(array.array("d", msg))
+            # Handle list[float] case, which will be the main use of this function (sending a packet)
+            if type(data) == list:
+                self.sock.send(array.array("d", data)) # no 'event' param, which causes `sock.send` to label the payload as a packet
                 return True
             
-            # Encode if string, else just construct bytes
-            self.sock.send(bytes(msg, 'utf-8') if type(msg) == str else bytes(msg))
+            # Encode if string, else just construct bytes. Send as event if provided
+            self.sock.send(bytes(data, 'utf-8') if type(data) == str else bytes(data), event_name=event_name)
             return True
         except (ConnectionAbortedError, ConnectionResetError):
             return False
@@ -63,21 +67,89 @@ class Client:
 
 class Room:
     def __init__(self, host: Client, clients: List[Client], id: int):
-        self.clients = set(clients)
+        
+        self.available_colors = CAR_COLORS.copy()
+        self.seen_usernames = []
+        
+        self.clients = {}
+        
+        # Initialize clients. for each client passed in, give them a random color.
+        for client in clients:
+            
+            # Handle repeat usernames (add a number suffix)
+            num_times_username_taken = self.seen_usernames.count(client.player.username)
+            new_client_username = client.player.username + (f"-{num_times_username_taken+1}" if num_times_username_taken > 0 else "")
+            self.seen_usernames.append(new_client_username)
+            
+            self.clients[client.id] = {
+                "client_obj": client,
+                "color": self.available_colors.pop(),
+                "username": new_client_username
+            }
+        
         self.id = id
         self.host = host
         self.started = False # TODO - if started, start data receive loop
+        
+        # Pick a random map.
+        self.map = GameMap()
 
     def start_game(self):
         """
         Marks the room as started (sets `self.started = True`) and begins receive loop from clients
         """
         self.started = True
-        for client in self.clients:
-            client.begin_receiving_data()
+        for client_id in self.clients:
+            # see game/screens/waiting_room.py - game-start and leave events dont need extra data.
+            self.clients[client_id]['client_obj'].send_data({}, "game-start")
 
     def add_client(self, client: Client):
-        self.clients.add(client)
+        
+        num_times_username_taken = self.seen_usernames.count(client.player.username)
+        new_client_username = client.player.username + (f"-{num_times_username_taken+1}" if num_times_username_taken > 0 else "")
+        
+        self.clients[client.id] = {
+            "client_obj": client,
+            "color": self.available_colors.pop(),
+            "username": new_client_username
+        }
+        
+        # add their username to the taken list
+        self.seen_usernames.append(new_client_username)
+        
+        # send the 'player-join' event to all other clients in the room, with the new client's username and color
+        for client_id in self.clients:
+            if client_id == client.id: continue
+            self.clients[client_id]['client_obj'].send_data({
+                "username": new_client_username,
+                "color": self.clients[client.id]['color']
+            }, "player-join")
+        
+    def remove_client(self, client: Client):
+        
+        # add their color back into the pool
+        self.available_colors.add(self.clients[client.id]['color'])
+        
+        # remove their username from the taken list
+        leaving_player_username = self.clients[client.id]['username']
+        self.seen_usernames.remove(leaving_player_username)
+        
+        # send the removed client a 'leave' event
+        # see game/screens/waiting_room.py - game-start and leave events dont need extra data.
+        client.send_data({}, "leave")
+        
+        # remove them from the room
+        # note - the `Client` object shouldn't be destroyed because of Python's garbage collector maintaining a nonzero reference count
+        # We can try testing this out later, for now just be safe and set to None
+        # del self.clients[client.id]
+        self.clients[client.id] = None
+        
+        # send the 'player-leave' event to all other clients in the room, with the client's username
+        for client_id in self.clients:
+            if client_id == client.id: continue
+            self.clients[client_id]['client_obj'].send_data({
+                "username": leaving_player_username
+            }, "player-leave")
         
     def num_connected(self):
         """
@@ -90,10 +162,7 @@ class Room:
                 self.remove_client(c)
         
         # All dc'ed clients removed, send back new len
-        return len(self.clients)        
-
-    def remove_client(self, client: Client):
-        self.clients.remove(client)
+        return len(self.clients)
         
     def update_if_started(self) -> bool:
         """
@@ -123,7 +192,7 @@ class Room:
         """
         if not self.started: return False
         for client in self.clients:
-            client.send_msg(client.player.get_physics_data())
+            client.send_data(client.player.get_physics_data())
 
     def broadcast_all(self, data):
         """
@@ -135,7 +204,7 @@ class Room:
         marked_deleted = []
         
         for c in self.clients: # every c represents a client obj
-            client_response = c.send_msg(data)
+            client_response = c.send_data(data)
             
             # if client is no longer connected, remove
             if not client_response:

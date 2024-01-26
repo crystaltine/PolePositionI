@@ -1,6 +1,9 @@
 import pygame
 import socket
 import httpx
+import threading
+from json import loads
+from typing import Dict, Callable, Any
 from time import sleep
 from CONSTANTS import id_map, HTTP_URL, SOCKET_HOST, SOCKET_PORT
 
@@ -35,23 +38,105 @@ class SocketManager:
     def __init__(self):
         """
         Simply creates a pointer to this future object.
+        
+        Also initializes a few basic things
         """
+    
+        self._listen_stopped = True
+        self.registered_events: Dict[str, Callable[[Dict], Any]] = {}
+        """ Should be a dict mapping event names to callback functions. """
+        
         return
     
-    def connect(self):
+    def connect(self, username: str) -> str | None:
         """
-        Creates a socket connection with the server.
-        """
+        Creates a socket connection with the server. **Because this contains `socket.recv` calls, it WILL BLOCK THE MAIN THREAD.**
         
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.connect((SOCKET_HOST, SOCKET_PORT))
+        Returns None if connection failed, else returns the client id.
+        
+        This function also begins the listening thread.
+        """
+        try:
+            self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.socket.connect((SOCKET_HOST, SOCKET_PORT))
+            
+            # IMPORTANT: see server/server.py: we need to send the server a username immediately
+            self.socket.send(username.encode('utf-8'))
+            
+            # Receive client id - special event that is sent on connection
+            res = self.socket.recv(1024)
+            self.client_id = res.decode('utf-8')
+            
+            self.listen() # now we begin listening for the general format
+            
+            return self.client_id
+        except Exception as e:
+            print(f"\x1b[31mError connecting to server: {e}\x1b[0m")
+            return None
 
-        # Receive client id
-        res = sock.recv(1024)
-        client_id = res.decode('utf-8')
+    def listen(self) -> None:
+        """
+        Starts a thread that purely listens for messages from the server.
+        Since this runs on a different thread, it will not block the main thread.
         
-        self.client_id = client_id
-        self.socket = sock
+        The main purpose of this is to listen for events such as:
+        - game-start (when we should proceed to live game screen)
+        - crash (our car crashed, start respawn screen)
+        - player-left (when player leaves lobby, and we have to rerender it)
+        """
+        
+        self._listen_stopped = False
+        
+        def listen_inner():
+            while True:
+                
+                if self._listen_stopped: break
+
+                raw_data = self.socket.recv(1024)
+                
+                # prefixing: first byte will be a '0' for events, '1' for packet data
+                if raw_data[0] == 1: 
+                    self.recv_packet(raw_data[1:])
+                    continue
+
+                # server sends in data as a JSON string
+                payload = loads(self.socket.recv(1024).decode('utf-8'))
+                print(f"\x1b[35mEVENT RECV: \x1b[33m{payload}\x1b[0m")
+                
+                event_name = payload.get('type')
+                data = payload.get('data')
+                
+                _callable = self.registered_events.get(event_name)
+                if _callable: _callable(data)
+                
+        self.listen_thread = threading.Thread(target=listen_inner)
+        self.listen_thread.start()
+    
+    def stop_listening(self) -> None:
+        """
+        Stops the listening thread. Registered events stay, but won't be called until `listen()` is called again.
+        """
+        self._listen_stopped = True
+    
+    def recv_packet(self, data: bytes) -> None:
+        """
+        @TODO 
+        
+        Handles a received physics packet from the server.
+        
+        The data already has prefix byte removed. (so we decode into physics data and update our game)
+        """
+        print(f"\x1b[35mPACKET RECV: \x1b[33m{data}\x1b[0m")
+                
+    def on(self, event_name, callback: Callable[[Dict], Any]) -> None:
+        """
+        Registers a callback function to be called when the specified event is received from the server.
+        
+        @param event_name: the name of the event to listen for
+        @param callback: the function to call when the event is received. The callback function should accept one parameter, which will be JSON-formatted data from server.
+        """
+        
+        self.registered_events[event_name] = callback        
 
     def handle_game_keypresses(self, event) -> None:
         """
@@ -103,26 +188,6 @@ class SocketManager:
         - `leave_room`
         """
         self.socket.send(event_name.encode('utf-8'))
-
-    def recv_packet(self):
-        """
-        Receives a packet from the server.
-        
-        @TODO - server response format changed - update this function
-        
-        Each packet contains the following data:
-        - x pos: int
-        - y pos: int
-        - x vel: int
-        - y vel: int
-        - x acc: int
-        - y acc: int
-        
-        In total, 6 ints, so 24 bytes of data.
-        """
-        data = self.socket.recv(24)
-        print(f"\x1b[35mserver->client: \x1b[33m{data}\x1b[0m")
-        return data
     
 class HTTPManager:
     """

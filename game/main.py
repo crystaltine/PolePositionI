@@ -11,8 +11,9 @@ def start_program():
     """
 
     ################## vvv TESTS vvv ##################
+    """ THIS TESTING CODE IS CURRENTLY DISABLED (it's all commented out)
     
-    # TODO - this should be obtained from server upon joining a room
+    # this should be obtained from server upon joining a room
     game_details = {
         "map": "Touch Grass",
         "map_preview_file": "touch_grass.png",
@@ -29,10 +30,24 @@ def start_program():
         pass
     else:
         main_menu() 
+    """
     ################## ^^^ TESTS ^^^ ##################
     
     # MAIN:
-    # main_menu()
+    
+    # see docstring for main_menu and other comments in that file for an explanation
+    main_menu_result = main_menu()
+    while not main_menu_result:
+        main_menu_result = main_menu()
+        
+    # if loop broken, that means we are ready to move on to the live game screen.
+    # TODO - start live game    
+    print("enter live game")
+    
+    try:
+        # Gracefully close the socket connection to prevent ghost client on server side
+        GameManager.socket_man.socket.close()
+    except: pass
 
 if __name__ == "__main__":
     start_program()

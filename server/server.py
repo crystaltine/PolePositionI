@@ -3,8 +3,10 @@ import typing
 import threading
 from time import sleep
 from uuid import uuid4
+import json
 
-from client import Client, Player, Room
+from socket_wrapper import PSocket
+from server.client_room import Client, Player, Room
 from CONSTANTS import HOST, PORT, TICK_SPEED, TICKS_PER_BROADCAST
 from key_decoder import decode_packet
 import flask
@@ -57,7 +59,7 @@ def joinroom(client_id: str, room_id: int):
         else:
             connected_clients[client_id].room = room_id
             room_data[room_id].add_client(connected_clients[client_id])
-            return {"success": True}
+            return {"success": True, "map_data": room_data[room_id].map.map_data}
 
     else:
         return {"success": False, "message": "Socket must be registered first."}
@@ -102,7 +104,7 @@ def createroom(client_id: str):
     client.hosting = room # mark this client as the host of this room
 
     # Return the code
-    return {"success": True, "code": f"{id:06d}"}
+    return {"success": True, "code": f"{id:06d}", "map_data": room.map.map_data}
 
 @app.route('/startgame/<string:client_id>/<int:room_id>')
 def startgame(client_id: str, room_id: int):
@@ -121,7 +123,7 @@ def startgame(client_id: str, room_id: int):
     room.start_game()
     return {"success": True, "message": f"Room {room_id} marked as started and recv loops initiated."}
 
-sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+sock = PSocket(socket.socket(socket.AF_INET, socket.SOCK_STREAM))
 sock.bind((HOST, PORT))
 sock.listen()   
 
@@ -134,18 +136,30 @@ def accept_socket():
     """
     while True:
         conn, address = sock.accept()
+        conn = PSocket(conn)
         print(f"\x1b[36mConnection established\x1b[0m from: \x1b[33m{address}\x1b[0m")
         
         # Send the client a generated ID (sort of like an auth cookie)
         client_id = uuid4().hex
 
-        # Create a Client object for the connection
+        # Create a Client object for the connection. Currently HAS NO USERNAME (see below)
         cli = Client(conn, host=address[0], port=address[1], id=client_id)
         connected_clients[client_id] = cli
         addresses_to_id[f"{address[0]}:{address[1]}"] = client_id
         
+        # IMPORTANT - the client side's `socket_man.connect()` must handle this (send a username!!!)
+        # ALSO IMPORATNT - we call this recv before sending the client id, since the client
+        # sends data before recv'ing. its 3 am and i cant think clearly but im guessing the order of these
+        # lines must corresponsd (recv on server <-> send on client and vice versa) because of thread blocking
+        username = conn.recv(1024).decode('utf-8') # wait for client to send back their username
+        
         # we created an id for them, now emit their id back
-        conn.send(client_id.encode('utf-8'))
+        # THIS IS A SPECIAL EVENT - does not get handled by event listener
+        # since the client SHOULD NOT HAVE BEGUN THE EVENT LISTENER YET. (it happens immediately after recv. this)
+        conn.send_raw(client_id.encode('utf-8'))
+        
+        # TODO - if invalid, kick them or something/ask for a new username
+        cli.player.username = username
 
 def apprun(host, port):
     print(f"Flask server running at {host}:{port+1}")
