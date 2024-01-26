@@ -59,7 +59,12 @@ def joinroom(client_id: str, room_id: int):
         else:
             connected_clients[client_id].room = room_id
             room_data[room_id].add_client(connected_clients[client_id])
-            return {"success": True, "map_data": room_data[room_id].map.map_data}
+            
+            player_details = [] # send a list of {username: str, color: str, is_host: bool} to the client for lobby display
+            for client in room_data[room_id].clients.values():
+                player_details.append({"username": client.player.username, "color": client.player.color, "is_host": not (client.hosting is None)})
+            
+            return {"success": True, "map_data": room_data[room_id].map.map_data, "players": player_details}
 
     else:
         return {"success": False, "message": "Socket must be registered first."}

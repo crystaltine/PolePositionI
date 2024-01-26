@@ -17,6 +17,8 @@ class GameManager:
     waiting_room_game_started = False
     waiting_room_leave_game = False
     
+    room_id: None | int = None
+    
     # Initiate connections with server
     socket_man = SocketManager()
     http_man: None | HTTPManager = None

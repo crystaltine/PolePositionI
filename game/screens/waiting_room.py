@@ -8,28 +8,43 @@ from elements.button import Button
 from elements.waiting_lobby_player import waiting_lobby_player
 from elements.waiting_room_main_panel import WaitingRoomMainPanel
 
-def waiting_room(details: dict, is_leader = False) -> bool:
+def waiting_room(details: dict, is_leader = False, connected_players: list = []) -> bool:
     """
     Creates/Mounts the room where the user is sent after creating/joining a room
     
     Just as a note, we are safe to use `GameManager.socket_man` and `GameManager.http_man` here because
     this function is only called AFTER both are successfully initialized and connected.
     
-    Returns `True` if we should proceed into the game screen, `False` if we left, got kicked, or room disbanded (return to main menu)
-    
-    As of Jan. 26th, 1:34AM, `details` should have the following schema: (see `server/CONSTANTS.py`)
+    @param `details` - As of Jan. 26th, 1:34AM, `details` should have the following schema: (see `server/CONSTANTS.py`)
     ```python
     {
         "map_name": "fsdfksdj",
         "preview_file": "fsdfksdj.png",
         "length": 999,
         "wr_time": 55,
-        # TODO - also need to somehow link to a representation of the map, so we can handle physics and stuff.
     }
     ``` 
+    
+    @param `is_leader` - Whether the user is the leader of the room (the one who can start the game). Determines
+    if the start button is disabled or not.
+    
+    @param `connected_players` - A list of players that are already connected to the room. CONTAINS THIS USER (us). 
+    This is used when the user joins a room that already has players in it. This is a list of dicts with the following schema:
+    ```python
+    {
+        "username": "their username",
+        "color": "a car color",
+        "is_host": True || False,
+    }
+    ```
+    
+    @returns `True` if we should proceed into the game screen, `False` if we left, got kicked, or room disbanded (return to main menu)
     """
     
     main_panel = WaitingRoomMainPanel()
+    
+    for already_connected_player in connected_players:
+        main_panel.add_player(**already_connected_player)
 
     side_panel = pygame.surface.Surface((280,720), pygame.SRCALPHA)
     side_panel.fill((0, 0, 0, 128))
@@ -120,10 +135,10 @@ def waiting_room(details: dict, is_leader = False) -> bool:
                 if start_button.is_hovering(pygame.mouse.get_pos()):
                     # start button won't be hovering ever if it is disabled
                     # so we don't need to check if it is disabled again here.
-                    # plus, server rejects all unauthorized start requests
-                    GameManager.socket_man.send_event('start_game')
+                    # plus, server rejects all unauthorized start requests (TODO maybe)
+                    GameManager.http_man.start_game(GameManager.room_id)
                 elif leave_button.is_hovering(pygame.mouse.get_pos()):
-                    GameManager.socket_man.send_event('leave_room')
+                    GameManager.http_man.leave_room()
                     return False
         
         pygame.display.update()   

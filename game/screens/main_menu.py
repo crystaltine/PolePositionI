@@ -10,6 +10,8 @@ from game_manager import GameManager
 from requests_handler import HTTPManager
 from screens.waiting_room import waiting_room
 
+# TODO generally, these tkinter popups are ugly and maybe we could replace them with in-game popups?
+
 def onclick_multiplayer_button(callback: Callable[[bool], Any]) -> dict:
     """
     when the user clicks on a multiplayer button, 
@@ -114,6 +116,7 @@ def main_menu() -> bool:
                         
                         else:
                             print("Room created successfully! Code:", res.get('code'))
+                            GameManager.room_id = res.get('code')
                             return waiting_room(res.get('map_data'), True)
                     
                     click_result = onclick_multiplayer_button(_cb)
@@ -149,14 +152,9 @@ def main_menu() -> bool:
                         
                         else:
                             print("Room joined successfully! Code:", res.get('code'))
+                            GameManager.room_id = res.get('code')
                             
-                            # waiting_room returns True if we should proceed to live game (game started)
-                            # and false if user left/got kicked/room disbanded, etc.
-                            # This return will get passed through all the way to the entered_a_game variable below.
-                            
-                            # TODO - we need to get a username from the user, then send to server, THEN run the waiting room func.
-                            
-                            return waiting_room(res.get('map_data'), False)
+                            return waiting_room(res.get('map_data'), False, res.get('players'))
                     
                     # This returns to the caller of main_menu whether or not to rerun it, or proceed.                    
                     click_result = onclick_multiplayer_button(_cb)

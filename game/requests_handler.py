@@ -244,6 +244,8 @@ class HTTPManager:
         """
         Call this function once the user has created their own room and is ready to start.
         
+        Requires id passed in as param because I want to avoid circular imports.
+        
         Returns a JSON/`dict` with the following schema:
         ```
         {
