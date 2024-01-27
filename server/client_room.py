@@ -43,7 +43,7 @@ class Client:
         self.player.num_processing(keyID, down)
         print(f"\x1b[35mPLAYER UPDATING! keyID={keyID}, down={down}")
         
-    def send_msg(self, data, event_name: str = None) -> bool:
+    def send_data(self, data, event_name: str = None) -> bool:
         """
         Send a message payload to this Client's registered socket.
         
