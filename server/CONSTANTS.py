@@ -12,4 +12,4 @@ MAPS = {
     } 
 }
 
-CAR_COLORS = set("red", "orange", "yellow", "green", "blue", "purple", "pink", "white")
+CAR_COLORS = set(["red", "orange", "yellow", "green", "blue", "purple", "pink", "white"])

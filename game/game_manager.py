@@ -1,9 +1,9 @@
 import pygame
-from CONSTANTS import *
+from typing import Union
 
+from CONSTANTS import *
 from elements.button import Button
 from elements.input import Input
-
 from requests_handler import SocketManager, HTTPManager
 
 class GameManager:
@@ -17,11 +17,11 @@ class GameManager:
     waiting_room_game_started = False
     waiting_room_leave_game = False
     
-    room_id: None | int = None
+    room_id: Union[None, int] = None
     
     # Initiate connections with server
     socket_man = SocketManager()
-    http_man: None | HTTPManager = None
+    http_man: Union[None, HTTPManager] = None
     """ Will be set externally """
     
     # main assets

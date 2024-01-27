@@ -3,7 +3,7 @@ import socket
 import httpx
 import threading
 from json import loads
-from typing import Dict, Callable, Any
+from typing import Dict, Callable, Any, Union
 from time import sleep
 from CONSTANTS import id_map, HTTP_URL, SOCKET_HOST, SOCKET_PORT
 
@@ -48,7 +48,7 @@ class SocketManager:
         
         return
     
-    def connect(self, username: str) -> str | None:
+    def connect(self, username: str) -> Union[str, None]:
         """
         Creates a socket connection with the server. **Because this contains `socket.recv` calls, it WILL BLOCK THE MAIN THREAD.**
         
@@ -100,7 +100,7 @@ class SocketManager:
                     continue
 
                 # server sends in data as a JSON string
-                payload = loads(self.socket.recv(1024).decode('utf-8'))
+                payload = loads(raw_data[1:].decode('utf-8'))
                 print(f"\x1b[35mEVENT RECV: \x1b[33m{payload}\x1b[0m")
                 
                 event_name = payload.get('type')
@@ -209,8 +209,8 @@ class HTTPManager:
         ```
         {
             "success": bool,
-            "code": str | None, # will be a 6-digit code if successful
-            "message": str | None # will be an error message if unsuccessful
+            "code": Union[str, None], # will be a 6-digit code if successful
+            "message": Union[str, None] # will be an error message if unsuccessful
         }
         ```
         """
@@ -227,7 +227,7 @@ class HTTPManager:
         ```
         {
             "success": bool,
-            "message": str | None # will be an error message if unsuccessful
+            "message": Union[str, None] # will be an error message if unsuccessful
         }
         ```
         """
@@ -239,7 +239,6 @@ class HTTPManager:
         print(f"Join room response: {res}")
         return res
 
-    @staticmethod
     def start_game(self, room_id: int) -> dict:
         """
         Call this function once the user has created their own room and is ready to start.
@@ -250,7 +249,7 @@ class HTTPManager:
         ```
         {
             "success": bool,
-            "message": str | None # will be an error message if unsuccessful
+            "message": Union[str, None] # will be an error message if unsuccessful
         }
         ```
         """
@@ -258,7 +257,6 @@ class HTTPManager:
         print(f"Start game response: {res}")
         return res
     
-    @staticmethod
     def leave_room(self) -> dict:
         """
         Call this function when the user is ready to leave the room.
@@ -267,7 +265,7 @@ class HTTPManager:
         ```
         {
             "success": bool,
-            "message": str | None # will be an error message if unsuccessful
+            "message": Union[str, None] # will be an error message if unsuccessful
         }
         ```
         """

@@ -53,15 +53,15 @@ def waiting_room(details: dict, is_leader = False, connected_players: list = [])
     map_preview = pygame.image.load(f'./game/assets/lobby/maps/{details["preview_file"]}')
     side_panel.blit(map_preview, (20, 20))
     
-    map_label = FONT_TINY.render("Map:", True, "#ffffff")
-    map_text = FONT_MEDIUM.render(details['map_name'], True, "#ffffff")
-    length_label = FONT_TINY.render("Track length:", True, "#ffffff")
-    length_text = FONT_MEDIUM.render(f"{details['length']} m", True, "#ffffff")
-    record_label = FONT_TINY.render("WR time:", True, "#ffffff")
-    record_text = FONT_MEDIUM.render(f"{details['wr_time']} s", True, "#ffffff")
+    map_label = FONT_TINY.render("Map:", True, (255, 255, 255))
+    map_text = FONT_MEDIUM.render(details['map_name'], True, (255, 255, 255))
+    length_label = FONT_TINY.render("Track length:", True, (255, 255, 255))
+    length_text = FONT_MEDIUM.render(f"{details['length']} m", True, (255, 255, 255))
+    record_label = FONT_TINY.render("WR time:", True, (255, 255, 255))
+    record_text = FONT_MEDIUM.render(f"{details['wr_time']} s", True, (255, 255, 255))
     # TODO - save pb times on client side (in a file), then fetch
-    #pb_label = FONT_TINY.render("PB time:", True, "#ffffff")
-    #pb_text = FONT_MEDIUM.render(f"{details['pb_time']} s", True, "#ffffff")
+    #pb_label = FONT_TINY.render("PB time:", True, (255, 255, 255))
+    #pb_text = FONT_MEDIUM.render(f"{details['pb_time']} s", True, (255, 255, 255))
     
     LABEL_GAP = 5
     DESC_GAP = 20
@@ -110,7 +110,7 @@ def waiting_room(details: dict, is_leader = False, connected_players: list = [])
         
         GameManager.draw_static_background()
     
-        text = FONT_LARGE.render(f"Waiting for start...", True, "#ffffff")
+        text = FONT_LARGE.render(f"Waiting for start...", True, (255, 255, 255))
         GameManager.screen.blit(text, (20,20))
         
         GameManager.screen.blit(side_panel, (920,0))   

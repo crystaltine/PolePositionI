@@ -24,7 +24,7 @@ def waiting_lobby_player(username: str, car_color: str, is_leader = False) -> py
     base_component = pygame.image.load('./game/assets/waiting_room_player_component.png')
     pygame.transform.scale(base_component, (200, 200))
     
-    username_text = FONT_SMALL.render(username, True, '#000000')
+    username_text = FONT_SMALL.render(username, True, (0, 0, 0))
     base_component.blit(username_text, (100-username_text.get_width()//2, 170-username_text.get_height()//2))
     
     # Now we render a car image on top of the pedestal image.

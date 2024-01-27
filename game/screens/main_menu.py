@@ -117,7 +117,9 @@ def main_menu() -> bool:
                         else:
                             print("Room created successfully! Code:", res.get('code'))
                             GameManager.room_id = res.get('code')
-                            return waiting_room(res.get('map_data'), True)
+
+                            # server will return ourselves (since it assigns us a random color)
+                            return waiting_room(res.get('map_data'), True, [res.get('player_data')])
                     
                     click_result = onclick_multiplayer_button(_cb)
                     # revert back to original text
