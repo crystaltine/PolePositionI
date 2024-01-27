@@ -44,7 +44,7 @@ class GameManager:
     join_game_input = Input(x=340, y=480, w=240, h=60, text="")
     join_game_button = Button(pos=(600, 480), display_text="JOIN GAME", base_color="#ffffff", hovering_color="#96faff", image=BUTTON_MEDIUM)
 
-    singleplayer_button = Button(pos=(340,560), display_text="SINGLEPLAYER", base_color="#ffffff", hovering_color="#96faff", image=BUTTON_MEDIUM)
+    livegametest_button = Button(pos=(340,560), display_text="LIVEGAMETEST", base_color="#ffffff", hovering_color="#96faff", image=BUTTON_MEDIUM)
     quit_button = Button(pos=(600,560), display_text="QUIT", base_color="#ffffff", hovering_color="#96faff", image=BUTTON_MEDIUM)
 
     countdown_button = Button(pos=(600,560), display_text="READY?", base_color="#ffffff", hovering_color="#96faff", image=BUTTON_MEDIUM)
@@ -97,7 +97,7 @@ class GameManager:
         - create_game_button
         - join_game_input
         - join_game_button
-        - singleplayer_button
+        - livegametest_button
         - quit_button
         """
         GameManager.create_game_button.changeColor(pygame.mouse.get_pos())
@@ -108,8 +108,8 @@ class GameManager:
         GameManager.join_game_button.changeColor(pygame.mouse.get_pos())
         GameManager.join_game_button.update(GameManager.screen)
         
-        GameManager.singleplayer_button.changeColor(pygame.mouse.get_pos())
-        GameManager.singleplayer_button.update(GameManager.screen)
+        GameManager.livegametest_button.changeColor(pygame.mouse.get_pos())
+        GameManager.livegametest_button.update(GameManager.screen)
         
         GameManager.quit_button.changeColor(pygame.mouse.get_pos())
         GameManager.quit_button.update(GameManager.screen)
