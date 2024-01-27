@@ -36,6 +36,8 @@ class GameManager:
     
     logo_img = pygame.image.load('./game/assets/logo.png')
 
+    car = pygame.image.load('./game/assets/atariPolePosition-carStraight.png')
+
     # Buttons
     create_game_button = Button(pos=(340,400), display_text="CREATE GAME", base_color="#ffffff", hovering_color="#96faff", image=BUTTON_LARGE)
 
@@ -114,3 +116,6 @@ class GameManager:
     
     def loop_countdown_button():
         GameManager.countdown_button.update(GameManager.screen)
+
+    def draw_car():
+        GameManager.screen.blit(GameManager.car, (340,560))
