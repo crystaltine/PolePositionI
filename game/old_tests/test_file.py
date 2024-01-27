@@ -22,17 +22,19 @@ grass = pygame.image.load(os.path.join(os.path.dirname(__file__), 'assets','gras
 grass = pygame.transform.scale(grass, (int(width), int(2 * height/3)))
 mtns = pygame.image.load(os.path.join(os.path.dirname(__file__), 'assets','mtns.png')).convert_alpha()
 mtns = pygame.transform.scale(mtns, (width*2, height/5))
-road = SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets','straightRoad.gif'), (0, -height/5, width, 4*height/3), 12, -1, True, 1)
+road = []
+for img in range(12):
+    road.append(SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\straight road', str(img) + ' 06-53-01.png'), (0, -height/5, width, 4*height/3), 12, -1, True, 100000000))
 roadpaths = [
     road,
-    SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets','turningLeft.gif'), (0, -height/5, width, 4*height/3), 12, -1, True, 1),
-    SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets','curvedLeft.gif'), (0, -height/5, width, 4*height/3), 12, -1, False, 1),
-    SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets','leftCentering.gif'), (0, -height/5, width, 4*height/3), 12, -1, False, 1),
+    SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets','turningLeft.gif'), (0, -height/5, width, 4*height/3), 8, -1, True, 1),
+    SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets','curvedLeft.gif'), (0, -height/5, width, 4*height/3), 12, -1, True, 1),
+    SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets','leftCentering.gif'), (0, -height/5, width, 4*height/3), 8, -1, True, 1),
     road
 ]
 current_loop = 0
-roadpaths[current_loop].iter()
-road_state = roadpaths[current_loop].next()
+road[current_loop].iter()
+road_state = road[current_loop].next()
 
 menu_text = font.render('Start playing asp_3', True, BLACK)
 menu_rect = menu_text.get_rect(center=(640,260))    #does rect take center as parameter     
@@ -47,22 +49,18 @@ menu_rect = menu_text.get_rect(center=(640,260))    #does rect take center as pa
 while True:
     screen.blit(grass, (0, 2*height/5))
     screen.blit(mtns, (0, height/5))
-    screen.blit(road_state, (0, -height/5))
     
     for event in pygame.event.get():
-        if event.type == pygame.KEYUP and event.key == pygame.K_0:
-            current_loop += 1
-            if current_loop >= len(roadpaths):
-                current_loop = 0
-            roadpaths[current_loop].iter()
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
         if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
             pygame.quit()
             sys.exit()
-            
+    current_loop += 1
+    if current_loop >= len(road):
+        current_loop = 0
+    road[current_loop].iter()
+    screen.blit(road_state, (0, -height/5))        
     pygame.display.flip()
-    road_state = roadpaths[current_loop].next()
-
-
+    road_state = road[current_loop].next()
