@@ -42,8 +42,10 @@ class GameManager:
     join_game_input = Input(x=340, y=480, w=240, h=60, text="")
     join_game_button = Button(pos=(600, 480), display_text="JOIN GAME", base_color="#ffffff", hovering_color="#96faff", image=BUTTON_MEDIUM)
 
-    settings_button = Button(pos=(340,560), display_text="SETTINGS", base_color="#ffffff", hovering_color="#96faff", image=BUTTON_MEDIUM)
+    singleplayer_button = Button(pos=(340,560), display_text="SINGLEPLAYER", base_color="#ffffff", hovering_color="#96faff", image=BUTTON_MEDIUM)
     quit_button = Button(pos=(600,560), display_text="QUIT", base_color="#ffffff", hovering_color="#96faff", image=BUTTON_MEDIUM)
+
+    countdown_button = Button(pos=(600,560), display_text="READY?", base_color="#ffffff", hovering_color="#96faff", image=BUTTON_MEDIUM)
 
     # main menu extra text
     text_bottom_left = FONT_TINY.render(MAIN_MENU_BOTTOM_LEFT_TEXT, True, (0, 0, 0))
@@ -93,7 +95,7 @@ class GameManager:
         - create_game_button
         - join_game_input
         - join_game_button
-        - settings_button
+        - singleplayer_button
         - quit_button
         """
         GameManager.create_game_button.changeColor(pygame.mouse.get_pos())
@@ -104,8 +106,11 @@ class GameManager:
         GameManager.join_game_button.changeColor(pygame.mouse.get_pos())
         GameManager.join_game_button.update(GameManager.screen)
         
-        GameManager.settings_button.changeColor(pygame.mouse.get_pos())
-        GameManager.settings_button.update(GameManager.screen)
+        GameManager.singleplayer_button.changeColor(pygame.mouse.get_pos())
+        GameManager.singleplayer_button.update(GameManager.screen)
         
         GameManager.quit_button.changeColor(pygame.mouse.get_pos())
         GameManager.quit_button.update(GameManager.screen)
+    
+    def loop_countdown_button():
+        GameManager.countdown_button.update(GameManager.screen)
