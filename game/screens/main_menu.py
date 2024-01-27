@@ -171,9 +171,8 @@ def main_menu() -> bool:
                     if click_result["callback_result"] is not None:
                         return click_result["callback_result"]
                     
-                elif GameManager.settings_button.is_hovering(mouse_pos):
-                    print(f"settings button clicked")
-                    pass # TODO - settings menu? (maybe)
+                elif GameManager.livegametest_button.is_hovering(mouse_pos):
+                    return True
                 
                 elif GameManager.quit_button.is_hovering(mouse_pos):
                     
