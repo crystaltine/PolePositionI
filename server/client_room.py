@@ -18,11 +18,11 @@ class Client:
     - The ID of the room they are currently connected to
     - A `key_press.Player` object that stores data about the player, like pos, vel, and acc
     """
-    def __init__(self, sock: socket, host: str = None, port: int = None, id: str = None, room: int = None):
+    def __init__(self, sock: socket, host: str = None, port: int = None, id: str = None, room_id: str = None):
         self.sock = sock
         self.address = (host, port)
         self.id = id
-        self.room = room
+        self.room_id = room_id
         self.player = Player()
         self.hosting: Room = None # If this client is the owner of a room, this field should point to that room 
 
@@ -57,13 +57,13 @@ class Client:
                 return True
             
             # Encode if string, else just construct bytes. Send as event if provided
-            _send(self.sock, bytes(data, 'utf-8') if type(data) == str else bytes(data), event_name=event_name)
+            _send(self.sock, data, event_name=event_name)
             return True
         except (ConnectionAbortedError, ConnectionResetError):
             return False
         
     def __str__(self) -> str:
-        return f"(Client\x1b[0m addr=\x1b[33m{self.address}\x1b[0m, id=\x1b[33m{self.id}\x1b[0m, room=\x1b[33m{self.room}\x1b[0m)"
+        return f"(Client\x1b[0m addr=\x1b[33m{self.address}\x1b[0m, id=\x1b[33m{self.id}\x1b[0m, room=\x1b[33m{self.room_id}\x1b[0m)"
 
 class Room:
     def __init__(self, host: Client, clients: List[Client], id: int):
@@ -213,3 +213,18 @@ class Room:
         # Update clients
         for client_id in marked_deleted:
             self.clients.pop(client_id)
+            
+    def disband(self):
+        """
+        Tells all clients in the room to disconnect, and sets their client objects accordingly.
+        """
+        print(f"\x1b[35mDisbanding room {self.id}...\x1b[0m")
+        
+        # "kick" all clients
+        for client in self.clients.values():
+            print(f"\x1b[35m\tKicking client {client['client_obj'].id}\x1b[0m")
+            client["client_obj"].send_data({}, "leave")
+            client["client_obj"].room_id = None
+            client["client_obj"].hosting = None
+            
+        

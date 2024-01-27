@@ -1,6 +1,8 @@
 import socket
 import typing
 import threading
+import random
+from string import ascii_uppercase, digits
 from uuid import uuid4
 
 from socket_wrapper import _send
@@ -15,76 +17,105 @@ app = flask.Flask(__name__)
 #######################################################################
 
 # Room system setup
-connected_clients: typing.Dict[str, Client] = {} # maps id to Client objs
-addresses_to_id = {}
+id_to_client: typing.Dict[str, Client] = {} # maps id to Client objs
 """
 Stores map from client id to Client object (containing socket, host, etc.) for all currently connected clients
 Schema: `{int client_id: client.Client client}`
 """
 
-room_data: typing.Dict[int, Room] = {}
-curr_room_ids = set()
+id_to_room: typing.Dict[str, Room] = {}
 """
 Stores all currently open room IDs 
-Schema: `{int room_id: client.Room room}`
+Schema: `{str room_id: client.Room room}`
 """
 
-def gen_room_id() -> int:
-    """ Generates an unused room ID from 0-999999 """
+def gen_room_id() -> str:
+    """
+    Generate a random room ID that is not currently in use.
+    Room IDs are 6-character long strings with the following characters allowed:
+    A-Z, 0-9
+    """
     
-    # TODO - more random room ids, maybe add passwords?
-    for i in range(1000000):
-        if i not in curr_room_ids:
-            curr_room_ids.add(i)
-            return i
+    characters = ascii_uppercase + digits
+    random_string = ''.join(random.choice(characters) for i in range(6))
+    
+    try_count = 0
+    while random_string in id_to_room.keys():
+        if try_count > 100:
+            return None
+        random_string = ''.join(random.choice(characters) for i in range(6))
+
+    return random_string
 
 # REST API endpoints - for room system
-@app.route('/checkroom/<int:room_id>')
-def checkroom(room_id: int):
-    return {"available": room_id not in room_data.keys()}
+@app.route('/checkroom/<string:room_id>')
+def checkroom(room_id: str):
+    return {"available": room_id not in id_to_room.keys()}
 
-@app.route('/joinroom/<string:client_id>/<int:room_id>')
-def joinroom(client_id: str, room_id: int):
-    if room_id not in room_data.keys():
+@app.route('/joinroom/<string:client_id>/<string:room_id>')
+def joinroom(client_id: str, room_id: str):
+    if room_id not in id_to_room.keys():
         return {"success": False, "message": "The requested room does not exist."}
 
     # Check if user is already connected and present in a room
-    if client_id in connected_clients.keys():
-        if connected_clients[client_id].room is not None:
-            return {"success": False, "message": f"You are already connected to room {connected_clients[client_id].room}!"}
+    if client_id in id_to_client.keys():
+        if id_to_client[client_id].room_id is not None:
+            return {"success": False, "message": f"You are already connected to room {id_to_client[client_id].room_id}!"}
+        
+        if id_to_room[room_id].started:
+            return {"success": False, "message": f"Room {room_id} has already started!"}
+        
+        if len(id_to_room[room_id].clients) >= 8: 
+            # "disconnected" clients still count towards the 8 max 
+            # ^^^ TODO, until we implement complete disconnected handling
+            return {"success": False, "message": f"Room {room_id} is full! (8 max)"}
+        
         else:
-            connected_clients[client_id].room = room_id
-            room_data[room_id].add_client(connected_clients[client_id])
+            id_to_client[client_id].room_id = room_id
+            id_to_room[room_id].add_client(id_to_client[client_id])
             
-            player_details = [] # send a list of {username: str, color: str, is_host: bool} to the client for lobby display
-            for client in room_data[room_id].clients.values():
-                player_details.append({"username": client.player.username, "color": client.player.color, "is_host": not (client.hosting is None)})
+            player_details = [] 
+            # send a list of {username: str, color: str, is_host: bool} to the client for lobby display
+            # this is a list of all players in the room, including the user themselves
+            for client_id in id_to_room[room_id].clients:
+                player_details.append({
+                    "username": id_to_room[room_id].clients[client_id]["username"],
+                    "color": id_to_room[room_id].clients[client_id]["color"],
+                    "is_host": not (id_to_room[room_id].clients[client_id]["client_obj"].hosting is None)
+                })
             
             return {
                 "success": True, 
-                "map_data": room_data[room_id].map.map_data, 
-                "players": player_details}
+                "map_data": id_to_room[room_id].map.map_data, 
+                "players": player_details,
+                "code": room_id
+            }
 
     else:
-        return {"success": False, "message": "Socket must be registered first."}
+        return {"success": False, "message": "Socket must be registered first (try restarting your game)."}
 
 @app.route('/leaveroom/<string:client_id>')
 def leaveroom(client_id: str):
-    client = connected_clients.get(client_id)
+    client = id_to_client.get(client_id)
     
     if not client:
-        return {"success": False, "message": "Socket must be registered first."}
+        return {"success": False, "message": "Socket must be registered first (try restarting your game)."}
     
-    room_id = client.room
+    room_id = client.room_id
     if room_id == None:
         return {"success": False, "message": "You are not currently in a room."}
     
-    # TODO - if the client is the host, disband the room (OR give someone else host)
+    room = id_to_room.get(room_id)
     
-    room_data[room_id].remove(connected_clients[client_id])
-    client.room = None
-
-    return {"success": True}
+    # If the client is the host, disband the room
+    if client.hosting is room or (room.num_connected() == 1):
+        room.disband()
+        del id_to_room[room_id] # use del to trigger the __del__ method of the room (which handles telling all clients to disconnect)
+        return {"success": True, "message": f"Successfully disbanded room {room_id}."}
+    
+    room.remove_client(id_to_client[client_id])
+    client.room_id = None
+    return {"success": True, "message": f"Successfully left room {room_id}."}
 
 @app.route('/createroom/<string:client_id>')
 def createroom(client_id: str):
@@ -95,22 +126,22 @@ def createroom(client_id: str):
         return {"success": False, "message": "Somehow, no rooms are available!"}
 
     # Required to have already completed initial handshake with socket
-    client: typing.Union[Client, None] = connected_clients.get(client_id)
+    client: typing.Union[Client, None] = id_to_client.get(client_id)
     if not client:
-        return {"success": False, "message": "Client has not completed initial socket handshake."}
+        return {"success": False, "message": "Client has not completed initial socket handshake (try restarting your game)."}
     
     # If client exists, set its room
-    client.room = id
+    client.room_id = id
 
     # Create room object
     room = Room(client, [client], id)
-    room_data[id] = room    
+    id_to_room[id] = room    
     client.hosting = room # mark this client as the host of this room
 
     # Return the code
     return {
         "success": True, 
-        "code": f"{id:06d}",
+        "code": f"{id}",
         "map_data": room.map.map_data,
         "player_data": { # return the user themselves
             "username": room.clients[client_id]["username"],
@@ -119,17 +150,17 @@ def createroom(client_id: str):
         }
     }
 
-@app.route('/startgame/<string:client_id>/<int:room_id>')
-def startgame(client_id: str, room_id: int):
+@app.route('/startgame/<string:client_id>/<string:room_id>')
+def startgame(client_id: str, room_id: str):
     # First, verify that client_id is currently in AND IS THE HOST of room_id
-    client = connected_clients.get(client_id)
+    client = id_to_client.get(client_id)
     
     if not client or not client.hosting.id == room_id:
         # error unauthenticated
         return {"success": False, "message": "Unauthorized attempt to start game"}
     
     # They are the host of the room, Mark the room as started
-    room = room_data.get(room_id)
+    room = id_to_room.get(room_id)
     if not room:
         return {"success": False, "message": f"Room {room_id} does not exist."}
     
@@ -156,14 +187,19 @@ def accept_socket():
 
         # Create a Client object for the connection. Currently HAS NO USERNAME (see below)
         cli = Client(conn, host=address[0], port=address[1], id=client_id)
-        connected_clients[client_id] = cli
-        addresses_to_id[f"{address[0]}:{address[1]}"] = client_id
+        id_to_client[client_id] = cli
         
         # IMPORTANT - the client side's `socket_man.connect()` must handle this (send a username!!!)
         # ALSO IMPORATNT - we call this recv before sending the client id, since the client
         # sends data before recv'ing. its 3 am and i cant think clearly but im guessing the order of these
         # lines must corresponsd (recv on server <-> send on client and vice versa) because of thread blocking
-        username = conn.recv(1024).decode('utf-8') # wait for client to send back their username
+        username = conn.recv(1024)
+        
+        if not username:
+            # client disconnected before sending username
+            print(f"\x1b[31mClient \x1b[33m{client_id}\x1b[31m disconnected before sending username\x1b[0m")
+        
+        username = username.decode('utf-8') # wait for client to send back their username
         
         # we created an id for them, now emit their id back
         # THIS IS A SPECIAL EVENT - does not get handled by event listener
@@ -178,6 +214,31 @@ def apprun(host, port):
     app.run(host, port+1)
 
 # Create multiprocess to continuously send data to clients, every tick
-threading.Thread(target=accept_socket).start()
-threading.Thread(target=apprun, args=(HOST, PORT)).start()
-threading.Thread(target=broadcast_mainloop, args=(sock, room_data, connected_clients)).start()
+thread_accept = threading.Thread(target=accept_socket, daemon=True)
+thread_accept.start()
+
+thread_flask = threading.Thread(target=apprun, args=(HOST, PORT), daemon=True)
+thread_flask.start()
+
+thread_loop = threading.Thread(target=broadcast_mainloop, args=(sock, id_to_room, id_to_client), daemon=True)
+thread_loop.start()
+
+# cli
+while True:
+    cmd = input("> ")
+    if cmd == "exit":
+        
+        # TODO - handle threads shutting down logic      
+        
+        sock.close()
+        exit(0)
+    elif cmd == "clients":
+        print(id_to_client)
+    elif cmd == "rooms":
+        print(id_to_room)
+    elif cmd == "help":
+        print("\x1b[33mexit\x1b[0m - exit the server")
+        print("\x1b[33mclients\x1b[0m - print all currently connected clients")
+        print("\x1b[33mrooms\x1b[0m - print all currently open rooms")
+    else:
+        print("\x1b[2mUnknown command. Type 'help' for a list of commands.\x1b[0m")

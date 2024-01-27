@@ -17,7 +17,9 @@ def onclick_multiplayer_button(callback: Callable[[bool], Any]) -> dict:
     when the user clicks on a multiplayer button, 
     we need to open connections to the server.
     
-    Registers the socket and http managers. 
+    Registers the socket and http managers. This function makes no requests.
+    However, the username selected will persist throughout the session (until the user closes the game)
+    (More specifically, while the server as a socket instance representing this client)
     
     ## Btw, registering the socket is a BLOCKING CALL (stops the program (thread) until it connects)
     
@@ -36,9 +38,7 @@ def onclick_multiplayer_button(callback: Callable[[bool], Any]) -> dict:
     result of the callback, and 'username-canceled' if the user canceled the username popup (keep looping main_menu)
     """
     
-    if GameManager.http_man is None:
-        # inline connects both the socket and http managers
-        
+    if GameManager.http_man is None:        
         # ask for a username using a popup
         Tk().wm_withdraw() #to hide the main window
         username = simpledialog.askstring(title="Username", prompt="Please enter a username")

@@ -6,7 +6,7 @@ from typing import Dict
 
 from CONSTANTS import HOST, PORT, TICK_SPEED, TICKS_PER_BROADCAST
 
-def broadcast_mainloop(sock: socket, rooms: Dict[int, Room], connected_clients: Dict[str, Client]) -> None:
+def broadcast_mainloop(sock: socket, rooms: Dict[int, Room], id_to_client: Dict[str, Client]) -> None:
     """
     Sends the specified packet to all specified addresses.
     Likely usage will be to send a packet to both (or multiple) clients connected to a room

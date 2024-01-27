@@ -41,6 +41,9 @@ def waiting_room(details: dict, is_leader = False, connected_players: list = [])
     @returns `True` if we should proceed into the game screen, `False` if we left, got kicked, or room disbanded (return to main menu)
     """
     
+    GameManager.waiting_room_game_started = False
+    GameManager.waiting_room_leave_game = False
+    
     main_panel = WaitingRoomMainPanel()
     
     for already_connected_player in connected_players:
@@ -80,7 +83,7 @@ def waiting_room(details: dict, is_leader = False, connected_players: list = [])
     
     # There is a 20px "padding" in side_panel because these buttons are 240px but the panel is 280px
     start_button = Button((940,640), "START GAME", "#ffffff", "#96faff", BUTTON_MEDIUM, disabled=(not is_leader))
-    leave_button = Button((940,560), "LEAVE", "#ffffff", "#ff9696", BUTTON_MEDIUM)
+    leave_button = Button((940,560), "LEAVE" if not is_leader else "DISBAND", "#ffffff", "#ff9696", BUTTON_MEDIUM)
     
     #####################################
     # Register player leave/join events #
@@ -92,7 +95,7 @@ def waiting_room(details: dict, is_leader = False, connected_players: list = [])
         print(f">>> Game started event received!!!!")
         GameManager.waiting_room_game_started = True # TODO - vscode shows these as not accessed. Could it be because they are in a nested function?
     def _leave(_):
-        print(f">>> Room closed event received!!!!")
+        print(f">>> leave event received!!!!")
         GameManager.waiting_room_leave_game = True
         
     # these actually run on a different thread, so this might work??
@@ -101,16 +104,16 @@ def waiting_room(details: dict, is_leader = False, connected_players: list = [])
     
     while True:
         
+        print(f"waiting room: iterating while with waiting_room_game_started = {GameManager.waiting_room_game_started} and waiting_room_leave_game = {GameManager.waiting_room_leave_game}")
+        
         if GameManager.waiting_room_game_started:
-            GameManager.waiting_room_game_started = False
             return True
         if GameManager.waiting_room_leave_game:
-            GameManager.waiting_room_leave_game = False
             return False
         
         GameManager.draw_static_background()
     
-        text = FONT_LARGE.render(f"Waiting for start...", True, (255, 255, 255))
+        text = FONT_LARGE.render(f"Room Code: {GameManager.room_id}", True, (255, 255, 255))
         GameManager.screen.blit(text, (20,20))
         
         GameManager.screen.blit(side_panel, (920,0))   

@@ -232,14 +232,14 @@ class HTTPManager:
         ```
         """
         
-        if not room_id.isdigit():
-            return {"success": False, "message": "Room code must be a number."}
+        if not room_id.isalnum():
+            return {"success": False, "message": "Room code must be alphanumeric."}
         
         res = api_call(f"/joinroom/{self.client_id}/{room_id}")
         print(f"Join room response: {res}")
         return res
 
-    def start_game(self, room_id: int) -> dict:
+    def start_game(self, room_id: str) -> dict:
         """
         Call this function once the user has created their own room and is ready to start.
         

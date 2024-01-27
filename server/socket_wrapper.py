@@ -5,6 +5,8 @@ def _send(socket: socket.socket, data, event_name: str = None) -> None:
     """
     Send wrapper for sockets, adding the prefix data labeler. `data` must 
     be a readable buffer, such as `bytes` or `array.array`.
+    
+    Please send `data` as a string (since we must serialize it to JSON)
     """
     if event_name:
         wrapped_data = {

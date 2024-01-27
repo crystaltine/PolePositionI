@@ -3,6 +3,8 @@ from CONSTANTS import COLOR_ACTIVE, COLOR_INACTIVE, FONT_MEDIUM, FONT_SIZES
 
 class Input:
     """
+    ### Currently, this can only be used for the main menu's room ID input box.
+    
     @see - https://stackoverflow.com/a/46390412/21385219
     """
     def __init__(self, x, y, w, h, text=''):
@@ -36,8 +38,9 @@ class Input:
             if self.active:
                 if event.key == pygame.K_BACKSPACE:
                     self.text = self.text[:-1]
-                elif len(self.text) < 6 and event.unicode.isdigit(): # only allow 6 digits
-                    self.text += event.unicode
+                elif len(self.text) < 6 and event.unicode.isalnum(): # only allow alphanumeric characters, and max length of 6
+                    self.text += event.unicode.upper() # all game IDs are uppercase alnums
+                
                 # Re-render the text.
                 
                 # if no text, render a faded placeholder text
