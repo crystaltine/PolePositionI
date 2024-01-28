@@ -58,7 +58,6 @@ class GameManager:
     grass = pygame.transform.scale(grass, (int(WIDTH), int(2 * HEIGHT/3)))
     
     mtns = pygame.image.load('./game/assets/mountains_img.png')
-    mtns = pygame.transform.scale(mtns, (WIDTH*2, HEIGHT-grass.get_height()))
     
     logo_img = pygame.image.load('./game/assets/logo.png')
 
@@ -104,7 +103,7 @@ class GameManager:
         """
         
         GameManager.screen.blit(GameManager.grass, (0, HEIGHT - GameManager.grass.get_height()))
-        GameManager.screen.blit(GameManager.mtns, (0, 0), (0, 0, WIDTH, HEIGHT - GameManager.grass.get_height()))
+        GameManager.screen.blit(GameManager.mtns, (0, 0))
         
     @staticmethod
     def draw_dynamic_background(angle: int):
@@ -121,11 +120,18 @@ class GameManager:
         """
         
         angle = int(angle % 360)
-        
         crop_pos_on_img = angle*12, 0
         size_of_crop = WIDTH, HEIGHT - GameManager.grass.get_height()
         
         GameManager.screen.blit(GameManager.mtns, (0, 0), (*crop_pos_on_img, *size_of_crop))
+        
+        if angle > 360-math.degrees(FOV):
+            # we ran past the right side of the png.
+            # so, in addition to the x=0 blit, we need to do an x= 12*(360-angle) blit
+            # we can actually omit the size, since it can just overflow off the screen
+            GameManager.screen.blit(GameManager.mtns, (12*(360-angle), 0))        
+            
+        # and then always draw the grass
         GameManager.screen.blit(GameManager.grass, (0, HEIGHT - GameManager.grass.get_height()))
         
     @staticmethod
@@ -189,9 +195,9 @@ class GameManager:
     @staticmethod 
     def draw_car():
         """
-        Draws the car in the bottom-ish center of the screen (centered x, 3/4 y)
+        Draws the car in the bottom-ish center of the screen (centered x, 80% y)
         """
-        GameManager.screen.blit(c:=GameManager.car, (WIDTH/2 - c.get_width()/2, 3*HEIGHT/4 - c.get_height()/2))
+        GameManager.screen.blit(c:=GameManager.car, (WIDTH/2 - c.get_width()/2, 4*HEIGHT/5 - c.get_height()/2))
     
     @staticmethod 
     def quit_game():
@@ -255,14 +261,18 @@ class RenderingManager:
         Draws on the screen a single frame based on the current state of the internal physics engine.
         """
         
-        GameManager.draw_dynamic_background(GameManager.get_our_entity().angle)
-        GameManager.draw_car()
+        GameManager.draw_dynamic_background(GameManager.get_our_entity().angle%360)
         
         # For each other entity, draw on screen
-        for other in GameManager.get_all_other_entities():
+        
+        sorted_by_dist = sorted(GameManager.get_all_other_entities(), key=lambda e: e.pos[0]**2 + e.pos[1]**2, reverse=True)
+        
+        for other in sorted_by_dist:
             size = RenderingManager.get_rendered_size(other)
             pos = (WIDTH/2 + RenderingManager.angle_offset(other), RenderingManager.get_y_pos(other))
             RenderingManager.draw_entity(size, pos, other.color)
+            
+        GameManager.draw_car() # draw our own car on top of everything else
 
         pygame.display.update()
         
@@ -353,10 +363,10 @@ class RenderingManager:
         us = GameManager.get_our_entity()
         
         dist = math.sqrt((other.pos[0] - us.pos[0])**2 + (other.pos[1] - us.pos[1])**2)
-        theta = math.asin(other.hitbox_radius / (dist + other.hitbox_radius))
+        theta = (math.asin(other.hitbox_radius / (dist + other.hitbox_radius)))
         width_on_screen = (WIDTH/2) * 2*theta/(FOV/2) # 2 and 4 are static (do not adjust)
         
-        print(f"\x1b[34mget_rendered_size\x1b[0m: {other.name} is {dist} away, so we are rendering it with size {width_on_screen}")
+        # print(f"\x1b[34mget_rendered_size\x1b[0m: dist={dist}, theta={theta} size={width_on_screen}")
         return round(width_on_screen)
         
     @staticmethod
@@ -379,7 +389,7 @@ class RenderingManager:
         us = GameManager.get_our_entity()
         
         dist = math.sqrt((other.pos[0] - us.pos[0])**2 + (other.pos[1] - us.pos[1])**2)
-        return round(30000/(dist+100) + 300)
+        return round(30000/(2*dist+100) + 300)
         
     @staticmethod
     def angle_offset(other: 'Entity') -> Union[int, None]:
@@ -388,19 +398,25 @@ class RenderingManager:
         
         Returns how many pixels relative to the center of the screen we should draw CENTER of the other entity at,
         based on the angle between us and the other entity.
-        
-        If they are off screen (angle > FOV/2), returns None. In this case, don't draw on screen.
         """
         
         us = GameManager.get_our_entity()
         
-        theta = math.atan2(other.pos[1] - us.pos[1], other.pos[0] - us.pos[0]) - math.radians(us.angle)
-        D = (theta/(FOV/2)) * (WIDTH/2)
+        theta = math.atan2(other.pos[1] - us.pos[1], other.pos[0] - us.pos[0]) - math.radians(us.angle%360)
+        theta = RenderingManager.adjust_angle(theta) # clamp to 0-360
+        D = int((theta/(FOV/2)) * (WIDTH/2))
         
-        print(f"\x1b[34mangle_offset\x1b[0m: {other.name} is {theta} radians away, so we are rendering it with offset (+-){D}")
+        # print(f"\x1b[34mangle_offset\x1b[0m: theta={theta}, offset={D}")
         
-        # fancy way of returning -D if theta < 0, D if theta > 0
-        return D*(theta > 0) - D*(theta < 0)
+        return D
+    
+    @staticmethod
+    def adjust_angle(radians: float) -> float:
+        """
+        Adjusts an angle to a -pi -> pi range. Returns in RADIANS.
+        """
+            
+        return radians % (2*math.pi) - math.pi
     
     @staticmethod
     def draw_entity(size: int, pos: tuple[int, int], color: str) -> None:
@@ -410,7 +426,7 @@ class RenderingManager:
         Currently, all it draws is a circle. (TODO - implement 3d models/rotating sprites)
         """
         
-        print(f"Drawing entity at {pos} with size {size} and color {color}")
+        # print(f"Drawing entity at {pos} with size {size} and color {color}")
         pygame.draw.circle(GameManager.screen, color, pos, size)
         
 class SocketManager:

@@ -1,6 +1,7 @@
 import math
 from typing import Tuple
 from time import time_ns
+from CONSTANTS import DRAG_MULTIPLIER
 
 class Entity:
     """
@@ -37,7 +38,7 @@ class Entity:
         self.pos = list(pos)
         self.vel = list(vel)
         self.acc = list(acc)
-        self.angle = angle
+        self.angle = angle%360
         self.hitbox_radius = hitbox_radius
         
         self.last_update_timestamp = time_ns()
@@ -71,20 +72,25 @@ class Entity:
         Should be run on every server tick (for now, 24tps) - see `../CONSTANTS.py`
         """
         
-        delta_time_s = (self.last_update_timestamp - time_ns()) / 1e9
+        delta_time_s = (time_ns() - self.last_update_timestamp) / 1e9
         
         # for now, when left/right are held, we can turn 50 degrees per second
         # TODO ^ some sort of turning acceleration (since its a car)
-        self.angle += (50*self.key_presses[2] - 50*self.key_presses[3]) * delta_time_s
+        self.angle += (50*self.key_presses[3] - 50*self.key_presses[2]) * delta_time_s
+        self.angle %= 360
         
         # use the angle to determine components of acceleration
-        self.acc_mag = 2*self.key_presses[0] - 2*self.key_presses[1]
-        self.acc[0] = self.acc_mag * math.cos(math.radians(self.angle))
-        self.acc[1] = self.acc_mag * math.sin(math.radians(self.angle))
+        # READ: im getting rid of keypress=accel and just doing keypress=vel for now
+        # self.acc_mag = 2*self.key_presses[0] - 2*self.key_presses[1]
+        # self.acc[0] = self.acc_mag * math.cos(math.radians(self.angle%360))
+        # self.acc[1] = self.acc_mag * math.sin(math.radians(self.angle%360))
         
-        # update velocity using acceleration
-        self.vel[0] += self.acc[0] * delta_time_s
-        self.vel[1] += self.acc[1] * delta_time_s
+        # update velocity
+        vel_mag = 10*self.key_presses[1] - 10*self.key_presses[0]
+        self.vel[0] = vel_mag * math.cos(math.radians(self.angle%360))
+        self.vel[1] = vel_mag * math.sin(math.radians(self.angle%360))
+        
+        # TODO - add some sort of drag/velocity loss when no acceleration
         
         # update position using velocity
         self.pos[0] += self.vel[0] * delta_time_s
@@ -112,7 +118,7 @@ class Entity:
             "pos": self.pos,
             "vel": self.vel,
             "acc": self.acc,
-            "angle": self.angle,
+            "angle": self.angle%360,
             "hitbox_radius": self.hitbox_radius,
             "keys": self.key_presses
         }

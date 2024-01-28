@@ -18,7 +18,6 @@ WIDTH = 1200
 HEIGHT = 720
 
 FOV = math.radians(100)
-
 """ degrees in total (FOV/2 degrees visible on each side) """
 
 # hex is 4370ff

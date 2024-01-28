@@ -1,5 +1,5 @@
 TICK_SPEED = 24
-TICKS_PER_BROADCAST = 24
+TICKS_PER_BROADCAST = 6
 HOST, PORT = "localhost", 3999
 
 MAPS = {
@@ -12,5 +12,8 @@ MAPS = {
         # TODO - also need to somehow link to a representation of the map, so we can handle physics and stuff.
     } 
 }
+
+DRAG_MULTIPLIER = 0.75
+""" The amount that velocity is multiplied by every second. """
 
 CAR_COLORS = set(["red", "orange", "yellow", "green", "blue", "purple", "pink", "white"])

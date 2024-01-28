@@ -37,7 +37,7 @@ class Entity:
         self.pos = list(pos)
         self.vel = list(vel)
         self.acc = list(acc)
-        self.angle = angle
+        self.angle = angle%360
         self.hitbox_radius = hitbox_radius
         
         self.last_update_timestamp = time_ns()
@@ -62,20 +62,22 @@ class Entity:
         This should be run as often as possible.
         """
         
-        delta_time_s = (self.last_update_timestamp - time_ns()) / 1e9
+        delta_time_s = (time_ns() - self.last_update_timestamp) / 1e9
         
         # for now, when left/right are held, we can turn 50 degrees per second
         # TODO ^ some sort of turning acceleration (since its a car)
-        self.angle += (50*self.key_presses[2] - 50*self.key_presses[3]) * delta_time_s
+        self.angle += (50*self.key_presses[3] - 50*self.key_presses[2]) * delta_time_s
+        self.angle %= 360
         
         # use the angle to determine components of acceleration
-        self.acc_mag = 2*self.key_presses[0] - 2*self.key_presses[1]
-        self.acc[0] = self.acc_mag * math.cos(math.radians(self.angle))
-        self.acc[1] = self.acc_mag * math.sin(math.radians(self.angle))
+        # self.acc_mag = 2*self.key_presses[0] - 2*self.key_presses[1]
+        # self.acc[0] = self.acc_mag * math.cos(math.radians(self.angle%360))
+        # self.acc[1] = self.acc_mag * math.sin(math.radians(self.angle%360))
 
-        # update velocity using acceleration
-        self.vel[0] += self.acc[0] * delta_time_s
-        self.vel[1] += self.acc[1] * delta_time_s
+        # update velocity
+        vel_mag = 10*self.key_presses[1] - 10*self.key_presses[0]
+        self.vel[0] = vel_mag * math.cos(math.radians(self.angle%360))
+        self.vel[1] = vel_mag * math.sin(math.radians(self.angle%360))
         
         # update position using velocity
         self.pos[0] += self.vel[0] * delta_time_s
@@ -102,7 +104,7 @@ class Entity:
             "pos": self.pos,
             "vel": self.vel,
             "acc": self.acc,
-            "angle": self.angle,
+            "angle": self.angle%360,
             "hitbox_radius": self.hitbox_radius,
         }
     
@@ -129,7 +131,7 @@ class Entity:
         self.pos = data["pos"]
         self.vel = data["vel"]
         self.acc = data["acc"]
-        self.angle = data["angle"]
+        self.angle = data["angle"]%360
         self.hitbox_radius = data["hitbox_radius"]
         self.key_presses = data["keys"]
         
