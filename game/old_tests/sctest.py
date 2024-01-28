@@ -1,6 +1,6 @@
 import pygame
 import sys
-from game.requests_handler import SocketManager
+from requests_handler import SocketManager
 import socket
 
 HOST, SPORT, HPORT = "localhost", 3999, 4000

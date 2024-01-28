@@ -1,7 +1,7 @@
 import pygame
 import sys
 import random
-#from game.requests_handler import capture_keypress_loop
+#from requests_handler import capture_keypress_loop
 import spritesheet
 from sprite_strip_anim import SpriteStripAnim
 import os

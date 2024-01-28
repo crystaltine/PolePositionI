@@ -5,6 +5,7 @@ import threading
 from json import loads
 from typing import Dict, Callable, Any, Union
 from time import sleep
+from renderer import GameRenderer
 from CONSTANTS import id_map, HTTP_URL, SOCKET_HOST, SOCKET_PORT
 
 def api_call(endpoint: str, query_params: dict = None) -> dict:
@@ -147,6 +148,7 @@ class SocketManager:
         # we also need to sift through and find out which username matches GameManager.our_username (to find our data)
         
         print(f"\x1b[35mPACKET RECV: \x1b[33m{len(world_data)}\x1b[0m playerdata packets included")
+        GameRenderer.set_physics(world_data)
                 
     def on(self, event_name, callback: Callable[[Dict], Any]) -> None:
         """

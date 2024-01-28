@@ -13,13 +13,22 @@ class GameManager:
     Will implement functions that allow for quick display management.
     """
     
+    # Used for live game. Is
+    game_renderer = None # of type `renderer.Renderer`
+    """ Used for live game. Is `None` until set by `./screens/waiting_room.py` on the `game-init` event. """
+    
     # used solely for waiting room event callbacks. See game/screens/waiting_room.py for more info.
     waiting_room_game_started = False
     waiting_room_leave_game = False
     
-    # both of these will be set when we join/create a room
+    # these will be set when we join/create a room
     room_id: Union[None, str] = None
     our_username: str = None
+    map_name: str = None
+    
+    # when the unix timestamp is this, begin taking keyboard input and sending to server
+    # this gets set when the host starts the game
+    start_timestamp: Union[None, float] = None
     
     # Initiate connections with server
     socket_man = SocketManager()
@@ -120,4 +129,7 @@ class GameManager:
         GameManager.countdown_button.update(GameManager.screen)
 
     def draw_car():
-        GameManager.screen.blit(GameManager.car, (340,560))
+        """
+        Draws the car in the center of the screen
+        """
+        GameManager.screen.blit(c:=GameManager.car, (WIDTH/2 - c.get_width()/2, HEIGHT/2 - c.get_height()/2))

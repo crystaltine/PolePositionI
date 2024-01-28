@@ -2,7 +2,7 @@ from game_manager import GameManager
 from screens.cant_connect import cant_connect
 from screens.main_menu import main_menu
 from screens.countdown import countdown
-from screens.live_game import start_live_game
+from renderer import GameRenderer
 from screens.waiting_room import waiting_room
 from requests_handler import HTTPManager
 
@@ -19,7 +19,7 @@ def start_program():
         
     # if loop broken, that means we are ready to move on to the live game screen.
     countdown()
-    start_live_game()
+    # start_live_game()
     
     try:
         # Gracefully close the socket connection to prevent ghost client on server side

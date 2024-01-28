@@ -2,14 +2,14 @@ import random
 from typing import Tuple
 import math
 
-
 class Entity:
     """
     Represents a car. (for now, can generalize later).
-    Has pos, vel, acc, angle, and a circular hitbox with a certain radius.
     
-    ### This must effectively be the same as on the client side
-    ^ just with a few extra things maybe, since we have to deal with client objects
+    ### This must be the exact same as on the server side
+    ^ just with a few server-related things removed, like client objects
+    
+    Has pos, vel, acc, angle, and a circular hitbox with a certain radius.
     
     Implements a few testing functions that randomize movement
     
@@ -24,7 +24,6 @@ class Entity:
         self,
         name: str,
         color: str,
-        client,
         pos: Tuple[float, float],
         vel: Tuple[float, float] = (0, 0),
         acc: Tuple[float, float] = (0, 0),
@@ -34,17 +33,12 @@ class Entity:
         
         self.name = name
         self.color = color
-        self.client = client
         self.pos = list(pos)
         self.vel = list(vel)
         self.acc = list(acc)
         self.angle = angle
         self.hitbox_radius = hitbox_radius
-        
-        # False = key is not held down, True = key is held down
-        # Use this to update acceleration and angle
-        # w = +acc, s = -acc, a = +angle, d = -angle
-        self.key_presses = [False, False, False, False]
+    
         """ `[forward, backward, left, right]` - see `./key_decoder.py` for more info."""
         
     def set_random_angle(self) -> None:
@@ -52,17 +46,6 @@ class Entity:
         
     def set_random_acceleration(self) -> None:
         self.acc = [random.randint(-2, 2), random.randint(-2, 2)]
-    
-    def update_keys(self, keyid: int, down: bool) -> None:
-        """
-        `keyid`: 0=forward, 1=backward, 2=left, 3=right
-        if `down` is True, then the key is being pressed down, otherwise it is being released
-        
-        This function does not update any physics; 
-        that should be done in `update()`, which is only used by the `World` class.
-        """
-        
-        self.key_presses[keyid] = down
     
     def update(self):
         """
@@ -115,14 +98,38 @@ class Entity:
             "angle": self.angle,
             "hitbox_radius": self.hitbox_radius,
         }
+    
+    def set_physics(self, data: dict) -> None:
+        """
+        Set and override the current physics data. This should only be used with server data (or for testing)
         
+        `data` must be a dict in the same format as the one returned by `get_physics_data()`, which looks like this:
+        
+        ```python
+        {
+            "pos": [px, py],
+            "vel": [vx, vy],
+            "acc": [ax, ay],
+            "angle": angle,
+            "hitbox_radius": hitbox_radius,
+        }
+        ```
+        
+        Note: does NOT check for collisions after setting, however that should be handled on the next frame.
+        """
+        
+        self.pos = data["pos"]
+        self.vel = data["vel"]
+        self.acc = data["acc"]
+        self.angle = data["angle"]
+        self.hitbox_radius = data["hitbox_radius"]
+    
     def on_entity_collide(self, other: 'Entity') -> None:
         """
         Called when this entity collides, but it must be WITH ANOTHER ENTITY.
         """
         
         print(f"{self.name} collided with {other.name}!")
-        self.client.send_data({}, 'crash')
         
     def on_wall_collide(self) -> None:
         """
@@ -130,4 +137,3 @@ class Entity:
         """
         
         print(f"{self.name} collided with a wall!")
-        self.client.send_data({}, 'crash')

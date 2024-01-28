@@ -117,6 +117,8 @@ def main_menu() -> bool:
                         else:
                             print("Room created successfully! Code:", res.get('code'))
                             GameManager.room_id = res.get('code')
+                            GameManager.our_username = res.get('player_data').get('username')
+                            GameManager.map_name = res.get('map_data')['map_name']
 
                             # server will return ourselves (since it assigns us a random color)
                             return waiting_room(res.get('map_data'), True, [res.get('player_data')])
@@ -156,6 +158,7 @@ def main_menu() -> bool:
                             print("Room joined successfully! Code:", res.get('code'))
                             GameManager.room_id = res.get('code')
                             GameManager.our_username = res.get('username')
+                            GameManager.map_name = res.get('map_data')['map_name']
                             
                             return waiting_room(res.get('map_data'), False, res.get('players'))
                     

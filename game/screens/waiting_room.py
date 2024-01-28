@@ -3,6 +3,7 @@ import sys
 from time import time
 
 from game_manager import GameManager
+from renderer import GameRenderer
 from CONSTANTS import BUTTON_MEDIUM, FONT_TINY, FONT_MEDIUM, FONT_LARGE, FONT_SIZES
 from elements.button import Button
 from elements.waiting_lobby_player import waiting_lobby_player
@@ -91,20 +92,23 @@ def waiting_room(details: dict, is_leader = False, connected_players: list = [])
     GameManager.socket_man.on('player-join', lambda data: main_panel.add_player(data['username'], data['color']))
     GameManager.socket_man.on('player-leave', lambda data: main_panel.remove_player(data['username']))
     
-    def _start(_): 
-        print(f">>> Game started event received!!!!")
+    def _init_start(data): 
+        print(f">>> Game init event received. The consensus start timestamp is {data['start_timestamp']}")
         GameManager.waiting_room_game_started = True
+        GameManager.start_timestamp = data['start_timestamp']
+        
+        # Create our GameRenderer (game is about to start)
+        GameManager.game_renderer = GameRenderer(data['init_world_data'])
+        
     def _leave(_):
         print(f">>> leave event received!!!!")
         GameManager.waiting_room_leave_game = True
         
     # these actually run on a different thread, so this might work??
-    GameManager.socket_man.on('game-init', _start)
+    GameManager.socket_man.on('game-init', _init_start)
     GameManager.socket_man.on('leave', _leave) # kicked, manually left, disbanded, etc.
     
     while True:
-        
-        print(f"waiting room: iterating while with waiting_room_game_started = {GameManager.waiting_room_game_started} and waiting_room_leave_game = {GameManager.waiting_room_leave_game}")
         
         if GameManager.waiting_room_game_started:
             return True

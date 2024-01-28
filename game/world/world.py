@@ -19,7 +19,7 @@ class World:
     """
     A 2D Plane that holds different `Entity` objects.
     
-    Basically, stores players as circular objects, each with their own pos, vel, acc.
+    Basically, stores players as circles, each with their own pos, vel, acc.
 
     To handle car collisions - send 'crash' event on the following: (UPDATE AFTER IMPLEMENTING HITBOXES)
         - if two players are within 5m of each other # TEMP - change to 2*hitbox_radius
@@ -48,18 +48,17 @@ class World:
         """
         self.size = size
         self.entities: Dict[str, Entity] = {}
-        """ a map from client_ids to entity objects """
+        """ a map from username to entity objects """
         
     def create_entity(
         self, 
         name: str,
         color: str,
-        client,
         pos: tuple[float, float], 
         vel: tuple[float, float] = (0, 0), 
         acc: tuple[float, float] = (0, 0),
         angle: float = 0,
-        hitbox_radius: float = 2.5
+        hitbox_radius: float = 0
         ) -> Entity:
         """
         Creates and places an entity at a certain position. 
@@ -70,15 +69,15 @@ class World:
         Returns the entity.
         """
         
-        e = Entity(name, color, client, pos, vel, acc, angle, hitbox_radius)
-        self.entities[client.id] = e
+        e = Entity(name, color, pos, vel, acc, angle, hitbox_radius)
+        self.entities[name] = e
         
-    def destroy_entity(self, client_id: str) -> None:
+    def destroy_entity(self, name: str) -> None:
         """
-        Removes the entity with the specified client_id from the world.
+        Removes the entity with the specified name from the world.
         """
         
-        del self.entities[client_id]
+        del self.entities[name]
         
     def update(self) -> None:
         """
@@ -134,7 +133,7 @@ class World:
               vel: [vel_x: number, vel_y: number],
               acc: [acc_x: number, acc_y: number],
               angle: number,
-              hitbox_radius: number
+              hitbox_radius: number,
             }
           },
           ...

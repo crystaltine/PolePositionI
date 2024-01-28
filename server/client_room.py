@@ -152,7 +152,10 @@ class Room:
         
         for client in self.clients.values():
             # see game/screens/waiting_room.py - game-init and leave events dont need extra data.
-            client['client_obj'].send_data({"start_time": start_time}, "game-init")
+            client['client_obj'].send_data({
+                "start_time": start_time,
+                "init_world_data": self.world.get_all_data() # list of init physics data for each entity
+            }, "game-init")
         
         # at start_time, begin the receive loop for all clients
         s = scheduler(time, sleep)
@@ -194,9 +197,15 @@ class Room:
                 "color": self.clients[client.id]['color']
             }, "player-join")
             
+        # add the new client to the world
+        self.world.create_entity(new_client_username, self.clients[client.id]['color'], client, (100, 100 + 50*len(self.clients)), hitbox_radius=2.5)
+            
         return { "username": new_client_username, "color": self.clients[client.id]['color'] }
         
     def remove_client(self, client: Client):
+        
+        # Delete the related entity from the world
+        self.world.destroy_entity(client.id)
         
         # add their color back into the pool
         self.available_colors.add(self.clients[client.id]['color'])
