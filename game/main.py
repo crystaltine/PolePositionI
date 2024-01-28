@@ -1,4 +1,4 @@
-from game_manager import GameManager
+from managers import GameManager, init_managers
 
 from screens.main_menu import main_menu
 from screens.countdown import countdown
@@ -10,6 +10,8 @@ def start_program():
     (Main menu or connecting... screen)
     """
     
+    init_managers()
+    
     # see docstring for main_menu and other comments in that file for an explanation
     # tldr - main menu will return False if we should stay on it, and True if we should proceed to the next screen
     main_menu_result = main_menu()
@@ -20,10 +22,7 @@ def start_program():
     countdown()
     live_game()
     
-    try:
-        # Gracefully close the socket connection to prevent ghost client on server side
-        GameManager.socket_man.socket.close()
-    except: pass
+    GameManager.quit_game()
 
 if __name__ == "__main__":
     start_program()

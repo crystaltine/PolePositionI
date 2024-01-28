@@ -2,8 +2,7 @@ import pygame
 import sys
 from time import time
 
-from game_manager import GameManager
-from renderer import GameRenderer
+from managers import GameManager, RenderingManager
 from CONSTANTS import BUTTON_MEDIUM, FONT_TINY, FONT_MEDIUM, FONT_LARGE, FONT_SIZES
 from elements.button import Button
 from elements.waiting_lobby_player import waiting_lobby_player
@@ -93,15 +92,15 @@ def waiting_room(details: dict, is_leader = False, connected_players: list = [])
     GameManager.socket_man.on('player-leave', lambda data: main_panel.remove_player(data['username']))
     
     def _init_start(data): 
-        print(f">>> Game init event received. The consensus start timestamp is {data['start_timestamp']}")
+        print(f"Initializing Live Game: The consensus start timestamp is \x1b[33m{data['start_timestamp']}\x1b[0m")
         GameManager.waiting_room_game_started = True
         GameManager.start_timestamp = data['start_timestamp']
         
-        # Create our GameRenderer (game is about to start)
-        GameManager.game_renderer = GameRenderer(data['init_world_data'])
+        # Create our RenderingManager (game is about to start)
+        GameManager.game_renderer = RenderingManager(data['init_world_data'])
         
     def _leave(_):
-        print(f">>> leave event received!!!!")
+        GameManager.socket_man.stop_listening()
         GameManager.waiting_room_leave_game = True
         
     # these actually run on a different thread, so this might work??

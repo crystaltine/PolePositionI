@@ -1,8 +1,6 @@
-from typing import Tuple
-import math
+from typing import Tuple, TYPE_CHECKING
 from time import time_ns
-
-from game_manager import GameManager
+import math
 
 class Entity:
     """
@@ -31,6 +29,7 @@ class Entity:
         acc: Tuple[float, float] = (0, 0),
         angle: float = 0,
         hitbox_radius: float = 0,
+        keys: list[bool] = [False, False, False, False]
         ) -> None:
         
         self.name = name
@@ -43,7 +42,11 @@ class Entity:
         
         self.last_update_timestamp = time_ns()
     
-        """ `[forward, backward, left, right]` - see `./key_decoder.py` for more info."""
+        # False = key is not held down, True = key is held down
+        # Use this to update acceleration and angle
+        # w = +acc, s = -acc, a = +angle, d = -angle
+        self.key_presses = keys
+        """ `[forward, backward, left, right]` """
         
     def update(self):
         """
@@ -61,7 +64,14 @@ class Entity:
         
         delta_time_s = (self.last_update_timestamp - time_ns()) / 1e9
         
-        # TODO - maybe also get keypress data from server so we know what to set acc and angle to?
+        # for now, when left/right are held, we can turn 50 degrees per second
+        # TODO ^ some sort of turning acceleration (since its a car)
+        self.angle += (50*self.key_presses[2] - 50*self.key_presses[3]) * delta_time_s
+        
+        # use the angle to determine components of acceleration
+        self.acc_mag = 2*self.key_presses[0] - 2*self.key_presses[1]
+        self.acc[0] = self.acc_mag * math.cos(math.radians(self.angle))
+        self.acc[1] = self.acc_mag * math.sin(math.radians(self.angle))
 
         # update velocity using acceleration
         self.vel[0] += self.acc[0] * delta_time_s
@@ -72,7 +82,7 @@ class Entity:
         self.pos[1] += self.vel[1] * delta_time_s
         
         self.last_update_timestamp = time_ns()
-        
+    
     def get_physics_data(self) -> dict:
         """
         Return all physical data in a dict of the following format:
@@ -109,6 +119,7 @@ class Entity:
             "acc": [ax, ay],
             "angle": angle,
             "hitbox_radius": hitbox_radius,
+            "keys": [forward, backward, left, right]
         }
         ```
         
@@ -120,6 +131,7 @@ class Entity:
         self.acc = data["acc"]
         self.angle = data["angle"]
         self.hitbox_radius = data["hitbox_radius"]
+        self.key_presses = data["keys"]
         
         self.last_update_timestamp = time_ns()
     

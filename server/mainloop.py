@@ -38,7 +38,11 @@ def broadcast_mainloop(id_to_room: Dict[str, Room], id_to_client: Dict[str, Clie
                 if num_connected == 0:
                     print(f"\x1b[31mNot broadcasting to room {room.id} because it has no connected clients.\x1b[0m")
                 else:
-                    print(f"Room {room.id} has {num_connected} connections, and started={room.started}") 
-                    # room.broadcast_all(f"[Server] You are in room: {room.id} with {num_connected-1} other players connected.") 
+                    print(f"\x1b[33m{room.id}\x1b[0m: {num_connected} players, started={room.started}") 
                     room.broadcast_physics()
+                    
+                    # DEBUG: print short physics info
+                    for client in room.clients.values():
+                        c: Client = client["client_obj"]
+                        print(f"\t{c.id}: \x1b[33m{c.entity.pos}, {c.entity.vel}, {c.entity.acc}, {c.entity.angle}\x1b[0m")
                             

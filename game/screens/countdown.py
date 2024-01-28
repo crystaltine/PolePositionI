@@ -1,8 +1,7 @@
 import pygame
 import time
 
-from game_manager import GameManager
-from renderer import GameRenderer
+from managers import GameManager, RenderingManager
 from CONSTANTS import FONT_LARGE, FONT_SIZES
 
 def countdown():
@@ -19,16 +18,19 @@ def countdown():
     countdown_container = pygame.surface.Surface((container_sidelen,container_sidelen), pygame.SRCALPHA)
     countdown_container.fill((0, 0, 0, 128))
     
+    text = FONT_LARGE.render(f"{time_left if time_left>0 else 'Go!'}", True, (255, 255, 255))    
     text_x = (container_sidelen - text.get_width()) / 2
     text_y = (container_sidelen - text.get_height()) / 2
 
     while True:
         
+        time_left = int(GameManager.start_timestamp - time.time())
+        
         if time.time() >= GameManager.start_timestamp:
             # After we return out of this, `../main.py` will call `live_game``
             return
 
-        GameRenderer.render_frame()
+        RenderingManager.render_frame()
         
         # draw the countdown
         countdown_container = pygame.surface.Surface((container_sidelen,container_sidelen), pygame.SRCALPHA)

@@ -2,8 +2,7 @@ import pygame
 import sys
 from typing import Callable, Any
 
-from game_manager import GameManager
-from renderer import GameRenderer
+from managers import GameManager, RenderingManager
 
 def live_game():
     """
@@ -19,9 +18,19 @@ def live_game():
     ^ see `SocketManager.on_packet` in `../requests_handler.py`
     """
     
+    def _leave(_):
+        GameManager.live_game_quit = True
+    
+    # create new event handler
+    GameManager.socket_man.on('leave', _leave)
+    
     while True:
-        GameRenderer.tick_world()
-        GameRenderer.render_frame()
+        
+        if GameManager.live_game_quit:
+            break
+        
+        GameManager.game_renderer.tick_world()
+        RenderingManager.render_frame()
         
         for event in pygame.event.get():
             if event == pygame.QUIT:

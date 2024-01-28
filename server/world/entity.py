@@ -103,6 +103,7 @@ class Entity:
             "acc": [ax, ay],
             "angle": angle,
             "hitbox_radius": hitbox_radius,
+            "keys": [forward, backward, left, right]
         }
         ```
         """
@@ -113,6 +114,7 @@ class Entity:
             "acc": self.acc,
             "angle": self.angle,
             "hitbox_radius": self.hitbox_radius,
+            "keys": self.key_presses
         }
         
     def on_entity_collide(self, other: 'Entity') -> None:

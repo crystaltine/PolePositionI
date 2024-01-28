@@ -1,7 +1,7 @@
 import array
 from typing import List
 from socket import socket
-from time import time, sleep
+import time
 from sched import scheduler
 import threading
 import json
@@ -51,6 +51,8 @@ class Client:
                 data = self.sock.recv(1)
                 if data is None: break
                 
+                # TODO - a ton of 0's come through when we ungracefully shutdown the client
+                # for some reason... fix maybe by changing packet codes to be 1-8, and just ignore 0's?
                 keydata = int.from_bytes(data, 'big')
                 
                 # key data should always be between 0 and 7. If not, ignore
@@ -68,7 +70,16 @@ class Client:
                 
             print(f"\x1b[34mClient \x1b[33m{self.id}\x1b[0m is disconnected!\x1b[0m")
             
-        threading.Thread(target=recv_loop).start()
+        print(f"\x1b[34mClient \x1b[33m{self.id}\x1b[0m: Starting recv loop...")
+        
+        try:
+            threading.Thread(target=recv_loop).start()
+        except ConnectionAbortedError:
+            print(f"\x1b[34mClient \x1b[33m{self.id}\x1b[0m: Connection aborted!\x1b[0m")
+            self.sock.close()
+            self.sock = None
+            
+            # TODO - delete this client from the room
         
     def send_data(self, data, event_name: str = None) -> bool:
         """
@@ -134,7 +145,8 @@ class Room:
         # testing: put them at (100, 100), (100, 150), (100, 200), and so on.
         # also they should have hitbox radius 2.5
         for i, client in enumerate(self.clients.values()):
-            self.world.create_entity(client["username"], client["color"], client["client_obj"], (100, 100 + (50 * i)), hitbox_radius=2.5)
+            e = self.world.create_entity(client["username"], client["color"], client["client_obj"], (100, 100 + (50 * i)), hitbox_radius=2.5)
+            client["client_obj"].entity = e
 
     def start_game(self):
         """
@@ -148,29 +160,31 @@ class Room:
             - Also, AFTER countdown, marks the room as started, which will allow the mainloop to begin updating physics.
         """
         
-        start_time = time() + 5
+        start_time = time.time() + 5
         
         for client in self.clients.values():
             # see game/screens/waiting_room.py - game-init and leave events dont need extra data.
             client['client_obj'].send_data({
-                "start_time": start_time,
+                "start_timestamp": start_time,
                 "init_world_data": self.world.get_all_data() # list of init physics data for each entity
             }, "game-init")
         
-        # at start_time, begin the receive loop for all clients
-        s = scheduler(time, sleep)
+        print(f"Start game: Starting in approx {start_time - time.time()} seconds...")
         
-        def begin():
+        def delayed_start():
+            time.sleep(start_time - time.time())
+            
             for client in self.clients.values():
                 client['client_obj'].start_recv_thread()  
                 
             # also start the game
             self.started = True       
+            
+            # thread will end here, and the mainloop will start updating physics
         
-        # schedule the loop to run at start_time. 
         # At that time, clients SHOULD ALSO START SENDING KEYBOARD INPUTS.
         # we dont start the loop on start-init otherwise clients can send keypresses before the game starts
-        s.enterabs(start_time, 1, begin)
+        threading.Thread(target=delayed_start).start()
 
     def add_client(self, client: Client) -> dict:
         """
@@ -198,7 +212,8 @@ class Room:
             }, "player-join")
             
         # add the new client to the world
-        self.world.create_entity(new_client_username, self.clients[client.id]['color'], client, (100, 100 + 50*len(self.clients)), hitbox_radius=2.5)
+        e = self.world.create_entity(new_client_username, self.clients[client.id]['color'], client, (100, 100 + 50*len(self.clients)), hitbox_radius=2.5)
+        client.entity = e
             
         return { "username": new_client_username, "color": self.clients[client.id]['color'] }
         
@@ -237,7 +252,6 @@ class Room:
         This also performs internal checks to see which clients are still connected. All disconnected sockets will be removed.
         """
         for c in self.clients.values():
-            print(f"room {self.id}: a client has fileno {c['client_obj'].sock.fileno()}")
             if c["client_obj"].sock.fileno() == -1:
                 self.remove_client(c["client_obj"])
         
@@ -309,5 +323,3 @@ class Room:
             client["client_obj"].send_data({}, "leave")
             client["client_obj"].room_id = None
             client["client_obj"].hosting = None
-            
-        

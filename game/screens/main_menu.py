@@ -1,13 +1,10 @@
 import pygame
-import sys
 from typing import Callable, Any
-from time import sleep
 
 from tkinter import *
 from tkinter import messagebox, simpledialog
 
-from game_manager import GameManager
-from requests_handler import HTTPManager
+from managers import GameManager, HTTPManager
 from screens.waiting_room import waiting_room
 
 # TODO generally, these tkinter popups are ugly and maybe we could replace them with in-game popups?

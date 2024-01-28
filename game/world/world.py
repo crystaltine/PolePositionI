@@ -58,7 +58,8 @@ class World:
         vel: tuple[float, float] = (0, 0), 
         acc: tuple[float, float] = (0, 0),
         angle: float = 0,
-        hitbox_radius: float = 0
+        hitbox_radius: float = 0,
+        keys: list[bool] = [False, False, False, False]
         ) -> Entity:
         """
         Creates and places an entity at a certain position. 
@@ -69,7 +70,7 @@ class World:
         Returns the entity.
         """
         
-        e = Entity(name, color, pos, vel, acc, angle, hitbox_radius)
+        e = Entity(name, color, pos, vel, acc, angle, hitbox_radius, keys)
         self.entities[name] = e
         
     def destroy_entity(self, name: str) -> None:
@@ -134,6 +135,7 @@ class World:
               acc: [acc_x: number, acc_y: number],
               angle: number,
               hitbox_radius: number,
+              keys: [forward: bool, backward: bool, left: bool, right: bool]
             }
           },
           ...

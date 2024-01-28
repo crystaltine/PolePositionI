@@ -73,6 +73,8 @@ class World:
         e = Entity(name, color, client, pos, vel, acc, angle, hitbox_radius)
         self.entities[client.id] = e
         
+        return e
+        
     def destroy_entity(self, client_id: str) -> None:
         """
         Removes the entity with the specified client_id from the world.
@@ -84,7 +86,7 @@ class World:
         """
         Updates all entities in the world.
         """
-        for e in self.entities: 
+        for e in self.entities.values(): 
             e.update()
         
     def check_entity_collisions(self) -> None:
@@ -134,7 +136,8 @@ class World:
               vel: [vel_x: number, vel_y: number],
               acc: [acc_x: number, acc_y: number],
               angle: number,
-              hitbox_radius: number
+              hitbox_radius: number,
+              keys: [forward: bool, backward: bool, left: bool, right: bool]
             }
           },
           ...
@@ -146,7 +149,7 @@ class World:
         
         for e in self.entities.values():
             data.append({
-                "username": e.client.username,
+                "username": e.name,
                 "color": e.color,
                 "physics": e.get_physics_data()
             })

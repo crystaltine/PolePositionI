@@ -90,7 +90,7 @@ def joinroom(client_id: str, room_id: str):
                 "map_data": id_to_room[room_id].map.map_data, 
                 "players": player_details,
                 "code": room_id,
-                "userame": this_player_info["username"],
+                "username": this_player_info["username"],
                 "color": this_player_info["color"],
             }
 
@@ -223,15 +223,17 @@ thread_accept.start()
 thread_flask = threading.Thread(target=apprun, args=(HOST, PORT), daemon=True)
 thread_flask.start()
 
-thread_loop = threading.Thread(target=broadcast_mainloop, args=(sock, id_to_room, id_to_client), daemon=True)
+thread_loop = threading.Thread(target=broadcast_mainloop, args=(id_to_room, id_to_client), daemon=True)
 thread_loop.start()
 
 # cli
 while True:
-    cmd = input("> ")
-    if cmd == "exit":
+    cmd = input()
+    if cmd in ["exit", "quit", "stop"]:
         
-        # TODO - handle threads shutting down logic      
+        # disband all rooms
+        for room_id in id_to_room:
+            id_to_room[room_id].disband()   
         
         sock.close()
         exit(0)

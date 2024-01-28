@@ -1,4 +1,6 @@
 import pygame
+import math
+
 pygame.init()
 
 id_map = {
@@ -15,7 +17,7 @@ id_map = {
 WIDTH = 1200
 HEIGHT = 720
 
-FOV = 100 
+FOV = math.radians(100)
 
 """ degrees in total (FOV/2 degrees visible on each side) """
 

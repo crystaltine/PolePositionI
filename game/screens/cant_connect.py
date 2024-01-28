@@ -1,7 +1,7 @@
 import time
 import sys
 from math import floor
-from game_manager import GameManager
+from managers import GameManager
 from CONSTANTS import *
 
 from elements.button import Button
