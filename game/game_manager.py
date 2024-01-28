@@ -1,20 +1,25 @@
 import pygame
-from typing import Union
+from typing import Union, TYPE_CHECKING
 
 from CONSTANTS import *
 from elements.button import Button
 from elements.input import Input
 from requests_handler import SocketManager, HTTPManager
 
+# this prevents a circular import
+# I NEED TYPE HINTS!!!!!!!!!!!!!!!!!!!!!!
+# see - https://stackoverflow.com/questions/39740632/python-type-hinting-without-cyclic-imports
+if TYPE_CHECKING:
+    from renderer import GameRenderer
+
 class GameManager:
     """
     A class that declares/scores all assets and resources used, such as screen, buttons, etc.
     
-    Will implement functions that allow for quick display management.
+    Implements functions that allow for general display and game management.
     """
     
-    # Used for live game. Is
-    game_renderer = None # of type `renderer.Renderer`
+    game_renderer: Union[None, GameRenderer] = None # of type `renderer.Renderer`
     """ Used for live game. Is `None` until set by `./screens/waiting_room.py` on the `game-init` event. """
     
     # used solely for waiting room event callbacks. See game/screens/waiting_room.py for more info.
