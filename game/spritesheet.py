@@ -5,6 +5,7 @@
 # Note: When calling images_at the rect is the format:
 # (x, y, x + offset, y + offset)
 # I've taken the taken code from https://www.pygame.org/wiki/Spritesheet?parent=CookBook 
+# and added a couple modifications of my own to the error message
 
 import pygame
 

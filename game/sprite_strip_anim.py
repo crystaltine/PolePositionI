@@ -1,4 +1,7 @@
-#code borrowed from https://www.pygame.org/wiki/Spritesheet?parent=CookBook 
+# code borrowed from https://www.pygame.org/wiki/Spritesheet?parent=CookBook 
+# I've added a couple modifications to frames so instead of it counting in tics it causes the program to sleep 
+# for the speficied amount of time
+
 import spritesheet
 from time import sleep
 import pygame
@@ -40,10 +43,6 @@ class SpriteStripAnim(object):
             else:
                 self.i = 0
         image = self.images[self.i]
-        #self.f -= 1
-        #if self.f == 0:
-        #    self.i += 1
-        #    self.f = self.frames
         sleep(self.frames)
         return image
     def __add__(self, ss):
