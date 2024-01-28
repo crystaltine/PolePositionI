@@ -15,6 +15,10 @@ id_map = {
 WIDTH = 1200
 HEIGHT = 720
 
+FOV = 100 
+
+""" degrees in total (FOV/2 degrees visible on each side) """
+
 # hex is 4370ff
 SKY_RGB = (67, 112, 255)
 BLACK = (0,0,0)

@@ -4,7 +4,7 @@ import httpx
 import threading
 from json import loads
 from typing import Dict, Callable, Any, Union
-from time import sleep
+
 from renderer import GameRenderer
 from CONSTANTS import id_map, HTTP_URL, SOCKET_HOST, SOCKET_PORT
 
@@ -120,9 +120,7 @@ class SocketManager:
         self._listen_stopped = True
     
     def on_packet(self, world_data: list) -> None:
-        """
-        @TODO 
-        
+        """       
         Handles a received physics packet from the server.
         
         The data should tell us the physics of every entity in the world. It has the following schema:

@@ -1,7 +1,6 @@
-import random
-from typing import Tuple
 import math
-
+from typing import Tuple
+from time import time_ns
 
 class Entity:
     """
@@ -41,18 +40,14 @@ class Entity:
         self.angle = angle
         self.hitbox_radius = hitbox_radius
         
+        self.last_update_timestamp = time_ns()
+        
         # False = key is not held down, True = key is held down
         # Use this to update acceleration and angle
         # w = +acc, s = -acc, a = +angle, d = -angle
         self.key_presses = [False, False, False, False]
         """ `[forward, backward, left, right]` - see `./key_decoder.py` for more info."""
-        
-    def set_random_angle(self) -> None:
-        self.angle = random.randint(0, 360)
-        
-    def set_random_acceleration(self) -> None:
-        self.acc = [random.randint(-2, 2), random.randint(-2, 2)]
-    
+
     def update_keys(self, keyid: int, down: bool) -> None:
         """
         `keyid`: 0=forward, 1=backward, 2=left, 3=right
@@ -76,9 +71,11 @@ class Entity:
         Should be run on every server tick (for now, 24tps) - see `../CONSTANTS.py`
         """
         
-        # for now, when left/right are pressed, we increase angle by 2 degrees
+        delta_time_s = (self.last_update_timestamp - time_ns()) / 1e9
+        
+        # for now, when left/right are held, we can turn 50 degrees per second
         # TODO ^ some sort of turning acceleration (since its a car)
-        self.angle += 2*self.key_presses[2] - 2*self.key_presses[3]
+        self.angle += (50*self.key_presses[2] - 50*self.key_presses[3]) * delta_time_s
         
         # use the angle to determine components of acceleration
         self.acc_mag = 2*self.key_presses[0] - 2*self.key_presses[1]
@@ -86,12 +83,14 @@ class Entity:
         self.acc[1] = self.acc_mag * math.sin(math.radians(self.angle))
         
         # update velocity using acceleration
-        self.vel[0] += self.acc[0]
-        self.vel[1] += self.acc[1]
+        self.vel[0] += self.acc[0] * delta_time_s
+        self.vel[1] += self.acc[1] * delta_time_s
         
         # update position using velocity
-        self.pos[0] + self.vel[0]
-        self.pos[1] + self.vel[1]
+        self.pos[0] += self.vel[0] * delta_time_s
+        self.pos[1] += self.vel[1] * delta_time_s
+        
+        self.last_update_timestamp = time_ns()
         
     def get_physics_data(self) -> dict:
         """

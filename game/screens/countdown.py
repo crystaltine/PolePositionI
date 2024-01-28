@@ -11,9 +11,7 @@ def countdown():
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                GameManager.socket_man.socket.close()
-                pygame.quit()
-                sys.exit()
+                GameManager.quit_game()
         pygame.display.update()
         #TODO - This freezes the entire game
         time.sleep(3)

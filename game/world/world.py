@@ -83,7 +83,7 @@ class World:
         """
         Updates all entities in the world.
         """
-        for e in self.entities: 
+        for e in self.entities.values(): 
             e.update()
         
     def check_entity_collisions(self) -> None:

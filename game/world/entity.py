@@ -1,6 +1,8 @@
-import random
 from typing import Tuple
 import math
+from time import time_ns
+
+from game_manager import GameManager
 
 class Entity:
     """
@@ -38,15 +40,11 @@ class Entity:
         self.acc = list(acc)
         self.angle = angle
         self.hitbox_radius = hitbox_radius
+        
+        self.last_update_timestamp = time_ns()
     
         """ `[forward, backward, left, right]` - see `./key_decoder.py` for more info."""
         
-    def set_random_angle(self) -> None:
-        self.angle = random.randint(0, 360)
-        
-    def set_random_acceleration(self) -> None:
-        self.acc = [random.randint(-2, 2), random.randint(-2, 2)]
-    
     def update(self):
         """
         Calculates the following:
@@ -55,26 +53,25 @@ class Entity:
             
             - `acc` based on `key_presses` and `angle`
             - `angle` based on `key_presses`
-            
-        Should be run on every server tick (for now, 24tps) - see `../CONSTANTS.py`
+           
+        Changes are scaled based on time elapsed since last update, which is stored in `GameManager`.
+        
+        This should be run as often as possible.
         """
         
-        # for now, when left/right are pressed, we increase angle by 2 degrees
-        # TODO ^ some sort of turning acceleration (since its a car)
-        self.angle += 2*self.key_presses[2] - 2*self.key_presses[3]
+        delta_time_s = (self.last_update_timestamp - time_ns()) / 1e9
         
-        # use the angle to determine components of acceleration
-        self.acc_mag = 2*self.key_presses[0] - 2*self.key_presses[1]
-        self.acc[0] = self.acc_mag * math.cos(math.radians(self.angle))
-        self.acc[1] = self.acc_mag * math.sin(math.radians(self.angle))
-        
+        # TODO - maybe also get keypress data from server so we know what to set acc and angle to?
+
         # update velocity using acceleration
-        self.vel[0] += self.acc[0]
-        self.vel[1] += self.acc[1]
+        self.vel[0] += self.acc[0] * delta_time_s
+        self.vel[1] += self.acc[1] * delta_time_s
         
         # update position using velocity
-        self.pos[0] + self.vel[0]
-        self.pos[1] + self.vel[1]
+        self.pos[0] += self.vel[0] * delta_time_s
+        self.pos[1] += self.vel[1] * delta_time_s
+        
+        self.last_update_timestamp = time_ns()
         
     def get_physics_data(self) -> dict:
         """
@@ -123,6 +120,8 @@ class Entity:
         self.acc = data["acc"]
         self.angle = data["angle"]
         self.hitbox_radius = data["hitbox_radius"]
+        
+        self.last_update_timestamp = time_ns()
     
     def on_entity_collide(self, other: 'Entity') -> None:
         """

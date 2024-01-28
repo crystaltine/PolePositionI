@@ -1,4 +1,5 @@
 import pygame
+import sys
 from typing import Union, TYPE_CHECKING
 
 from CONSTANTS import *
@@ -11,6 +12,7 @@ from requests_handler import SocketManager, HTTPManager
 # see - https://stackoverflow.com/questions/39740632/python-type-hinting-without-cyclic-imports
 if TYPE_CHECKING:
     from renderer import GameRenderer
+    from world.entity import Entity
 
 class GameManager:
     """
@@ -70,12 +72,52 @@ class GameManager:
     text_bottom_right = FONT_TINY.render(MAIN_MENU_BOTTOM_RIGHT_TEXT, True, (0, 0, 0))
     
     @staticmethod
+    def get_our_entity() -> 'Entity':
+        """
+        Returns the entity associated with this client. (finds by username)
+        
+        Could be None if we aren't in a game
+        """
+        return GameManager.game_renderer.world.entities[GameManager.our_username]
+    
+    @staticmethod
+    def get_all_other_entities() -> list['Entity']:
+        """
+        Returns a list of all entities except for our own.
+        
+        Could be empty if we aren't in a game
+        """
+        return [e for e in GameManager.game_renderer.world.entities.values() if e.username != GameManager.our_username]
+    
+    @staticmethod
     def draw_static_background():
         """
         Draws non-animated grass and mountains on the screen.
         """
         GameManager.screen.blit(GameManager.grass, (0, HEIGHT - GameManager.grass.get_height()))
         GameManager.screen.blit(GameManager.mtns, (0, 0))
+        
+    @staticmethod
+    def draw_dynamic_background(angle: int):
+        """
+        Draws static grass on the screen, but shows different sections of the mountains based on the angle we are turned.
+        
+        ### How the scrolling works:
+        
+        - Always render the full height of the mountains
+        - When angle is 0, use x=0 -> x=WIDTH as the x range to show.
+        - since `mtns_img` is 4320x300px, 1 degree is 4320/360 = 12px
+        
+        Thus, the x-coord of the left side should be `angle * 12`, and the right side should be `angle * 12 + WIDTH`
+        """
+        
+        angle = int(angle % 360)
+        
+        crop_pos_on_img = angle*12, 0
+        size_of_crop = WIDTH, HEIGHT - GameManager.grass.get_height()
+        
+        GameManager.screen.blit(GameManager.mtns, (0, 0), (*crop_pos_on_img, *size_of_crop))
+        GameManager.screen.blit(GameManager.grass, (0, HEIGHT - GameManager.grass.get_height()))
         
     @staticmethod
     def draw_logo(posx = 200, posy = 50, scale = 1):
@@ -103,7 +145,8 @@ class GameManager:
         GameManager.draw_static_background()
         GameManager.draw_homescreen_text()
         GameManager.draw_logo()
-        
+    
+    @staticmethod  
     def loop_titlescreen_buttons():
         """
         Handles styling and hovering on main menu buttons/inputs. Run inside the game loop.
@@ -130,11 +173,29 @@ class GameManager:
         GameManager.quit_button.changeColor(pygame.mouse.get_pos())
         GameManager.quit_button.update(GameManager.screen)
     
+    @staticmethod 
     def loop_countdown_button():
         GameManager.countdown_button.update(GameManager.screen)
 
+    @staticmethod 
     def draw_car():
         """
         Draws the car in the center of the screen
         """
         GameManager.screen.blit(c:=GameManager.car, (WIDTH/2 - c.get_width()/2, HEIGHT/2 - c.get_height()/2))
+    
+    @staticmethod 
+    def quit_game():
+        """
+        Exits the game gracefully.
+        """
+        
+        # leave the room if we are in one
+        if GameManager.room_id is not None:
+            GameManager.http_man.leave_room()
+            
+        # close the socket connection
+        GameManager.socket_man.socket.close()
+        
+        pygame.quit()
+        sys.exit()

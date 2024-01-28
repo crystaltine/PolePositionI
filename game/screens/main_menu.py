@@ -91,9 +91,7 @@ def main_menu() -> bool:
             GameManager.join_game_input.handle_event(event)
             
             if event.type == pygame.QUIT:
-                GameManager.socket_man.socket.close()
-                pygame.quit()
-                sys.exit()
+                GameManager.quit_game()
                 
             # Handle button clicks
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1: # LEFT CLICKS ONLY!!!
@@ -179,12 +177,7 @@ def main_menu() -> bool:
                     return True
                 
                 elif GameManager.quit_button.is_hovering(mouse_pos):
-                    
-                    # close the sockets
-                    GameManager.socket_man.socket.close()
-                    
-                    pygame.quit()
-                    sys.exit()
+                    GameManager.quit_game()
                     
         pygame.display.update()
        

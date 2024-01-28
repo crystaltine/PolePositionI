@@ -1,9 +1,12 @@
 import pygame
-import sys
+import math
+from typing import Union
 
 from game_manager import GameManager
 from map_utils import get_map
 from world.world import World
+from world.entity import Entity
+from CONSTANTS import WIDTH, HEIGHT, FOV
 
 class GameRenderer:
     """
@@ -11,6 +14,8 @@ class GameRenderer:
     based on the data the server sends us (every minute)
     
     We keep an internal physics engine for smoother animations, although server data overrides this.
+    
+    @TODO - we should probably destroy this object when the game ends (once we implement game end logic)
     """
     
     def __init__(self, init_entities: list = []) -> None:
@@ -41,17 +46,18 @@ class GameRenderer:
             self.place_entity(entity)
 
     def render_frame():
+        """
+        Draws on the screen a single frame based on the current state of the internal physics engine.
+        """
         
-        # TODO - place entities on the screen
-        
-        GameManager.draw_static_background()
+        GameManager.draw_dynamic_background(GameManager.get_our_entity().angle)
         GameManager.draw_car()
         
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                GameManager.socket_man.socket.close()
-                pygame.quit()
-                sys.exit()
+        # For each other entity, draw on screen
+        for other in GameManager.get_all_other_entities():
+            size = GameRenderer.get_rendered_size(other)
+            pos = (WIDTH/2 + GameRenderer.angle_offset(other), GameRenderer.get_y_pos(other))
+            GameManager.draw_entity(size, pos, other.color)
 
         pygame.display.update()
         
@@ -95,6 +101,9 @@ class GameRenderer:
             entity_data['color'],
             **entity_data['physics']
         )
+        
+        # update world
+        self.tick_world()
      
     def set_physics(self, data: list):
         """
@@ -126,3 +135,69 @@ class GameRenderer:
         # for each object in that list, update the corresponding entity.
         for entity_data in data:
             self.world.entities[entity_data['username']].set_physics(entity_data['physics'])
+            
+    @staticmethod
+    def get_rendered_size(other: Entity) -> int:
+        """
+        ### See `../RENDERER_NOTES.png`
+        
+        Returns a size in px for the eneity based on how far away and at what angle it is from us.
+        """
+        
+        us = GameManager.get_our_entity()
+        
+        dist = math.sqrt((other.pos[0] - us.pos[0])**2 + (other.pos[1] - us.pos[1])**2)
+        theta = math.asin(other.hitbox_radius / (dist + other.hitbox_radius))
+        width_on_screen = (WIDTH/2) * 4*theta/math.pi # 2 and 4 are static (do not adjust)
+        
+        return round(width_on_screen)
+        
+    @staticmethod
+    def get_y_pos(other: Entity) -> int:
+        """
+        Returns a y-position on the screen based on an entity's distance from us.
+        
+        The idea is that farther away entities should be drawn higher up (lower y-value)
+        because they are closer to the horizon.
+        
+        Will not return a value lower than 300 (the horizon)
+        and higher than 600 (bottom of screen, with some padding ofc)
+        
+        ### The function used for this calculation
+        (can be changed - i just picked a random asymptotic decay from 600->300 in desmos)
+        
+        y_coord = `30000/(dist+100) + 300`
+        """    
+        
+        us = GameManager.get_our_entity()
+        
+        dist = math.sqrt((other.pos[0] - us.pos[0])**2 + (other.pos[1] - us.pos[1])**2)
+        return round(30000/(dist+100) + 300)
+        
+    @staticmethod
+    def angle_offset(other: Entity) -> Union[int, None]:
+        """
+        ### See `../RENDERER_NOTES.png`
+        
+        Returns how many pixels relative to the center of the screen we should draw CENTER of the other entity at,
+        based on the angle between us and the other entity.
+        
+        If they are off screen (angle > FOV/2), returns None. In this case, don't draw on screen.
+        """
+        
+        us = GameManager.get_our_entity()
+        
+        theta = math.atan2(other.pos[1] - us.pos[1], other.pos[0] - us.pos[0])
+        D = 8*theta/math.pi * (WIDTH/2)
+        
+        return -D # the math makes pos=left, so we have to negate to match screen coords
+    
+    @staticmethod
+    def draw_entity(size: int, pos: tuple[int, int], color: str) -> None:
+        """
+        Draws an entity on the screen, given a size, offset, and color.
+        
+        Currently, all it draws is a circle. (TODO - implement 3d models/rotating sprites)
+        """
+        
+        pygame.draw.circle(GameManager.screen, color, pos, size)

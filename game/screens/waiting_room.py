@@ -134,9 +134,7 @@ def waiting_room(details: dict, is_leader = False, connected_players: list = [])
         for event in pygame.event.get():
             
             if event.type == pygame.QUIT:
-                GameManager.socket_man.socket.close()
-                pygame.quit()
-                sys.exit()
+                GameManager.quit_game()
                 
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1: # left click
                 if start_button.is_hovering(pygame.mouse.get_pos()):
