@@ -1,3 +1,6 @@
+import math
+from typing import List
+from key_press import Player
 #keep track of the center of the track. The only change is in the y position of the center since the entire time the track is moving forward/increasing its x value
 #since the track doesn't go in a circle i can just get the center of the track's y position based on the x position of the car.
 #this y position is either going to be incremented or decremented based on the turn. if turning left it increases and if turning right it decreases, straight line is constant
@@ -55,7 +58,12 @@ class Center:
                 return False
         #if entire loop has gone through and didn't hit the return that means all distances are too far away and True is returned
         return True
-        
-        
+    
+    #can be changed later but this method gets the distances between all players and then returns list that contains which players crashed and need to be reset 
+    #players right now is just a list of player objects
+    def collision(self, players: List[Player]):
+        for i in range (len(players)):
+            for j in range(i+1, len(players)):
+
 
 #lower = 10 upper = 20, range is 10 
