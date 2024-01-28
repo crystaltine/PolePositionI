@@ -23,13 +23,35 @@ grass = pygame.transform.scale(grass, (int(width), int(2 * height/3)))
 mtns = pygame.image.load(os.path.join(os.path.dirname(__file__), 'assets','mtns.png')).convert_alpha()
 mtns = pygame.transform.scale(mtns, (width*2, height/5))
 road = []
+curved_left = []
+curved_right = []
+left_centering = []
+right_centering = []
+turning_left = []
+turning_right = []
 for img in range(12):
-    road.append(SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\straight road', str(img) + ' 06-53-01.png'), (0, -height/5, width, 4*height/3), 12, -1, True, 100000000))
+    if img < 11:
+        road.append(SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\straight road', str(img) + ' 06-53-01.png'), (0, -2*height/5, width, 4*height/3), 12, -1, True, 0.041))
+        curved_left.append(SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\curved left', str(img) + ' 06-50-02.png'), (0, -height/5, width, 4*height/3), 12, -1, True, 0.041))
+        curved_right.append(SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\curved right', str(img) + ' 06-50-35.png'), (0, -height/5, width, 4*height/3), 12, -1, True, 0.041))
+    else:
+        road.append(SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\straight road', str(img) + ' 06-53-01.png'), (0, -2*height/5, width, 4*height/3), 12, -1, False, 0.041))
+        curved_left.append(SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\curved left', str(img) + ' 06-50-02.png'), (0, -height/5, width, 4*height/3), 12, -1, False, 0.041))
+        curved_right.append(SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\curved right', str(img) + ' 06-50-35.png'), (0, -height/5, width, 4*height/3), 12, -1, True, 0.041))
+
+for img in range(8):
+    if img < 7:
+        left_centering.append(SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\left centering', str(img) + ' 06-50-52.png'), (0, -height/5, width, 4*height/3), 12, -1, True, 0.041))
+        right_centering.append(SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\right centering', str(img) + ' 06-52-48.png'), (0, -height/5, width, 4*height/3), 12, -1, True, 0.041))
+        turning_left.append(SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\turning left', str(img) + ' 06-52-17.png'), (0, -height/5, width, 4*height/3), 12, -1, True, 0.041))
+        turning_right.append(SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\turning right', str(img) + ' 06-51-52.png'), (0, -height/5, width, 4*height/3), 12, -1, True, 0.041))
+    else:
+        left_centering.append(SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\left centering', str(img) + ' 06-50-52.png'), (0, -height/5, width, 4*height/3), 12, -1, False, 0.041))
+        right_centering.append(SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\right centering', str(img) + ' 06-52-48.png'), (0, -height/5, width, 4*height/3), 12, -1, True, 0.041))
+        turning_left.append(SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\turning left', str(img) + ' 06-52-17.png'), (0, -height/5, width, 4*height/3), 12, -1, True, 0.041))
+        turning_right.append(SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\turning right', str(img) + ' 06-51-52.png'), (0, -height/5, width, 4*height/3), 12, -1, True, 0.041))
+
 roadpaths = [
-    road,
-    SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets','turningLeft.gif'), (0, -height/5, width, 4*height/3), 8, -1, True, 1),
-    SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets','curvedLeft.gif'), (0, -height/5, width, 4*height/3), 12, -1, True, 1),
-    SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets','leftCentering.gif'), (0, -height/5, width, 4*height/3), 8, -1, True, 1),
     road
 ]
 current_loop = 0
@@ -60,7 +82,7 @@ while True:
     current_loop += 1
     if current_loop >= len(road):
         current_loop = 0
-    road[current_loop].iter()
+    road[current_loop].next()
     screen.blit(road_state, (0, -height/5))        
     pygame.display.flip()
     road_state = road[current_loop].next()

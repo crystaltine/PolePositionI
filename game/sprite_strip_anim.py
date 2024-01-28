@@ -1,5 +1,6 @@
 #code borrowed from https://www.pygame.org/wiki/Spritesheet?parent=CookBook 
 import spritesheet
+from time import sleep
 
 class SpriteStripAnim(object):
     """sprite strip animator
@@ -8,7 +9,7 @@ class SpriteStripAnim(object):
     __add__() method for joining strips which comes in handy when a
     strip wraps to the next row.
     """
-    def __init__(self, filename, rect, count, colorkey = None, loop=False, frames=1):
+    def __init__(self, filename, rect, count, colorkey = None, loop=False, frames=0.041):
         """construct a SpriteStripAnim
         
         filename, rect, count, and colorkey are the same arguments used
@@ -17,7 +18,7 @@ class SpriteStripAnim(object):
         loop is a boolean that, when True, causes the next() method to
         loop. If False, the terminal case raises StopIteration.
         
-        frames is the number of ticks to return the same image before
+        frames is the number of seconds to return the same image before
         the iterator advances to the next image.
         """
         self.filename = filename
@@ -38,10 +39,11 @@ class SpriteStripAnim(object):
             else:
                 self.i = 0
         image = self.images[self.i]
-        self.f -= 1
-        if self.f == 0:
-            self.i += 1
-            self.f = self.frames
+        #self.f -= 1
+        #if self.f == 0:
+        #    self.i += 1
+        #    self.f = self.frames
+        sleep(self.frames)
         return image
     def __add__(self, ss):
         self.images.extend(ss.images)

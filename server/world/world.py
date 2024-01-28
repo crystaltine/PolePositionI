@@ -1,6 +1,5 @@
 from typing import Dict
 from world.entity import Entity
-from client_room import Client
 import math
 
 def are_colliding(e1: Entity, e2: Entity) -> bool:
@@ -55,7 +54,7 @@ class World:
         self, 
         name: str,
         color: str,
-        client: Client,
+        client,
         pos: tuple[float, float], 
         vel: tuple[float, float] = (0, 0), 
         acc: tuple[float, float] = (0, 0),

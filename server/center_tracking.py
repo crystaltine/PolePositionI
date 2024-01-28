@@ -1,3 +1,6 @@
+import math
+from typing import List
+from key_press import Player
 #keep track of the center of the track. The only change is in the y position of the center since the entire time the track is moving forward/increasing its x value
 #since the track doesn't go in a circle i can just get the center of the track's y position based on the x position of the car.
 #this y position is either going to be incremented or decremented based on the turn. if turning left it increases and if turning right it decreases, straight line is constant
@@ -21,6 +24,7 @@ class Center:
         self.center_x = self.all_center_coordinates(player_x)[0]
         self.center_y = self.all_center_coordinates(player_x)[1]
 
+
     #method that calculates the distance from the user to the center of the track
     def distances_to_center(self, player_x, player_y) -> list:
         #clear distances
@@ -40,9 +44,10 @@ class Center:
         for i in range(upper_x - lower_x + 1):
             cx = self.all_center_coordinates(lower_x + i)[0]
             cy = self.all_center_coordinates(lower_x + i)[1]
-            dist = math.sqrt((player_x-cx)**2 + (player_y-cy)**2)
+            dist = distance(player_x, player_y, cx, cy)
             self.distances.add(dist)
         #after this loop distances should be populated with numerous distances with the car to the nearest centers of track
+
 
     #method that sees if the user is too far from the track and needs to be blown up
     def too_far(self, player_x, player_y) -> bool:
@@ -55,7 +60,24 @@ class Center:
                 return False
         #if entire loop has gone through and didn't hit the return that means all distances are too far away and True is returned
         return True
-        
-        
+    
 
-#lower = 10 upper = 20, range is 10 
+    #can be changed later but this method gets the distances between all players and then returns list that contains which players crashed and need to be reset 
+    #players right now is just a list of player objects
+    def collision(self, players: List[Player]) ->List:
+        #list that will contain usernames of which players crashed
+        crashed_players = []
+        for i in range (len(players)):
+            player_1 = players[i]
+            for j in range(i+1, len(players)):
+                player_2 = players[j]
+                dist = distance(player_1.x, player_1.y, player_2.x, player_2.y)
+                #arbitrary number that if they get too close will be a crash and adds the player to a crash 
+                #**IMPORTANT do not skip over players when checking crashes because if there is a 3+ player crash and I skip over players once i declare them as crashed, i won't detect some
+                if dist < 10:
+                    crashed_players += [player_1.username, player_2.username]
+        return crashed_players
+   
+def distance (x1, y1, x2, y2):
+    dist = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
+    return dist
