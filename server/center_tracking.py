@@ -24,6 +24,7 @@ class Center:
         self.center_x = self.all_center_coordinates(player_x)[0]
         self.center_y = self.all_center_coordinates(player_x)[1]
 
+
     #method that calculates the distance from the user to the center of the track
     def distances_to_center(self, player_x, player_y) -> list:
         #clear distances
@@ -47,6 +48,7 @@ class Center:
             self.distances.add(dist)
         #after this loop distances should be populated with numerous distances with the car to the nearest centers of track
 
+
     #method that sees if the user is too far from the track and needs to be blown up
     def too_far(self, player_x, player_y) -> bool:
         #loop through all distances
@@ -59,11 +61,19 @@ class Center:
         #if entire loop has gone through and didn't hit the return that means all distances are too far away and True is returned
         return True
     
+
     #can be changed later but this method gets the distances between all players and then returns list that contains which players crashed and need to be reset 
     #players right now is just a list of player objects
-    def collision(self, players: List[Player]):
+    def collision(self, players: List[Player]) ->List:
+        #list that will contain usernames of which players crashed
+        crashed_players = []
         for i in range (len(players)):
+            player_1 = players[i]
             for j in range(i+1, len(players)):
-
-
-#lower = 10 upper = 20, range is 10 
+                player_2 = players[j]
+                dist = math.sqrt((player_1.x - player_2.x)**2 + (player_1.y - player_2.y) ** 2)
+                #arbitrary number that if they get too close will be a crash and adds the player to a crash 
+                #**IMPORTANT do not skip over players when checking crashes because if there is a 3+ player crash and I skip over players once i declare them as crashed, i won't detect some
+                if dist < 10:
+                    crashed_players += [player_1.username, player_2.username]
+        return crashed_players
