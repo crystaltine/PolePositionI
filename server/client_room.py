@@ -134,7 +134,7 @@ class Room:
         # testing: put them at (100, 100), (100, 150), (100, 200), and so on.
         # also they should have hitbox radius 2.5
         for i, client in enumerate(self.clients.values()):
-            self.world.create_entity(client["username"], client["client_obj"], (100, 100 + (50 * i)), hitbox_radius=2.5)
+            self.world.create_entity(client["username"], client["color"], client["client_obj"], (100, 100 + (50 * i)), hitbox_radius=2.5)
 
     def start_game(self):
         """
