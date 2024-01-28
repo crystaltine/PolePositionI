@@ -44,7 +44,7 @@ class Center:
         for i in range(upper_x - lower_x + 1):
             cx = self.all_center_coordinates(lower_x + i)[0]
             cy = self.all_center_coordinates(lower_x + i)[1]
-            dist = math.sqrt((player_x-cx)**2 + (player_y-cy)**2)
+            dist = distance(player_x, player_y, cx, cy)
             self.distances.add(dist)
         #after this loop distances should be populated with numerous distances with the car to the nearest centers of track
 
@@ -71,9 +71,13 @@ class Center:
             player_1 = players[i]
             for j in range(i+1, len(players)):
                 player_2 = players[j]
-                dist = math.sqrt((player_1.x - player_2.x)**2 + (player_1.y - player_2.y) ** 2)
+                dist = distance(player_1.x, player_1.y, player_2.x, player_2.y)
                 #arbitrary number that if they get too close will be a crash and adds the player to a crash 
                 #**IMPORTANT do not skip over players when checking crashes because if there is a 3+ player crash and I skip over players once i declare them as crashed, i won't detect some
                 if dist < 10:
                     crashed_players += [player_1.username, player_2.username]
         return crashed_players
+   
+def distance (x1, y1, x2, y2):
+    dist = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
+    return dist
