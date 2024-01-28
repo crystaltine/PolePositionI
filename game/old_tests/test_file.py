@@ -11,8 +11,8 @@ pygame.init()
 SKY = (97, 120, 232)
 BLACK = (0,0,0)
 
-width = 1200
-height = 720
+width = 1200 #2.4
+height = 720 #1.6
 
 screen = pygame.display.set_mode([width,height])
 screen.fill(SKY)
@@ -31,11 +31,11 @@ turning_left = []
 turning_right = []
 for img in range(12):
     if img < 11:
-        road.append(SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\straight road', str(img) + ' 06-53-01.png'), (0, -2*height/5, width, 4*height/3), 12, -1, True, 0.041))
+        road.append(SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\straight road', str(img) + ' 06-53-01.png'), (0, -3*height/5, width, 4*height/3), 12, -1, True, 0.041))
         curved_left.append(SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\curved left', str(img) + ' 06-50-02.png'), (0, -height/5, width, 4*height/3), 12, -1, True, 0.041))
         curved_right.append(SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\curved right', str(img) + ' 06-50-35.png'), (0, -height/5, width, 4*height/3), 12, -1, True, 0.041))
     else:
-        road.append(SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\straight road', str(img) + ' 06-53-01.png'), (0, -2*height/5, width, 4*height/3), 12, -1, False, 0.041))
+        road.append(SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\straight road', str(img) + ' 06-53-01.png'), (0, -3*height/5, width, 4*height/3), 12, -1, False, 0.041))
         curved_left.append(SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\curved left', str(img) + ' 06-50-02.png'), (0, -height/5, width, 4*height/3), 12, -1, False, 0.041))
         curved_right.append(SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\curved right', str(img) + ' 06-50-35.png'), (0, -height/5, width, 4*height/3), 12, -1, True, 0.041))
 
@@ -52,11 +52,16 @@ for img in range(8):
         turning_right.append(SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\turning right', str(img) + ' 06-51-52.png'), (0, -height/5, width, 4*height/3), 12, -1, True, 0.041))
 
 roadpaths = [
+    road, 
+    turning_right,
+    curved_right, 
+    right_centering,
     road
 ]
 current_loop = 0
 road[current_loop].iter()
 road_state = road[current_loop].next()
+road_state = pygame.transform.scale_by(road_state, (2.4, 1.82))
 
 menu_text = font.render('Start playing asp_3', True, BLACK)
 menu_rect = menu_text.get_rect(center=(640,260))    #does rect take center as parameter     
@@ -83,6 +88,7 @@ while True:
     if current_loop >= len(road):
         current_loop = 0
     road[current_loop].next()
-    screen.blit(road_state, (0, -height/5))        
+    screen.blit(road_state, (0, -6*height/5))        
     pygame.display.flip()
     road_state = road[current_loop].next()
+    road_state = pygame.transform.scale_by(road_state, (2.4, 1.82)) #2900, 653

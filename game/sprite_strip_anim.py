@@ -1,6 +1,7 @@
 #code borrowed from https://www.pygame.org/wiki/Spritesheet?parent=CookBook 
 import spritesheet
 from time import sleep
+import pygame
 
 class SpriteStripAnim(object):
     """sprite strip animator
