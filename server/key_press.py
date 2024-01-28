@@ -38,7 +38,7 @@ class Player:
                 player1.set_angle()
                 player1.up = False
             else:
-                player1.set_angle(True)
+                player1.set_angle()
                 player1.up = True
         else:
             #if the key is up and the key pressed was either forwards or backwards, default the acceleration to be something slightly negative to simulate air resistance 
