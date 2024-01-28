@@ -110,8 +110,8 @@ class Room:
         for client in clients:
             
             # Handle repeat usernames (add a number suffix)
-            num_times_username_taken = self.seen_usernames.count(client.player.username)
-            new_client_username = client.player.username + (f"-{num_times_username_taken+1}" if num_times_username_taken > 0 else "")
+            num_times_username_taken = self.seen_usernames.count(client.username)
+            new_client_username = client.username + (f"-{num_times_username_taken+1}" if num_times_username_taken > 0 else "")
             self.seen_usernames.append(new_client_username)
             
             self.clients[client.id] = {
@@ -174,8 +174,8 @@ class Room:
         Joins a client to the room. Returns their username and color in a dictionary.
         """
         
-        num_times_username_taken = self.seen_usernames.count(client.player.username)
-        new_client_username = client.player.username + (f"-{num_times_username_taken+1}" if num_times_username_taken > 0 else "")
+        num_times_username_taken = self.seen_usernames.count(client.username)
+        new_client_username = client.username + (f"-{num_times_username_taken+1}" if num_times_username_taken > 0 else "")
         
         self.clients[client.id] = {
             "client_obj": client,
