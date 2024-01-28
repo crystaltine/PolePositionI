@@ -17,7 +17,9 @@ class GameManager:
     waiting_room_game_started = False
     waiting_room_leave_game = False
     
+    # both of these will be set when we join/create a room
     room_id: Union[None, str] = None
+    our_username: str = None
     
     # Initiate connections with server
     socket_man = SocketManager()

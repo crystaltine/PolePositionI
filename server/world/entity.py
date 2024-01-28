@@ -6,7 +6,7 @@ from client_room import Client
 
 class Entity:
     """
-    Currently a temp, proof-of-concept object for use in the `World` class. 
+    Represents a car. (for now, can generalize later).
     Has pos, vel, acc, angle, and a circular hitbox with a certain radius.
     
     Implements a few testing functions that randomize movement
@@ -21,6 +21,7 @@ class Entity:
     def __init__(
         self,
         name: str,
+        color: str,
         client: Client,
         pos: Tuple[float, float],
         vel: Tuple[float, float] = (0, 0),
@@ -30,6 +31,7 @@ class Entity:
         ) -> None:
         
         self.name = name
+        self.color = color
         self.client = client
         self.pos = list(pos)
         self.vel = list(vel)
@@ -90,18 +92,28 @@ class Entity:
         self.pos[0] + self.vel[0]
         self.pos[1] + self.vel[1]
         
-    def get_physics_data(self) -> list:
+    def get_physics_data(self) -> dict:
         """
-        Return all physical data in a 7-element list
-        Format: `[pos_x, pos_y, vel_x, vel_y, acc_x, acc_y, angle]`
+        Return all physical data in a dict of the following format:
+        
+        ```python
+        {
+            "pos": [px, py],
+            "vel": [vx, vy],
+            "acc": [ax, ay],
+            "angle": angle,
+            "hitbox_radius": hitbox_radius,
+        }
+        ```
         """
         
-        return [
-            self.pos[0], self.pos[1],
-            self.vel[0], self.vel[1],
-            self.acc[0], self.acc[1],
-            self.angle
-        ]
+        return {
+            "pos": self.pos,
+            "vel": self.vel,
+            "acc": self.acc,
+            "angle": self.angle,
+            "hitbox_radius": self.hitbox_radius,
+        }
         
     def on_entity_collide(self, other: 'Entity') -> None:
         """

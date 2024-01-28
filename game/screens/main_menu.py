@@ -155,6 +155,7 @@ def main_menu() -> bool:
                         else:
                             print("Room joined successfully! Code:", res.get('code'))
                             GameManager.room_id = res.get('code')
+                            GameManager.our_username = res.get('username')
                             
                             return waiting_room(res.get('map_data'), False, res.get('players'))
                     

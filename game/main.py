@@ -21,7 +21,6 @@ def start_program():
     countdown()
     start_live_game()
     
-    
     try:
         # Gracefully close the socket connection to prevent ghost client on server side
         GameManager.socket_man.socket.close()

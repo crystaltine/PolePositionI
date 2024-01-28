@@ -94,18 +94,17 @@ class SocketManager:
                 if self._listen_stopped: break
 
                 raw_data = self.socket.recv(1024)
+                payload = loads(raw_data[1:].decode('utf-8'))
                 
                 # prefixing: first byte will be a '0' for events, '1' for packet data
                 if raw_data[0] == 1: 
-                    self.recv_packet(raw_data[1:])
+                    self.on_packet(payload)
                     continue
 
-                # server sends in data as a JSON string
-                payload = loads(raw_data[1:].decode('utf-8'))
-                print(f"\x1b[35mEVENT RECV: \x1b[33m{payload}\x1b[0m")
-                
                 event_name = payload.get('type')
                 data = payload.get('data')
+                
+                print(f"\x1b[35mEVENT RECV: \x1b[33m{event_name}\x1b[0m")
                 
                 _callable = self.registered_events.get(event_name)
                 if _callable: _callable(data)
@@ -119,15 +118,35 @@ class SocketManager:
         """
         self._listen_stopped = True
     
-    def recv_packet(self, data: bytes) -> None:
+    def on_packet(self, world_data: list) -> None:
         """
         @TODO 
         
         Handles a received physics packet from the server.
         
-        The data already has prefix byte removed. (so we decode into physics data and update our game)
+        The data should tell us the physics of every entity in the world. It has the following schema:
+        ```typescript
+        [
+          {
+            username: string,
+            color: string,
+            physics: {
+              pos: [number, number],
+              vel: [number, number],
+              acc: [number, number],
+              angle: number,
+              hitbox_radius: number
+            }
+          },
+          ...
+        ]
+        ```
         """
-        print(f"\x1b[35mPACKET RECV: \x1b[33m{data}\x1b[0m")
+        
+        # update our renderer with all the world data. (TODO)
+        # we also need to sift through and find out which username matches GameManager.our_username (to find our data)
+        
+        print(f"\x1b[35mPACKET RECV: \x1b[33m{len(world_data)}\x1b[0m playerdata packets included")
                 
     def on(self, event_name, callback: Callable[[Dict], Any]) -> None:
         """
@@ -178,17 +197,7 @@ class SocketManager:
         """
         keydata = keyid | (keydown << 2)
         print(f"Creating&sending packet with keyid={keyid}, keydown={keydown}")
-        self.socket.send(keydata.to_bytes(4, 'big'))
-        
-    def send_event(self, event_name: str) -> None:
-        """
-        Sends an event to the server.
-        
-        ### Event names:
-        - `start_game`
-        - `leave_room`
-        """
-        self.socket.send(event_name.encode('utf-8'))
+        self.socket.send(keydata.to_bytes(1, 'big'))
     
 class HTTPManager:
     """

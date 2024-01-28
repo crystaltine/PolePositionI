@@ -4,6 +4,7 @@ from socket import socket
 from time import time, sleep
 from sched import scheduler
 import threading
+import json
 
 from socket_wrapper import _send
 from key_decoder import decode_packet
@@ -46,7 +47,8 @@ class Client:
         def recv_loop():
             while True:
                 
-                data = self.sock.recv(4)
+                # the client only sends keypress encodings, which are only 0-7 (representable in 1 byte)
+                data = self.sock.recv(1)
                 if data is None: break
                 
                 keydata = int.from_bytes(data, 'big')
@@ -167,7 +169,10 @@ class Room:
         # we dont start the loop on start-init otherwise clients can send keypresses before the game starts
         s.enterabs(start_time, 1, begin)
 
-    def add_client(self, client: Client):
+    def add_client(self, client: Client) -> dict:
+        """
+        Joins a client to the room. Returns their username and color in a dictionary.
+        """
         
         num_times_username_taken = self.seen_usernames.count(client.player.username)
         new_client_username = client.player.username + (f"-{num_times_username_taken+1}" if num_times_username_taken > 0 else "")
@@ -188,6 +193,8 @@ class Room:
                 "username": new_client_username,
                 "color": self.clients[client.id]['color']
             }, "player-join")
+            
+        return { "username": new_client_username, "color": self.clients[client.id]['color'] }
         
     def remove_client(self, client: Client):
         
@@ -246,16 +253,20 @@ class Room:
         """
         If game not started yet, do nothing.
         
-        Otherwise, for each socket, send the client their current, updated physics data.
+        Otherwise, for each socket, send the client the physics data of every entity in the world.
         
         It is assumed that this function will be called inside a tickloop, 
         currently intended for use only in `./mainloop.py` and running once per second.
         
         Returns whether or not data was sent.
         """
+        
+        current_world_data = self.world.get_all_data()
+        
         if not self.started: return False
         for client in self.clients.values():
-            client["client_obj"].send_data(client["client_obj"].entity.get_physics_data())
+            # pre-encode data
+            client["client_obj"].send_data(json.dumps(current_world_data).encode('utf-8'))
 
     def broadcast_event(self, payload: dict, event_name: str):
         """

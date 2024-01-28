@@ -93,7 +93,7 @@ def waiting_room(details: dict, is_leader = False, connected_players: list = [])
     
     def _start(_): 
         print(f">>> Game started event received!!!!")
-        GameManager.waiting_room_game_started = True # TODO - vscode shows these as not accessed. Could it be because they are in a nested function?
+        GameManager.waiting_room_game_started = True
     def _leave(_):
         print(f">>> leave event received!!!!")
         GameManager.waiting_room_leave_game = True

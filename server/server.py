@@ -72,7 +72,8 @@ def joinroom(client_id: str, room_id: str):
         
         else:
             id_to_client[client_id].room_id = room_id
-            id_to_room[room_id].add_client(id_to_client[client_id])
+            
+            this_player_info = id_to_room[room_id].add_client(id_to_client[client_id])
             
             player_details = [] 
             # send a list of {username: str, color: str, is_host: bool} to the client for lobby display
@@ -88,7 +89,9 @@ def joinroom(client_id: str, room_id: str):
                 "success": True, 
                 "map_data": id_to_room[room_id].map.map_data, 
                 "players": player_details,
-                "code": room_id
+                "code": room_id,
+                "userame": this_player_info["username"],
+                "color": this_player_info["color"],
             }
 
     else:
