@@ -99,7 +99,7 @@ def waiting_room(details: dict, is_leader = False, connected_players: list = [])
         GameManager.waiting_room_leave_game = True
         
     # these actually run on a different thread, so this might work??
-    GameManager.socket_man.on('game-start', _start)
+    GameManager.socket_man.on('game-init', _start)
     GameManager.socket_man.on('leave', _leave) # kicked, manually left, disbanded, etc.
     
     while True:

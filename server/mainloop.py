@@ -6,7 +6,7 @@ from typing import Dict
 
 from CONSTANTS import HOST, PORT, TICK_SPEED, TICKS_PER_BROADCAST
 
-def broadcast_mainloop(sock: socket, rooms: Dict[int, Room], id_to_client: Dict[str, Client]) -> None:
+def broadcast_mainloop(id_to_room: Dict[str, Room], id_to_client: Dict[str, Client]) -> None:
     """
     Sends the specified packet to all specified addresses.
     Likely usage will be to send a packet to both (or multiple) clients connected to a room
@@ -24,7 +24,7 @@ def broadcast_mainloop(sock: socket, rooms: Dict[int, Room], id_to_client: Dict[
     while True:
         sleep(1 / TICK_SPEED)
 
-        for room in rooms.values():
+        for room in id_to_room.values():
             room.update_if_started()
 
         counter += 1    
@@ -32,7 +32,7 @@ def broadcast_mainloop(sock: socket, rooms: Dict[int, Room], id_to_client: Dict[
             counter = 0
             
             # FOR EACH ROOM, DO STUFF!!!
-            for room in rooms.values():
+            for room in id_to_room.values():
                 
                 num_connected = room.num_connected()
                 if num_connected == 0:

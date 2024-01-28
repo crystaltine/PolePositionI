@@ -80,7 +80,8 @@ class SocketManager:
         Since this runs on a different thread, it will not block the main thread.
         
         The main purpose of this is to listen for events such as:
-        - game-start (when we should proceed to live game screen)
+        - game-init (when we should proceed to live game screen/begin countdown)
+        - game-start (when we actually start moving, which should be a bit delayed due to countdown/loading times)
         - crash (our car crashed, start respawn screen)
         - player-left (when player leaves lobby, and we have to rerender it)
         """
