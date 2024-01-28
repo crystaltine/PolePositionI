@@ -20,6 +20,7 @@ def live_game():
     """
     
     while True:
+        GameRenderer.tick_world()
         GameRenderer.render_frame()
         
         for event in pygame.event.get():
