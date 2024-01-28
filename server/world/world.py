@@ -47,7 +47,7 @@ class World:
         complete information about the track and obstacles.
         """
         self.size = size
-        self.entities: Dict[str, Entity] = []
+        self.entities: Dict[str, Entity] = {}
         """ a map from client_ids to entity objects """
         
     def create_entity(
