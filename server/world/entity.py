@@ -2,7 +2,6 @@ import random
 from typing import Tuple
 import math
 
-from client_room import Client
 
 class Entity:
     """
@@ -21,7 +20,7 @@ class Entity:
     def __init__(
         self,
         name: str,
-        client: Client,
+        client,
         pos: Tuple[float, float],
         vel: Tuple[float, float] = (0, 0),
         acc: Tuple[float, float] = (0, 0),

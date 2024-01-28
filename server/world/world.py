@@ -1,6 +1,5 @@
 from typing import List
 from world.entity import Entity
-from client_room import Client
 import math
 
 def are_colliding(e1: Entity, e2: Entity) -> bool:
@@ -53,7 +52,7 @@ class World:
     def create_entity(
         self, 
         name: str,
-        client: Client,
+        client,
         pos: tuple[float, float], 
         vel: tuple[float, float] = (0, 0), 
         acc: tuple[float, float] = (0, 0),

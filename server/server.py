@@ -6,7 +6,7 @@ from string import ascii_uppercase, digits
 from uuid import uuid4
 
 from socket_wrapper import _send
-from client_room import Client, Player, Room
+import client_room
 from CONSTANTS import HOST, PORT
 import flask
 from mainloop import broadcast_mainloop
@@ -17,13 +17,13 @@ app = flask.Flask(__name__)
 #######################################################################
 
 # Room system setup
-id_to_client: typing.Dict[str, Client] = {} # maps id to Client objs
+id_to_client: typing.Dict[str, client_room.Client] = {} # maps id to Client objs
 """
 Stores map from client id to Client object (containing socket, host, etc.) for all currently connected clients
 Schema: `{int client_id: client.Client client}`
 """
 
-id_to_room: typing.Dict[str, Room] = {}
+id_to_room: typing.Dict[str, client_room.Room] = {}
 """
 Stores all currently open room IDs 
 Schema: `{str room_id: client.Room room}`
@@ -126,7 +126,7 @@ def createroom(client_id: str):
         return {"success": False, "message": "Somehow, no rooms are available!"}
 
     # Required to have already completed initial handshake with socket
-    client: typing.Union[Client, None] = id_to_client.get(client_id)
+    client: typing.Union[client_room.Client, None] = id_to_client.get(client_id)
     if not client:
         return {"success": False, "message": "Client has not completed initial socket handshake (try restarting your game)."}
     
@@ -134,7 +134,7 @@ def createroom(client_id: str):
     client.room_id = id
 
     # Create room object
-    room = Room(client, [client], id)
+    room = client_room.Room(client, [client], id)
     id_to_room[id] = room    
     client.hosting = room # mark this client as the host of this room
 
@@ -186,7 +186,7 @@ def accept_socket():
         client_id = uuid4().hex
 
         # Create a Client object for the connection. Currently HAS NO USERNAME (see below)
-        cli = Client(conn, host=address[0], port=address[1], id=client_id)
+        cli = client_room.Client(conn, host=address[0], port=address[1], id=client_id)
         id_to_client[client_id] = cli
         
         # IMPORTANT - the client side's `socket_man.connect()` must handle this (send a username!!!)
