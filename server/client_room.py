@@ -145,7 +145,7 @@ class Room:
         # testing: put them at (100, 100), (100, 150), (100, 200), and so on.
         # also they should have hitbox radius 2.5
         for i, client in enumerate(self.clients.values()):
-            e = self.world.create_entity(client["username"], client["color"], client["client_obj"], (100, 100 + (50 * i)), hitbox_radius=2.5)
+            e = self.world.create_entity(client["username"], client["color"], client["client_obj"], (0 + (-20 * i), 0), hitbox_radius=2.5)
             client["client_obj"].entity = e
 
     def start_game(self):
@@ -212,7 +212,7 @@ class Room:
             }, "player-join")
             
         # add the new client to the world
-        e = self.world.create_entity(new_client_username, self.clients[client.id]['color'], client, (100, 100 + 50*len(self.clients)), hitbox_radius=2.5)
+        e = self.world.create_entity(new_client_username, self.clients[client.id]['color'], client, (0, -20*len(self.clients)), hitbox_radius=2.5)
         client.entity = e
             
         return { "username": new_client_username, "color": self.clients[client.id]['color'] }
