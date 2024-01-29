@@ -193,11 +193,11 @@ class GameManager:
         GameManager.countdown_button.update(GameManager.screen)
 
     @staticmethod 
-    def draw_car():
+    def draw_car(sideways_pos:int):
         """
         Draws the car in the bottom-ish center of the screen (centered x, 80% y)
         """
-        GameManager.screen.blit(c:=GameManager.car, (WIDTH/2 - c.get_width()/2, 4*HEIGHT/5 - c.get_height()/2))
+        GameManager.screen.blit(c:=GameManager.car, ((WIDTH/2 - c.get_width()/2) - sideways_pos * 4, 4*HEIGHT/5 - c.get_height()/2))
     
     @staticmethod 
     def quit_game():
@@ -272,7 +272,7 @@ class RenderingManager:
             pos = (WIDTH/2 + RenderingManager.angle_offset(other), RenderingManager.get_y_pos(other))
             RenderingManager.draw_entity(size, pos, other.color)
             
-        GameManager.draw_car() # draw our own car on top of everything else
+        GameManager.draw_car(GameManager.get_our_entity().pos[1]) # draw our own car on top of everything else
 
         pygame.display.update()
         
