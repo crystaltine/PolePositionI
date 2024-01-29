@@ -40,7 +40,7 @@ class SpriteStripAnim(object):
         self.i += 1
         if self.i >= len(self.images):
             if not self.loop:
-                raise StopIteration
+                return None
             else:
                 self.i = 0
         image = self.images[self.i]

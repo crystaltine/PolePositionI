@@ -16,11 +16,6 @@ class spritesheet(object):
         for file in os.listdir(foldername):
             file_path = os.path.join(foldername, file)
             self.frames.append(pygame.image.load(file_path).convert())
-        #try:
-        #    self.sheet = pygame.image.load(foldername).convert()
-        #except pygame.error:
-        #    print('Unable to load spritesheet image:' + foldername)
-        #    raise SystemExit
     # Load a specific image from a specific rectangle
     def image_at(self, rectangle, index, colorkey = None):
         "Loads image from x,y,x+offset,y+offset"
@@ -33,12 +28,10 @@ class spritesheet(object):
             image.set_colorkey(colorkey, pygame.RLEACCEL)
         return image
     # Load a whole bunch of images and return them as a list
-    def images_at(self, rects, colorkey = None):
+    def images_at(self, rect, colorkey = None):
         "Loads multiple images, supply a list of coordinates"
-        return [self.image_at(rects[i], i, colorkey) for i in range (len(rects))]
+        return [self.image_at(rect, i, colorkey) for i in range (len(self.frames))]
     # Load a whole strip of images
     def load_strip(self, rect, image_count, colorkey = None):
         "Loads a strip of images and returns them as a list"
-        tups = [(rect[0]+rect[2]*x, rect[1], rect[2], rect[3])
-                for x in range(image_count)]
-        return self.images_at(tups, colorkey)
+        return self.images_at(rect, colorkey)

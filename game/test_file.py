@@ -1,8 +1,6 @@
 import pygame
 import sys
-import random
 #from requests_handler import capture_keypress_loop
-import spritesheet
 from sprite_strip_anim import SpriteStripAnim
 import os
 import datetime
@@ -41,46 +39,13 @@ roadpaths = [
 ]
 roadpaths_index = 0
 roadpaths[roadpaths_index].iter()
-road_state = roadpaths[roadpaths_index].current()
-road_state = pygame.transform.scale_by(road_state, (2.4, 1.82))
-
-road_state = roadpaths[roadpaths_index].next()
-road_state = roadpaths[roadpaths_index].next()
-
-screen.blit(road_state, (0, -6*height/5))        
-pygame.display.flip()
-sleep(1)
-road_state = roadpaths[roadpaths_index].next()
-road_state = pygame.transform.scale_by(road_state, (2.4, 1.82))
-screen.blit(road_state, (0, -6*height/5))        
-pygame.display.flip()
-sleep(1)
-road_state = roadpaths[roadpaths_index].next()
-road_state = pygame.transform.scale_by(road_state, (2.4, 1.82))
-screen.blit(road_state, (0, -6*height/5))        
-pygame.display.flip()
-sleep(1)
-road_state = roadpaths[roadpaths_index].next()
-road_state = pygame.transform.scale_by(road_state, (2.4, 1.82))
-screen.blit(road_state, (0, -6*height/5))        
-pygame.display.flip()
-sleep(1)
-road_state = roadpaths[roadpaths_index].next()
-road_state = pygame.transform.scale_by(road_state, (2.4, 1.82))
-
-
+road_image = roadpaths[roadpaths_index].current()
+road_image = pygame.transform.scale_by(road_image, (2.4, 1.82))
 
 menu_text = font.render('Start playing asp_3', True, BLACK)
 menu_rect = menu_text.get_rect(center=(640,260))    #does rect take center as parameter     
 
-start_time = datetime.datetime.now()
-start = start_time.minute * 10 + start_time.second
-
-#def main_menu(): # start screen 
-#    while running: 
-#        mouse_pos = pygame.mouse.get_pos()
-#        screen.fill("white")
-
+road_state = 0
 
 #call object instances outside the loop
 while True:
@@ -91,18 +56,20 @@ while True:
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-            pygame.quit()
-            sys.exit()
-    screen.blit(road_state, (0, -6*height/5))        
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                pygame.quit()
+                sys.exit()
+            if event.key == pygame.K_RIGHT:
+                roadpaths_index += 1
+                if roadpaths_index >= len(roadpaths):
+                    roadpaths_index = 0
+    screen.blit(road_image, (0, -6*height/5))        
     pygame.display.flip()
-    road_state = roadpaths[roadpaths_index].next()
-    road_state = pygame.transform.scale_by(road_state, (2.4, 1.82)) #2900, 653
+    road_image = roadpaths[roadpaths_index].next()
+    if road_image is None:
+        roadpaths_index += 1
+        roadpaths[roadpaths_index].iter()
+        road_image = roadpaths[roadpaths_index].current()
+    road_image = pygame.transform.scale_by(road_image, (2.4, 1.82)) #2900, 653
     sleep(0.1)
-    current_time = datetime.datetime.now()
-    #current = current_time.minute * 100 + current_time.second
-    #if not(current - start < 8) and roadpaths_index < 1:
-    #    roadpaths_index += 1
-    #elif (not current - start < 9) and roadpaths_index < 2:
-    #    roadpaths_index +=1
-    
