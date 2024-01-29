@@ -24,7 +24,7 @@ def countdown():
         text = FONT_LARGE.render(f"{time_left if time_left>0 else 'Go!'}", True, (255, 255, 255))
         
         container_dims = (text.get_width() + 20, text.get_height() + 20)
-        countdown_container = pygame.surface.Surface(*container_dims, pygame.SRCALPHA)
+        countdown_container = pygame.surface.Surface(container_dims, pygame.SRCALPHA)
         countdown_container.fill((0, 0, 0, 128))
         
         text_x = (container_dims[0] - text.get_width()) / 2
