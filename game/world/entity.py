@@ -77,7 +77,11 @@ class Entity:
         total_vel = math.sqrt(self.vel[0] ** 2 + self.vel[1] ** 2)
 
         # update acceleration, required for calculations below
-        self.acc = math.sqrt(100*self.key_presses[1] - 100*self.key_presses[0] - total_vel)
+        #if statement used redundantly to see if only braking is pressed
+        if self.key_presses[1] and not self.key_presses[0]:
+            self.acc = -10
+        else:
+            self.acc = math.sqrt(100*self.key_presses[1] - 100*self.key_presses[0] - total_vel)
 
 
         # for now, when left/right are held, we can turn 50 degrees per second
@@ -99,7 +103,7 @@ class Entity:
 
         #add to total velocity with the acceleration and how long it was pressed for, maybe a change needed since the acceleration doesn't change 
         #until the next tick im pretty sure the conversion is based on just multiplying by the time for all but talk to michael
-        total_vel += self.acc * delta_time_s
+        total_vel = max(total_vel + self.acc * delta_time_s, 0)
 
         self.vel[0] = total_vel * math.cos(math.radians(self.angle))
         self.vel[1] = total_vel * math.sin(math.radians(self.angle))
