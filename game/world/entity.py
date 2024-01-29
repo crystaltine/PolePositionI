@@ -27,7 +27,7 @@ class Entity:
         #Tuples are for x and y values of 
         pos: Tuple[float, float],
         vel: Tuple[float, float] = (0, 0),
-        acc: Tuple[float, float] = (0, 0),
+        acc: float = 0,
         angle: float = 0,
         hitbox_radius: float = 0,
         keys: list[bool] = [False, False, False, False]
@@ -73,8 +73,11 @@ class Entity:
         # self.acc[0] = self.acc_mag * math.cos(math.radians(self.angle%360))
         # self.acc[1] = self.acc_mag * math.sin(math.radians(self.angle%360))
 
-        # update velocity, required for calculations below
-        vel_mag = 10*self.key_presses[1] - 10*self.key_presses[0]
+        #total velocity
+        total_vel = math.sqrt(self.vel[0] ** 2 + self.vel[1] ** 2)
+
+        # update acceleration, required for calculations below
+        self.acc = math.sqrt(100*self.key_presses[1] - 100*self.key_presses[0] - total_vel)
 
 
         # for now, when left/right are held, we can turn 50 degrees per second
@@ -82,20 +85,24 @@ class Entity:
 
         #Aidan change: making max turning 20 degrees a second and not allowing the user to turn if they are stopped
         #if statement to deal with corner case of not allowing user to turn while not moving, this is to stop users from going backwards
-        if vel_mag == 0:
+        if total_vel == 0:
             self.angle += 0
         else:
             #50 * True or False guarantees that turning has the correct behavior based on which keys are pressed down in any 
             #if none are pressed then it has an angle change of 0, if both then 0, only difference is when one is pressed and not the other
-            denominator = 0.1 * vel_mag + 2.22 
+            denominator = 0.1 * total_vel+ 2.22 
             #value that changes how much a person can turn based on speed 
             angular_accel = 10/denominator + .5
             self.angle += (angular_accel*self.key_presses[3] - angular_accel*self.key_presses[2]) * delta_time_s
         #set angle back down 
         self.angle %= 360
 
-        self.vel[0] = vel_mag * math.cos(math.radians(self.angle%360))
-        self.vel[1] = vel_mag * math.sin(math.radians(self.angle%360))
+        #add to total velocity with the acceleration and how long it was pressed for, maybe a change needed since the acceleration doesn't change 
+        #until the next tick im pretty sure the conversion is based on just multiplying by the time for all but talk to michael
+        total_vel += self.acc * delta_time_s
+
+        self.vel[0] = total_vel * math.cos(math.radians(self.angle))
+        self.vel[1] = total_vel * math.sin(math.radians(self.angle))
         
         
         # update position using velocity
