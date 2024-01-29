@@ -77,6 +77,8 @@ class Entity:
         #total velocity
         total_vel = math.sqrt(self.vel[0] ** 2 + self.vel[1] ** 2)
 
+        # update acceleration, required for calculations below
+        self.acc = math.sqrt(100*self.key_presses[1] - 100*self.key_presses[0] - total_vel)
 
         #Aidan change: making max turning 20 degrees a second and not allowing the user to turn if they are stopped
         #if statement to deal with corner case of not allowing user to turn while not moving, this is to stop users from going backwards
