@@ -9,18 +9,6 @@ def countdown():
     Renders the world, then begins a countdown overlaying it
     until the timestamp in `GameManager.start_timestamp` is reached.
     """
-    
-    time_left = int(GameManager.start_timestamp - time.time()) # display this on the screen
-    
-    # Countdown display setup
-    container_sidelen = FONT_SIZES['large'] * 2 # 0.5em padding on each side
-
-    countdown_container = pygame.surface.Surface((container_sidelen,container_sidelen), pygame.SRCALPHA)
-    countdown_container.fill((0, 0, 0, 128))
-    
-    text = FONT_LARGE.render(f"{time_left if time_left>0 else 'Go!'}", True, (255, 255, 255))    
-    text_x = (container_sidelen - text.get_width()) / 2
-    text_y = (container_sidelen - text.get_height()) / 2
 
     while True:
         
@@ -33,13 +21,18 @@ def countdown():
         RenderingManager.render_frame()
         
         # draw the countdown
-        countdown_container = pygame.surface.Surface((container_sidelen,container_sidelen), pygame.SRCALPHA)
-        countdown_container.fill((0, 0, 0, 128))
         text = FONT_LARGE.render(f"{time_left if time_left>0 else 'Go!'}", True, (255, 255, 255))
+        
+        container_dims = (text.get_width() + 20, text.get_height() + 20)
+        countdown_container = pygame.surface.Surface(*container_dims, pygame.SRCALPHA)
+        countdown_container.fill((0, 0, 0, 128))
+        
+        text_x = (container_dims[0] - text.get_width()) / 2
+        text_y = (container_dims[1] - text.get_height()) / 2
         countdown_container.blit(text, (text_x, text_y))
         
         # blit onto the screen
-        GameManager.screen.blit(countdown_container, (GameManager.screen.get_width()/2 - container_sidelen/2, GameManager.screen.get_height()/2 - container_sidelen/2))
+        GameManager.screen.blit(countdown_container, (GameManager.screen.get_width()/2 - container_dims[0]/2, GameManager.screen.get_height()/2 - container_dims[1]/2))
         
         for event in pygame.event.get():
             if event.type == pygame.QUIT:

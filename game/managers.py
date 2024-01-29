@@ -34,7 +34,10 @@ class GameManager:
     waiting_room_leave_game = False
     
     # used to determine when to break out of the live game loop
-    live_game_quit = False
+    live_game_proceed_code = 0
+    """ 0 is stay, 1 is game ended, 2 is leave game (back to main menu) """
+    leaderboard_data = None
+    """ Set once game-end event is received. """
     
     # these will be set when we join/create a room
     room_id: Union[None, str] = None
@@ -274,7 +277,7 @@ class RenderingManager:
             
         GameManager.draw_car() # draw our own car on top of everything else
 
-        pygame.display.update()
+        # pygame.display.update()
         
     def tick_world(self):
         """
@@ -491,33 +494,33 @@ class SocketManager:
         self._listen_stopped = False
         
         def listen_inner():
-            while True:
-                
-                if self._listen_stopped: break
+            try:
+                while True:
+                    
+                    if self._listen_stopped: break
 
-                raw_data = self.socket.recv(1024)
-                payload = json.loads(raw_data[1:].decode('utf-8'))
-                
-                # prefixing: first byte will be a '0' for events, '1' for packet data
-                if raw_data[0] == 1: 
-                    self.on_packet(payload)
-                    continue
+                    raw_data = self.socket.recv(1024)
+                    payload = json.loads(raw_data[1:].decode('utf-8'))
+                    
+                    # prefixing: first byte will be a '0' for events, '1' for packet data
+                    if raw_data[0] == 1: 
+                        self.on_packet(payload)
+                        continue
 
-                event_name = payload.get('type')
-                data = payload.get('data')
-                
-                _callable = self.registered_events.get(event_name)
-                if _callable: 
-                    print(f"\x1b[35mHandling Event \x1b[33m{event_name}\x1b[0m")
-                    _callable(data)
-                else:
-                    print(f"\x1b[2mIgnoring Unhandled event \x1b[0m\x1b[33m{event_name}\x1b[0m")
+                    event_name = payload.get('type')
+                    data = payload.get('data')
+                    
+                    _callable = self.registered_events.get(event_name)
+                    if not (_callable is None): 
+                        print(f"\x1b[35mHandling Event \x1b[33m{event_name}\x1b[0m")
+                        _callable(data)
+                    else:
+                        print(f"\x1b[2mIgnoring Unhandled event \x1b[0m\x1b[33m{event_name}\x1b[0m")
+            except (ConnectionAbortedError, ConnectionResetError) as e:
+                print(f"\x1b[31mConnection to server disrupted!\x1b[0m")
                         
-        try:
-            self.listen_thread = threading.Thread(target=listen_inner)
-            self.listen_thread.start()
-        except (ConnectionAbortedError, ConnectionResetError) as e:
-            print(f"\x1b[31mConnection to server disrupted!\x1b[0m")
+        self.listen_thread = threading.Thread(target=listen_inner)
+        self.listen_thread.start()
     
     def stop_listening(self) -> None:
         """
@@ -558,8 +561,10 @@ class SocketManager:
         
         If the event is already registered, this will overwrite the previous callback.
         
-        @param event_name: the name of the event to listen for
-        @param callback: the function to call when the event is received. The callback function should accept one parameter, which will be JSON-formatted data from server.
+        ### Warning: Event handlers run on the listening thread. Do not use blocking functions.
+        
+        @param `event_name`: the name of the event to listen for
+        @param `callback`: the function to call when the event is received. The callback function should accept one parameter, which will be JSON-formatted data from server.
         """
         
         self.registered_events[event_name] = callback        

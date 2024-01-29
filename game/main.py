@@ -3,6 +3,7 @@ from managers import GameManager, init_managers
 from screens.main_menu import main_menu
 from screens.countdown import countdown
 from screens.live_game import live_game
+from screens.game_end import game_end
 
 def start_program():
     """
@@ -20,9 +21,14 @@ def start_program():
         
     # if loop broken, that means we are ready to move on to the countdown screen.
     countdown()
-    live_game()
+    live_game_result = live_game()
     
-    GameManager.quit_game()
+    if live_game_result == 2: # this is a code to move to the end screen
+        game_end(GameManager.leaderboard_data)
+
+    GameManager.socket_man.stop_listening()
+    del GameManager.game_renderer.world
 
 if __name__ == "__main__":
-    start_program()
+    while True:
+        start_program()
