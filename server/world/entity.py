@@ -27,7 +27,7 @@ class Entity:
         client,
         pos: Tuple[float, float],
         vel: Tuple[float, float] = (0, 0),
-        acc: Tuple[float, float] = (0, 0),
+        acc: float = 0,
         angle: float = 0,
         hitbox_radius: float = 0,
         ) -> None:

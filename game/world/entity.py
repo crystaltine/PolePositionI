@@ -108,6 +108,8 @@ class Entity:
         # update position using velocity
         self.pos[0] += self.vel[0] * delta_time_s
         self.pos[1] += self.vel[1] * delta_time_s
+
+        #TODO add the drag mechanic from key_press
         
         self.last_update_timestamp = time_ns()
     
