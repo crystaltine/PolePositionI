@@ -110,4 +110,11 @@ class Player:
         return [self.x, self.y, self.x_velocity, self.y_velocity, self.x_acceleration, self.y_acceleration]
     
     
-        
+# Example values
+value1 = 10
+value2 = 15
+
+# Ensure the result doesn't go below 0
+result = max(20 + value2 * 2, 0)
+
+print(f"The result is: {result}")
