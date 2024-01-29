@@ -13,7 +13,7 @@ class SpriteStripAnim(object):
     __add__() method for joining strips which comes in handy when a
     strip wraps to the next row.
     """
-    def __init__(self, filename, rect, count, colorkey = None, loop=False, frames=0.041):
+    def __init__(self, foldername, rect, count, colorkey = None, loop=False, frames=0.041):
         """construct a SpriteStripAnim
         
         filename, rect, count, and colorkey are the same arguments used
@@ -25,8 +25,8 @@ class SpriteStripAnim(object):
         frames is the number of seconds to return the same image before
         the iterator advances to the next image.
         """
-        self.filename = filename
-        ss = spritesheet.spritesheet(filename)
+        self.foldername = foldername
+        ss = spritesheet.spritesheet(foldername)
         self.images = ss.load_strip(rect, count, colorkey)
         self.i = 0
         self.loop = loop
@@ -37,13 +37,17 @@ class SpriteStripAnim(object):
         self.f = self.frames
         return self
     def next(self):
+        self.i += 1
         if self.i >= len(self.images):
             if not self.loop:
-                raise StopIteration
+                return None
             else:
                 self.i = 0
         image = self.images[self.i]
         sleep(self.frames)
+        return image
+    def current(self):
+        image = self.images[self.i]
         return image
     def __add__(self, ss):
         self.images.extend(ss.images)
