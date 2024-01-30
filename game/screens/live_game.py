@@ -40,7 +40,7 @@ def live_game() -> bool:
             return GameManager.live_game_proceed_code == 2 # True if 2, False if 1
         
         GameManager.game_renderer.tick_world()
-        RenderingManager.render_frame()
+        RenderingManager.render_frame(True)
         
         for event in pygame.event.get():
             if event == pygame.QUIT:

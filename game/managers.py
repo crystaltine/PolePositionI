@@ -13,6 +13,9 @@ from elements.input import Input
 from world.world import World
 from map_utils import get_map
 
+from sprite_strip_anim import SpriteStripAnim
+import os
+
 # this prevents a circular import
 # I NEED TYPE HINTS!!!!!!!!!!!!!!!!!!!!!!
 # see - https://stackoverflow.com/questions/39740632/python-type-hinting-without-cyclic-imports
@@ -98,6 +101,11 @@ class GameManager:
         Could be empty if we aren't in a game
         """
         return [v for k,v in GameManager.game_renderer.world.entities.items() if k != GameManager.our_username]
+    
+        
+    @staticmethod
+    def draw_road(road_image) -> None:
+        GameManager.screen.blit(road_image, (0, -6*RenderingManager.height/5)) 
     
     @staticmethod
     def draw_static_background():
@@ -230,6 +238,44 @@ class RenderingManager:
     
     @TODO - we should probably destroy this object when the game ends (once we implement game end logic)
     """
+
+    width = 1200 #2.4
+    height = 720 #1.6
+
+    road_straight = SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\straight road'), (0, -3*height/5, width, 4*height/3), 12, -1, True, 0.041)
+    curved_left = SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\curved left'), (0, -3*height/5, width, 4*height/3), 12, -1, True, 0.041)
+    curved_right = SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\curved right'), (0, -3*height/5, width, 4*height/3), 12, -1, True, 0.041)
+    left_centering = SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\left centering'), (0, -3*height/5, width, 4*height/3), 8, -1, False, 0.08)
+    right_centering = SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\right centering'), (0, -3*height/5, width, 4*height/3), 8, -1, False, 0.125)
+    turning_left = SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\turning left'), (0, -3*height/5, width, 4*height/3), 8, -1, False, 0.041)
+    turning_right = SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\turning right'), (0, -3*height/5, width, 4*height/3), 8, -1, False, 0.125)
+
+    #all linked animations for the full track
+    roadpaths = [
+        road_straight, 
+        turning_left,
+        curved_left, 
+        left_centering,
+        road_straight, 
+        turning_right,
+        curved_right,
+        right_centering,
+        road_straight,
+        turning_left,
+        curved_left, 
+        left_centering,
+        road_straight,
+        turning_right,
+        curved_right,
+        right_centering,
+        road_straight,
+        turning_left,
+        curved_left, 
+        left_centering,
+        road_straight
+    ]
+    roadpaths_index = 0
+
     
     def __init__(self, init_entities: list = []) -> None:
         """
@@ -259,12 +305,30 @@ class RenderingManager:
             self.place_entity(entity)
 
     @staticmethod
-    def render_frame():
+    def render_frame(road_moving:bool):
         """
         Draws on the screen a single frame based on the current state of the internal physics engine.
         """
         
         GameManager.draw_dynamic_background(GameManager.get_our_entity().angle%360)
+
+        #add road
+        #RenderingManager.roadpaths[RenderingManager.roadpaths_index].iter()
+        if road_moving:
+            road_image = RenderingManager.roadpaths[RenderingManager.roadpaths_index].current()
+            road_image = pygame.transform.scale_by(road_image, (2.4, 1.82))      
+            GameManager.draw_road(road_image) 
+            #pygame.display.update()
+            road_image = RenderingManager.roadpaths[RenderingManager.roadpaths_index].next()
+            if road_image is None:
+                roadpaths_index += 1
+                RenderingManager.roadpaths[roadpaths_index].iter()
+                road_image = RenderingManager.roadpaths[RenderingManager.roadpaths_index].current()
+            road_image = pygame.transform.scale_by(road_image, (2.4, 1.82))
+        else:
+            road_image = RenderingManager.roadpaths[RenderingManager.roadpaths_index].current()
+            road_image = pygame.transform.scale_by(road_image, (2.4, 1.82))      
+            GameManager.draw_road(road_image) 
         
         # For each other entity, draw on screen
         

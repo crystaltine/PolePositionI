@@ -4,7 +4,6 @@ import sys
 from sprite_strip_anim import SpriteStripAnim
 import os
 import datetime
-from time import sleep
 
 pygame.init()
 
@@ -22,7 +21,7 @@ grass = pygame.image.load(os.path.join(os.path.dirname(__file__), 'assets','gras
 grass = pygame.transform.scale(grass, (int(width), int(2 * height/3)))
 mtns = pygame.image.load(os.path.join(os.path.dirname(__file__), 'assets','mtns.png')).convert_alpha()
 mtns = pygame.transform.scale(mtns, (width*2, height/5))
-road = SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\straight road'), (0, -3*height/5, width, 4*height/3), 12, -1, True, 0.041)
+road_straight = SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\straight road'), (0, -3*height/5, width, 4*height/3), 12, -1, True, 0.041)
 curved_left = SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\curved left'), (0, -3*height/5, width, 4*height/3), 12, -1, True, 0.041)
 curved_right = SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\curved right'), (0, -3*height/5, width, 4*height/3), 12, -1, True, 0.041)
 left_centering = SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\left centering'), (0, -3*height/5, width, 4*height/3), 8, -1, False, 0.08)
@@ -30,29 +29,29 @@ right_centering = SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'asset
 turning_left = SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\turning left'), (0, -3*height/5, width, 4*height/3), 8, -1, False, 0.041)
 turning_right = SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\turning right'), (0, -3*height/5, width, 4*height/3), 8, -1, False, 0.125)
 
-#all the animations for the full track
+#all linked animations for the full track
 roadpaths = [
-    road, 
+    road_straight, 
     turning_left,
     curved_left, 
     left_centering,
-    road, 
+    road_straight, 
     turning_right,
     curved_right,
     right_centering,
-    road,
+    road_straight,
     turning_left,
     curved_left, 
     left_centering,
-    road,
+    road_straight,
     turning_right,
     curved_right,
     right_centering,
-    road,
+    road_straight,
     turning_left,
     curved_left, 
     left_centering,
-    road
+    road_straight
 ]
 roadpaths_index = 0
 roadpaths[roadpaths_index].iter()
@@ -94,4 +93,3 @@ while True:
         roadpaths[roadpaths_index].iter()
         road_image = roadpaths[roadpaths_index].current()
     road_image = pygame.transform.scale_by(road_image, (2.4, 1.82))
-    sleep(0.1)
