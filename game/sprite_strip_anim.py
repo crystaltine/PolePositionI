@@ -38,9 +38,9 @@ class SpriteStripAnim(object):
     def next(self):
         self.i += 1
         if self.i >= len(self.images):
+            self.i = 0
             if not self.loop:
                 return None
-            self.i = 0
         image = self.images[self.i]
         sleep(self.frames)
         return image
