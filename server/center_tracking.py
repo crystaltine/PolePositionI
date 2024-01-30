@@ -77,6 +77,10 @@ class Center:
                 if dist < 10:
                     crashed_players += [player_1.username, player_2.username]
         return crashed_players
+    #method that will hardcode the center distances for the map and populate the list 
+    #will return a list that has the indexes as x values and elements as y values. 
+    def populate_center_distances(self):
+        pass
    
 def distance (x1, y1, x2, y2):
     dist = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
