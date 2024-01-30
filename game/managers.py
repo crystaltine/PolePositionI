@@ -126,6 +126,11 @@ class GameManager:
         """
         return [v for k,v in GameManager.game_renderer.world.entities.items() if k != GameManager.our_username]
     
+    @staticmethod
+    def reset() -> None:
+        GameManager.waiting_room_game_started = False
+        GameManager.waiting_room_leave_game = False
+        GameManager.live_game_proceed_code = 0
         
     @staticmethod
     def draw_road(road_image) -> None:

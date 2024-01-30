@@ -1,6 +1,4 @@
 import pygame
-import sys
-from time import time
 
 from managers import GameManager, RenderingManager
 from CONSTANTS import BUTTON_MEDIUM, FONT_TINY, FONT_MEDIUM, FONT_LARGE, FONT_SIZES

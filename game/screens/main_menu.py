@@ -10,7 +10,7 @@ from screens.game_end import game_end
 from managers import GameManager, HTTPManager
 from screens.waiting_room import waiting_room
 
-# TODO generally, these tkinter popups are ugly and maybe we could replace them with in-game popups?
+GameManager.reset()
 
 def onclick_multiplayer_button(callback: Callable[[bool], Any]) -> dict:
     """
