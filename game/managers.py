@@ -5,16 +5,15 @@ import socket
 import httpx
 import json
 import threading
-from typing import Union, Dict, Callable, Any, TYPE_CHECKING
+import os
+from time import time_ns
+from typing import Union, Dict, List, Callable, Any, TYPE_CHECKING
+from sprite_strip_anim import SpriteStripAnim
 
 from CONSTANTS import *
 from elements.button import Button
 from elements.input import Input
 from world.world import World
-from map_utils import get_map
-
-from sprite_strip_anim import SpriteStripAnim
-import os
 
 # this prevents a circular import
 # I NEED TYPE HINTS!!!!!!!!!!!!!!!!!!!!!!
@@ -46,14 +45,24 @@ class GameManager:
     room_id: Union[None, str] = None
     our_username: str = None
     
-    room_details: dict = {
-        "map_name": "Touch Grass",
-        "preview_file": "touch_grass.png",
-        "length": 3500,
-        "world_size": (800, 1000),
-        "wr_time": 47.23,
+    map_data: dict = None
+    """
+    Set after joining/creating a room. Format:
+    ```typescript
+    {
+      map_name: string,
+      map_file: string, // the file inside ./maps, on both the server and client
+      preview_file: string, // the file the client should load as a waiting room preview img
+      length: number,
+      width: number,
+      oob_leniency: number,
+      wr_time: number,
     } 
-    """ Set after joining/creating a room. Used to store game details. """
+    ```
+    """
+    
+    crash_end_timestamp = 0
+    """ Determines when our crash respawn timer ends. Set when we crash. """
     
     # when the unix timestamp is this, begin taking keyboard input and sending to server
     # this gets set when the host starts the game
@@ -63,6 +72,11 @@ class GameManager:
     socket_man: 'SocketManager' = None
     http_man: Union[None, 'HTTPManager'] = None
     """ Will be set externally """
+    
+    accumulated_angle: float = 0.0
+    """
+    Used to determine how to scroll mountains. Gets changed at a rate of `track_angle * ANGLE_ACCUMULATION_FACTOR` per second.
+    """
     
     # main assets
     screen = pygame.display.set_mode([WIDTH,HEIGHT])
@@ -76,6 +90,8 @@ class GameManager:
     logo_img = pygame.image.load('./game/assets/logo.png')
 
     car = pygame.image.load('./game/assets/atariPolePosition-carStraight.png')
+    
+    explosion = pygame.image.load('./game/assets/explosion.png') # 200w x 100h image
 
     # Buttons
     create_game_button = Button(pos=(340,400), display_text="CREATE GAME", base_color="#ffffff", hovering_color="#96faff", image=BUTTON_LARGE)
@@ -83,11 +99,9 @@ class GameManager:
     join_game_input = Input(x=340, y=480, w=240, h=60, text="")
     join_game_button = Button(pos=(600, 480), display_text="JOIN GAME", base_color="#ffffff", hovering_color="#96faff", image=BUTTON_MEDIUM)
 
-    livegametest_button = Button(pos=(340,560), display_text="LIVEGAMETEST", base_color="#ffffff", hovering_color="#96faff", image=BUTTON_MEDIUM)
-    quit_button = Button(pos=(600,560), display_text="QUIT", base_color="#ffffff", hovering_color="#96faff", image=BUTTON_MEDIUM)
-
-    countdown_button = Button(pos=(500,150), display_text="READY?", base_color="#ffffff", hovering_color="#96faff", image=BUTTON_MEDIUM)
-
+    livegametest_button = Button(pos=(340,560), display_text="Testing", base_color="#ffffff", hovering_color="#96faff", image=BUTTON_MEDIUM)
+    quit_button = Button(pos=(600,560), display_text="QUIT", base_color="#ffffff", hovering_color="#ff9696", image=BUTTON_MEDIUM)
+    
     # main menu extra text
     text_bottom_left = FONT_TINY.render(MAIN_MENU_BOTTOM_LEFT_TEXT, True, (0, 0, 0))
     text_bottom_right = FONT_TINY.render(MAIN_MENU_BOTTOM_RIGHT_TEXT, True, (0, 0, 0))
@@ -113,7 +127,7 @@ class GameManager:
         
     @staticmethod
     def draw_road(road_image) -> None:
-        GameManager.screen.blit(road_image, (0, -6*RenderingManager.height/5)) 
+        GameManager.screen.blit(road_image, (0, -6.9*RenderingManager.height/5)) 
     
     @staticmethod
     def draw_static_background():
@@ -125,9 +139,9 @@ class GameManager:
         GameManager.screen.blit(GameManager.mtns, (0, 0))
         
     @staticmethod
-    def draw_dynamic_background(angle: int):
+    def draw_dynamic_background():
         """
-        Draws static grass on the screen, but shows different sections of the mountains based on the angle we are turned.
+        Draws static grass on the screen, but shows different sections of the mountains based on the angle we have accumulated from the track.
         
         ### How the scrolling works:
         
@@ -138,8 +152,8 @@ class GameManager:
         Thus, the x-coord of the left side should be `angle * 12`, and the right side should be `angle * 12 + WIDTH`
         """
         
-        angle = int(angle % 360)
-        crop_pos_on_img = angle*12, 0
+        angle = GameManager.accumulated_angle % 360
+        crop_pos_on_img = round(angle*12), 0
         size_of_crop = WIDTH, HEIGHT - GameManager.grass.get_height()
         
         GameManager.screen.blit(GameManager.mtns, (0, 0), (*crop_pos_on_img, *size_of_crop))
@@ -148,7 +162,7 @@ class GameManager:
             # we ran past the right side of the png.
             # so, in addition to the x=0 blit, we need to do an x= 12*(360-angle) blit
             # we can actually omit the size, since it can just overflow off the screen
-            GameManager.screen.blit(GameManager.mtns, (12*(360-angle), 0))        
+            GameManager.screen.blit(GameManager.mtns, (round(12*(360-angle)), 0))        
             
         # and then always draw the grass
         GameManager.screen.blit(GameManager.grass, (0, HEIGHT - GameManager.grass.get_height()))
@@ -206,17 +220,40 @@ class GameManager:
         
         GameManager.quit_button.changeColor(pygame.mouse.get_pos())
         GameManager.quit_button.update(GameManager.screen)
-    
-    @staticmethod 
-    def loop_countdown_button():
-        GameManager.countdown_button.update(GameManager.screen)
 
     @staticmethod 
-    def draw_car(sideways_pos:int):
+    def draw_car(pos_y: float, angle: float):
         """
-        Draws the car in the bottom-ish center of the screen (centered x, 80% y)
+        If currently in a crash, draws an explosion.
+        
+        Draws the car in the bottom-ish of the screen (80% of y)
+        
+        Moves it left and right depending on our y position.
+        
+        If our `pos[1] < 0`, render closer to the left side
+        If our `pos[1] > 0`, render closer to the right side
+        
+        The offset is linear, with our car being positioned at x=20 when pos[1] is the map's width/2 - oob_leniency,
+        and x=WIDTH-20 when pos[1] is the map's width/2 + oob_leniency.
         """
-        GameManager.screen.blit(c:=GameManager.car, ((WIDTH/2 - c.get_width()/2) - sideways_pos * 4, 4*HEIGHT/5 - c.get_height()/2))
+        
+        vertical_pos = 4*HEIGHT/5 - GameManager.car.get_height()/2
+        
+        # if timestamp < GameManager.crash_end_timestamp, draw explosion
+        if time_ns()/1e9 < GameManager.crash_end_timestamp:
+            # draw explosion at bottom-center of screen
+            horizontal_pos = WIDTH/2 - GameManager.explosion.get_width()/2
+            GameManager.screen.blit(c:=GameManager.car, (horizontal_pos, vertical_pos))
+            return
+        
+        # calculate the offset
+        total_x_range = WIDTH - 40 - GameManager.car.get_width() # 20px padding on each side, plus the width of the car
+        total_track_width = GameManager.map_data['width'] + 2*GameManager.map_data['oob_leniency']
+        proportion_of_total_range = (pos_y + total_track_width/2) / total_track_width
+        
+        horizontal_pos = 20 + proportion_of_total_range * total_x_range
+        
+        GameManager.screen.blit(GameManager.car, (horizontal_pos, vertical_pos))
     
     @staticmethod 
     def quit_game():
@@ -294,62 +331,58 @@ class RenderingManager:
         `init_entities` should be an (optional) list of entities, each of which is a dict of the format:
         ```typescript
         {
-            username: string,
-            color: string,
-            physics: {
-              pos: [pos_x: number, pos_y: number],
-              vel: [vel_x: number, vel_y: number],
-              acc: [acc_x: number, acc_y: number],
-              angle: number,
-              hitbox_radius: number
-            }
+          username: string,
+          color: string,
+          physics: {
+            pos: [pos_x: number, pos_y: number],
+            vel: number,
+            acc: number,
+            angle: number, // in degrees
+            hitbox_radius: number,
+            keys: [forward: bool, backward: bool, left: bool, right: bool]
+          }
         }
+        ```
         """
+        self.world = World(GameManager.map_data)
         
-        map_class = get_map(GameManager.room_details['map_name'])
-        self.world = World(map_class.world_size, map_class.track_geometry)
+        self.last_render_time = time_ns()
         
         for entity in init_entities:
             self.place_entity(entity)
 
-    @staticmethod
-    def render_frame(road_moving:bool):
+    def render_frame(self):
         """
         Draws on the screen a single frame based on the current state of the internal physics engine.
         """
         
-        GameManager.draw_dynamic_background(GameManager.get_our_entity().angle%360)
+        deltatime = (time_ns() - self.last_render_time) / 1e9
+        self.last_render_time = time_ns()
+        
+        us = GameManager.get_our_entity()
+        
+        GameManager.draw_dynamic_background()
+        
+        vanishing_point_loc = self.world.gamemap.vanishing_point_at(us.pos[0])
+        
+        # add to accumulated angle
+        GameManager.accumulated_angle += self.world.gamemap.angle_at(us.pos[0]) * ANGLE_ACCUMULATION_FACTOR * deltatime
 
-        #add road
-        #RenderingManager.roadpaths[RenderingManager.roadpaths_index].iter()
-        if road_moving:
-            road_image = RenderingManager.roadpaths[RenderingManager.roadpaths_index].current()
-            road_image = pygame.transform.scale_by(road_image, (2.4, 1.82))      
-            GameManager.draw_road(road_image) 
-            #pygame.display.update()
-            road_image = RenderingManager.roadpaths[RenderingManager.roadpaths_index].next()
-            if road_image is None:
-                roadpaths_index += 1
-                RenderingManager.roadpaths[roadpaths_index].iter()
-                road_image = RenderingManager.roadpaths[RenderingManager.roadpaths_index].current()
-            road_image = pygame.transform.scale_by(road_image, (2.4, 1.82))
-        else:
-            road_image = RenderingManager.roadpaths[RenderingManager.roadpaths_index].current()
-            road_image = pygame.transform.scale_by(road_image, (2.4, 1.82))      
-            GameManager.draw_road(road_image) 
+        # TODO - draw the road
+        # for now, we just draw four testing lines:
+        # one from bottom left of screen to x=200,y=520
+        # one from bottom right to x=1000,y=520
+        # one from x=200,y=520 to x=vanishing_point_loc,y=240
+        # one from x=1000,y=520 to x=vanishing_point_loc,y=240
         
-        # For each other entity, draw on screen
+        pygame.draw.line(GameManager.screen, (0,0,0), (0, HEIGHT), (200, 520), 5)
+        pygame.draw.line(GameManager.screen, (0,0,0), (WIDTH, HEIGHT), (1000, 520), 5)
+        pygame.draw.line(GameManager.screen, (0,0,0), (200, 520), (vanishing_point_loc, 240), 5)
+        pygame.draw.line(GameManager.screen, (0,0,0), (1000, 520), (vanishing_point_loc, 240), 5)
         
-        sorted_by_dist = sorted(GameManager.get_all_other_entities(), key=lambda e: e.pos[0]**2 + e.pos[1]**2, reverse=True)
-        
-        for other in sorted_by_dist:
-            size = RenderingManager.get_rendered_size(other)
-            pos = (WIDTH/2 + RenderingManager.angle_offset(other), RenderingManager.get_y_pos(other))
-            RenderingManager.draw_entity(size, pos, other.color)
+        # TODO - draw entities
             
-        GameManager.draw_car(GameManager.get_our_entity().pos[1]) # draw our own car on top of everything else
-
-        # pygame.display.update()
+        GameManager.draw_car(us.pos[1], us.angle)
         
     def tick_world(self):
         """
@@ -401,7 +434,7 @@ class RenderingManager:
         
         This depends on the broadcast frequency of the server. 1/s at the time of writing
         
-        `data` should have the same schema as the `World.get_all_data` function, which looks like this:
+        `data` should have the same schema as the `World.get_world_data` function, which looks like this:
         ```typescript
         [
           {
@@ -409,11 +442,11 @@ class RenderingManager:
             color: string,
             physics: {
               pos: [pos_x: number, pos_y: number],
-              vel: [vel_x: number, vel_y: number],
-              acc: [acc_x: number, acc_y: number],
-              angle: number,
+              vel: number,
+              acc: number,
+              angle: number, // in degrees
               hitbox_radius: number,
-              keys: [bool, bool, bool, bool]
+              keys: [forward: bool, backward: bool, left: bool, right: bool]
             }
           },
           ...
@@ -572,7 +605,12 @@ class SocketManager:
                     if self._listen_stopped: break
 
                     raw_data = self.socket.recv(1024)
-                    payload = json.loads(raw_data[1:].decode('utf-8'))
+                    
+                    try:
+                        payload = json.loads(raw_data[1:].decode('utf-8'))
+                    except json.decoder.JSONDecodeError as e:
+                        print(f"\x1b[31mError decoding JSON (skipping): {e}\x1b[0m")
+                        continue
                     
                     # prefixing: first byte will be a '0' for events, '1' for packet data
                     if raw_data[0] == 1: 
@@ -581,6 +619,8 @@ class SocketManager:
 
                     event_name = payload.get('type')
                     data = payload.get('data')
+                    
+                    # data could be a list or dict, depending on the event (since its JSON)
                     
                     _callable = self.registered_events.get(event_name)
                     if not (_callable is None): 
@@ -627,7 +667,7 @@ class SocketManager:
         print(f"\x1b[35mPACKET RECV: \x1b[33m{len(world_data)}\x1b[0m playerdata packets included")
         GameManager.game_renderer.set_physics(world_data)
                 
-    def on(self, event_name, callback: Callable[[Dict], Any]) -> None:
+    def on(self, event_name, callback: Callable[[Dict | List], Any]) -> None:
         """
         Registers a callback function to be called when the specified event is received from the server.
         
@@ -666,6 +706,10 @@ class SocketManager:
         - `110` - left keydown
         - `111` - right keydown
         """
+        
+        # if timestamp < GameManager.crash_end_timestamp, ignore all keys
+        if time_ns()/1e9 < GameManager.crash_end_timestamp:
+            return
         
         if event.type == pygame.KEYDOWN or event.type == pygame.KEYUP:
             keyid = id_map.get(event.key)
@@ -790,8 +834,7 @@ class HTTPManager:
             return res.json()
         except Exception as e:
             print(f"\x1b[31mError making API call: {e}\x1b[0m")
-            return {"success": False, "message": f"Couldn't connect to the server."}
-        
+            return {"success": False, "message": f"An error occured! Please try again. ({e})"}
 def init_managers():
     """
     Run on game start

@@ -4,7 +4,6 @@
 
 import spritesheet
 from time import sleep
-import pygame
 
 class SpriteStripAnim(object):
     """sprite strip animator
@@ -20,7 +19,7 @@ class SpriteStripAnim(object):
         by spritesheet.load_strip.
         
         loop is a boolean that, when True, causes the next() method to
-        loop. If False, the terminal case raises StopIteration.
+        loop. If False returns None.
         
         frames is the number of seconds to return the same image before
         the iterator advances to the next image.
@@ -53,5 +52,3 @@ class SpriteStripAnim(object):
         return self
     def set_frames(self, frames):
         self.frames = frames
-    
-    #issue is in fact with the colorkey

@@ -59,15 +59,15 @@ def draw_ending_sidebar(seconds_since_screen_mounted: float) -> None:
     side_panel.fill((0, 0, 0, 128))
     
     # Load the 240x240 map preview
-    map_preview = pygame.image.load(f'./game/assets/lobby/maps/{GameManager.room_details["preview_file"]}')
+    map_preview = pygame.image.load(f'./game/assets/lobby/maps/{GameManager.map_data["preview_file"]}')
     side_panel.blit(map_preview, (20, 20))
     
     map_label = FONT_TINY.render("Map:", True, (255, 255, 255))
-    map_text = FONT_MEDIUM.render(GameManager.room_details['map_name'], True, (255, 255, 255))
+    map_text = FONT_MEDIUM.render(GameManager.map_data['map_name'], True, (255, 255, 255))
     length_label = FONT_TINY.render("Track length:", True, (255, 255, 255))
-    length_text = FONT_MEDIUM.render(f"{GameManager.room_details['length']} m", True, (255, 255, 255))
+    length_text = FONT_MEDIUM.render(f"{GameManager.map_data['length']} m", True, (255, 255, 255))
     record_label = FONT_TINY.render("WR time:", True, (255, 255, 255))
-    record_text = FONT_MEDIUM.render(f"{GameManager.room_details['wr_time']} s", True, (255, 255, 255))
+    record_text = FONT_MEDIUM.render(f"{GameManager.map_data['wr_time']} s", True, (255, 255, 255))
     
     LABEL_GAP = 5
     DESC_GAP = 20
@@ -115,7 +115,7 @@ def game_end(leaderboard_data: list) -> None:
     leaderboard = Leaderboard(leaderboard_data)
 
     #uncomment once able to run in real game
-    #RenderingManager.render_frame()
+    #GameManager.game_renderer.render_frame()
     
     start_timestamp = time.time()
     
@@ -132,6 +132,12 @@ def game_end(leaderboard_data: list) -> None:
             if event.type == pygame.QUIT:
                 GameManager.quit_game()
                 
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if exit_button.is_hovering(pygame.mouse.get_pos()):
+                    # leave the room
+                    GameManager.http_man.leave_room()
+                    return
+                
         if elapsed > 3:
             leaderboard.draw_leaderboard(elapsed)
             if elapsed > 4:
@@ -140,9 +146,6 @@ def game_end(leaderboard_data: list) -> None:
                 exit_button.changeColor(pygame.mouse.get_pos())
                 exit_button.update(GameManager.screen)
         
-        if exit_button.is_hovering(pygame.mouse.get_pos()):
-            # leave the room
-            GameManager.http_man.leave_room()
-            return
+        
                 
         pygame.display.update()

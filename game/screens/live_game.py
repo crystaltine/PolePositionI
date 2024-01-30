@@ -1,8 +1,8 @@
 import pygame
-import sys
 from typing import Callable, Any
 
-from managers import GameManager, RenderingManager
+from managers import GameManager
+from CONSTANTS import *
 
 def live_game() -> bool:
     """
@@ -23,29 +23,42 @@ def live_game() -> bool:
     So after this function runs, just return to the main menu. (the game_end screen also returns when user clicks "back to main menu")
     """
     
+    us = GameManager.get_our_entity()
+    
     def _leave(_):
         GameManager.live_game_proceed_code = 1
         
     def _proceed(data):
-        GameManager.live_game_proceed_code = 2
+        print(f"LEADERBOARD DATA: {data}")
         GameManager.leaderboard_data = data
-    
+        GameManager.live_game_proceed_code = 2
+        
+    def _crash(crash_data):
+        # set our new physics
+        GameManager.crash_end_timestamp = crash_data['crash_end_timestamp']
+        us.set_physics(crash_data['new_physics'])
+        
     # create new event handler
     GameManager.socket_man.on('leave', _leave)
     GameManager.socket_man.on('game-end', _proceed)
+    GameManager.socket_man.on('crash', _crash)
     
     while True:
-        
+
         if GameManager.live_game_proceed_code != 0:
             return GameManager.live_game_proceed_code == 2 # True if 2, False if 1
         
         GameManager.game_renderer.tick_world()
-        RenderingManager.render_frame(True)
+        GameManager.game_renderer.render_frame()
         
         for event in pygame.event.get():
             if event == pygame.QUIT:
                 GameManager.quit_game()
                 
             GameManager.socket_man.handle_game_keypresses(event)
+            
+        velocity_mph = us.vel * 2.237
+        speedometer_text = FONT_LARGE.render(f"{velocity_mph:.1f} mph", True, (255, 255, 255))
+        GameManager.screen.blit(speedometer_text, (20, 20))
         
         pygame.display.update()

@@ -67,7 +67,6 @@ def joinroom(client_id: str, room_id: str):
         
         if len(id_to_room[room_id].clients) >= 8: 
             # "disconnected" clients still count towards the 8 max 
-            # ^^^ TODO, until we implement complete disconnected handling
             return {"success": False, "message": f"Room {room_id} is full! (8 max)"}
         
         else:
@@ -87,7 +86,7 @@ def joinroom(client_id: str, room_id: str):
             
             return {
                 "success": True, 
-                "map_data": id_to_room[room_id].map.map_data, 
+                "map_data": id_to_room[room_id].world.get_map_data(),
                 "players": player_details,
                 "code": room_id,
                 "username": this_player_info["username"],
@@ -117,6 +116,11 @@ def leaveroom(client_id: str):
         return {"success": True, "message": f"Successfully disbanded room {room_id}."}
     
     room.remove_client(id_to_client[client_id])
+    
+    # if nobody is left in the room and room.ended is True, delete the room
+    if room.num_connected() == 0 and room.ended:
+        del id_to_room[room_id]
+    
     client.room_id = None
     return {"success": True, "message": f"Successfully left room {room_id}."}
 
@@ -145,7 +149,7 @@ def createroom(client_id: str):
     return {
         "success": True, 
         "code": f"{id}",
-        "map_data": room.map.map_data,
+        "map_data": room.world.get_map_data(),
         "player_data": { # return the user themselves
             "username": room.clients[client_id]["username"],
             "color": room.clients[client_id]["color"],

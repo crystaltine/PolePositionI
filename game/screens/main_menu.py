@@ -38,6 +38,10 @@ def onclick_multiplayer_button(callback: Callable[[bool], Any]) -> dict:
     result of the callback, and 'username-canceled' if the user canceled the username popup (keep looping main_menu)
     """
     
+    # if socket_man is not listening, but exists, begin listening again
+    # this happens when a user's game ended, and they want to play again
+    
+    
     if GameManager.http_man is None:        
         # ask for a username using a popup
         Tk().wm_withdraw() #to hide the main window
@@ -118,7 +122,7 @@ def main_menu() -> bool:
                             GameManager.our_username = res.get('player_data').get('username')
 
                             # server will return ourselves (since it assigns us a random color)
-                            GameManager.room_details = res.get('map_data')
+                            GameManager.map_data = res.get('map_data')
                             return waiting_room(True, [res.get('player_data')])
                     
                     click_result = onclick_multiplayer_button(_cb)
@@ -157,7 +161,7 @@ def main_menu() -> bool:
                             GameManager.room_id = res.get('code')
                             GameManager.our_username = res.get('username')
                             
-                            GameManager.room_details = res.get('map_data')
+                            GameManager.map_data = res.get('map_data')
                             
                             return waiting_room(False, res.get('players'))
                     
