@@ -1,6 +1,7 @@
 from typing import Dict
 from world.entity import Entity
 import math
+import center_tracking
 
 def are_colliding(e1: Entity, e2: Entity) -> bool:
     """
@@ -118,7 +119,45 @@ class World:
                     # Tell both entities that they crashed
                     e1.on_entity_collide(e2)
                     e2.on_entity_collide(e1)
-                    
+
+    #TODO populate the center distances
+    #out of bounds tracking that uses populate_center_distances when it is working               
+    #integration of method from center_tracking.py
+    #loops through all of the players and checks to see if they have gone to far from track
+    #if they have then crash is sent to server
+    def out_of_bounds (self):
+        #create list of centers and list of cars
+        centers = center_tracking.populate_center_distances()
+        entity_list = list(self.entities.values())
+        for i in range (len(entity_list)):
+            #reset the distances, update which entity is being accounted for, and if car should be crashed
+            distances = []
+            entity = entity_list[i]
+            #assume car is crashed unless one of the distances is close enough
+            crashed = True
+            #TODO replace values in range calcs with actual track values and adjust range if needed
+
+            #getting range of x values around the entity to check distance to center 
+            #max and min ensures that it doesn't go out of bounds, 5 is a range that can be increased or decreased if too lenient
+            #0 and 1000 are placeholders for what would be the x beginning and end coords of track
+            lower_x = max(0, entity.pos[0] - 5)
+            upper_x = min(1000, entity.pos[0] + 5)
+            #get distances from center for all values in range
+            for i in range (upper_x - lower_x + 1):
+                center_x = lower_x + i
+                center_y = centers[center_x]
+                distances.append(center_tracking.distance(entity.pos[0], entity.pos[1], center_x, center_y))
+            for x in distances:
+                if x < 30:
+                    crashed = False
+                    break
+            if crashed:
+                entity.on_wall_collide()
+            
+
+        
+        
+            
     def get_all_data(self) -> list:
         """
         Returns a JSON-serializable list of dicts containing all data about the world.
