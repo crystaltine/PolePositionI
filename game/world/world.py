@@ -1,7 +1,6 @@
 from typing import Dict
 from world.entity import Entity
 import math
-import center_tracking
 
 def are_colliding(e1: Entity, e2: Entity) -> bool:
     """
@@ -127,7 +126,7 @@ class World:
     #if they have then crash is sent to server
     def out_of_bounds (self):
         #create list of centers and list of cars
-        centers = center_tracking.populate_center_distances()
+        centers = populate_center_distances()
         entity_list = list(self.entities.values())
         for i in range (len(entity_list)):
             #reset the distances, update which entity is being accounted for, and if car should be crashed
@@ -149,7 +148,7 @@ class World:
                 center_x = lower_x + i
                 center_y = centers[center_x]
                 #add to range of distances for the entity 
-                distances.append(center_tracking.distance(entity.pos[0], entity.pos[1], center_x, center_y))
+                distances.append(distance(entity.pos[0], entity.pos[1], center_x, center_y))
             #loop through all distances to see if any are close enough, values can be adjusted if too generous
             for x in distances:
                 #if just 1 value is close enough, can say the car hasn't crashed and break out of loop
@@ -198,3 +197,13 @@ class World:
             })
         
         return data
+
+#distance method copied over 
+def distance (x1, y1, x2, y2):
+    dist = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
+    return dist
+
+#hardcoded method that will define the center of track
+# returns a list with the indexes acting as x coords and the elements representing the respective y coords 
+def populate_center_distances(self) ->list[int]:
+        pass
