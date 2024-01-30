@@ -142,15 +142,21 @@ class World:
             #0 and 1000 are placeholders for what would be the x beginning and end coords of track
             lower_x = max(0, entity.pos[0] - 5)
             upper_x = min(1000, entity.pos[0] + 5)
+
             #get distances from center for all values in range
             for i in range (upper_x - lower_x + 1):
+                #center_x is the index to get the correspond y coord from centers
                 center_x = lower_x + i
                 center_y = centers[center_x]
+                #add to range of distances for the entity 
                 distances.append(center_tracking.distance(entity.pos[0], entity.pos[1], center_x, center_y))
+            #loop through all distances to see if any are close enough, values can be adjusted if too generous
             for x in distances:
+                #if just 1 value is close enough, can say the car hasn't crashed and break out of loop
                 if x < 30:
                     crashed = False
                     break
+            #send crash if car is too far from center
             if crashed:
                 entity.on_wall_collide()
             
