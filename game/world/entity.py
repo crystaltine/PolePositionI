@@ -38,7 +38,8 @@ class Entity:
         self.color = color
         self.pos = list(pos)
         self.vel = list(vel)
-        self.acc = list(acc)
+        #might cause issues, michael originally had acc as a list but i'm changing that here 
+        self.acc = acc
         self.angle = angle%360
         self.hitbox_radius = hitbox_radius
         
@@ -80,12 +81,16 @@ class Entity:
         #if statement used redundantly to see if only braking is pressed
         if self.key_presses[1] and not self.key_presses[0]:
             self.acc = -10
-        elif not self.key_presses[1] and self.key_presses[0]:
-            self.acc = 10
+        #conditional to simulate drag if neither backwards or forwards is pressed
+        elif not self.key_presses[1] and not self.key_presses[0]:
+            self.acc = -3
+        else:
+            #when multiplying by a boolean True acts as a 1 and False acts as 0
+            #these references to self.key_presses are to deal with forward and backwards being pressed 
+            #at the same time, or none. It ensures correct behavior without many lines added 
+            self.acc = math.sqrt(100*self.key_presses[0] - 100*self.key_presses[1] - total_vel)
 
 
-        # for now, when left/right are held, we can turn 50 degrees per second
-        # TODO ^ some sort of turning acceleration (since its a car)
 
         #Aidan change: making max turning 20 degrees a second and not allowing the user to turn if they are stopped
         #if statement to deal with corner case of not allowing user to turn while not moving, this is to stop users from going backwards
@@ -97,7 +102,9 @@ class Entity:
             denominator = 0.1 * total_vel+ 2.22 
             #value that changes how much a person can turn based on speed 
             angular_accel = 10/denominator + .5
-            self.angle += (angular_accel*self.key_presses[3] - angular_accel*self.key_presses[2]) * delta_time_s
+            #same logic above with the acceleration, self.key_presses[2] increases angle and self.key_presses[3] decreases
+            #done to handle multiple keys pressed at once 
+            self.angle += (angular_accel*self.key_presses[2] - angular_accel*self.key_presses[3]) * delta_time_s
         #set angle back down 
         self.angle %= 360
 
