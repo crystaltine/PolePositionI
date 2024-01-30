@@ -50,7 +50,7 @@ class Entity:
         # False = key is not held down, True = key is held down
         # Use this to update acceleration and angle
         # w = +acc, s = -acc, a = +angle, d = -angle
-        self.key_presses = keys
+        self.key_presses = keys.copy()
         """ `[forward, backward, left, right]` """
         
     def update(self):
