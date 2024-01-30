@@ -92,7 +92,12 @@ class GameManager:
     car = pygame.image.load('./game/assets/atariPolePosition-carStraight.png')
     
     explosion = pygame.image.load('./game/assets/explosion.png') # 200w x 100h image
-    
+
+    #animted explosion
+    boom = SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\collision explosino'), (0, 0, width, height), 5, -1, True, 0.25)
+    boom.iter()
+    boom_frame = boom.current()
+
     progressbar_img = pygame.image.load('./game/assets/progress_bar_frame.png')
 
     # Buttons
@@ -250,7 +255,8 @@ class GameManager:
         if time_ns()/1e9 < GameManager.crash_end_timestamp:
             # draw explosion at bottom-center of screen
             horizontal_pos = WIDTH/2 - GameManager.explosion.get_width()/2
-            GameManager.screen.blit(c:=GameManager.car, (horizontal_pos, vertical_pos))
+            GameManager.screen.blit(GameManager.boom_frame, (horizontal_pos, vertical_pos))
+            GameManager.boom.next()
             return
         
         # calculate the offset
