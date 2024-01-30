@@ -29,7 +29,28 @@ def game_end(leaderboard_data: list):
     for item in leaderboard_data:
         print(item)
 
+
+
+
+
+    #uncomment once able to run in real game
+    #RenderingManager.render_frame()
+    
+
     while True:
+        # draw the countdown
+        text = FONT_LARGE.render(f"GAME OVER", True, (255, 255, 255))
+        
+        container_dims = (text.get_width() + 20, text.get_height() + 20)
+        countdown_container = pygame.surface.Surface(container_dims, pygame.SRCALPHA)
+        countdown_container.fill((0, 0, 0, 128))
+        
+        text_x = (container_dims[0] - text.get_width()) / 2
+        text_y = (container_dims[1] - text.get_height()) / 2
+        countdown_container.blit(text, (text_x, text_y))
+        
+        # blit onto the screen
+        GameManager.screen.blit(countdown_container, (GameManager.screen.get_width()/2 - container_dims[0]/2, GameManager.screen.get_height()/2 - container_dims[1]/2))
             
         for event in pygame.event.get():
             if event.type == pygame.QUIT:

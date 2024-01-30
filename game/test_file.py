@@ -30,11 +30,28 @@ right_centering = SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'asset
 turning_left = SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\turning left'), (0, -3*height/5, width, 4*height/3), 8, -1, False, 0.041)
 turning_right = SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\turning right'), (0, -3*height/5, width, 4*height/3), 8, -1, False, 0.125)
 
+#all the animations for the full track
 roadpaths = [
     road, 
+    turning_left,
+    curved_left, 
+    left_centering,
+    road, 
     turning_right,
-    curved_right, 
+    curved_right,
     right_centering,
+    road,
+    turning_left,
+    curved_left, 
+    left_centering,
+    road,
+    turning_right,
+    curved_right,
+    right_centering,
+    road,
+    turning_left,
+    curved_left, 
+    left_centering,
     road
 ]
 roadpaths_index = 0
@@ -47,7 +64,10 @@ menu_rect = menu_text.get_rect(center=(640,260))    #does rect take center as pa
 
 road_state = 0
 
-#call object instances outside the loop
+start_time = datetime.datetime.now()
+game_start_time = start_time.minute + start_time.second*100
+
+#game state 
 while True:
     screen.blit(grass, (0, 2*height/5))
     screen.blit(mtns, (0, height/5))
@@ -67,9 +87,11 @@ while True:
     screen.blit(road_image, (0, -6*height/5))        
     pygame.display.flip()
     road_image = roadpaths[roadpaths_index].next()
+    current_time = datetime.datetime.now()
+    game_current_time = current_time.minute + current_time.second*100
     if road_image is None:
         roadpaths_index += 1
         roadpaths[roadpaths_index].iter()
         road_image = roadpaths[roadpaths_index].current()
-    road_image = pygame.transform.scale_by(road_image, (2.4, 1.82)) #2900, 653
+    road_image = pygame.transform.scale_by(road_image, (2.4, 1.82))
     sleep(0.1)

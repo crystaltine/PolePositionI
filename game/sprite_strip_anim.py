@@ -52,5 +52,7 @@ class SpriteStripAnim(object):
     def __add__(self, ss):
         self.images.extend(ss.images)
         return self
+    def set_frames(self, frames):
+        self.frames = frames
     
     #issue is in fact with the colorkey
