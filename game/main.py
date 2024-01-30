@@ -15,6 +15,7 @@ def start_program():
     
     # see docstring for main_menu and other comments in that file for an explanation
     # tldr - main menu will return False if we should stay on it, and True if we should proceed to the next screen
+    
     main_menu_result = main_menu()
     while not main_menu_result:
         main_menu_result = main_menu()

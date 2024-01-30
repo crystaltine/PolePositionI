@@ -80,8 +80,8 @@ class Entity:
         #if statement used redundantly to see if only braking is pressed
         if self.key_presses[1] and not self.key_presses[0]:
             self.acc = -10
-        else:
-            self.acc = math.sqrt(100*self.key_presses[1] - 100*self.key_presses[0] - total_vel)
+        elif not self.key_presses[1] and self.key_presses[0]:
+            self.acc = 10
 
 
         # for now, when left/right are held, we can turn 50 degrees per second
