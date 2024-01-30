@@ -92,6 +92,8 @@ class GameManager:
     car = pygame.image.load('./game/assets/atariPolePosition-carStraight.png')
     
     explosion = pygame.image.load('./game/assets/explosion.png') # 200w x 100h image
+    
+    progressbar_img = pygame.image.load('./game/assets/progress_bar_frame.png')
 
     # Buttons
     create_game_button = Button(pos=(340,400), display_text="CREATE GAME", base_color="#ffffff", hovering_color="#96faff", image=BUTTON_LARGE)

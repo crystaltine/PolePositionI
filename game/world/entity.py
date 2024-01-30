@@ -127,6 +127,15 @@ class Entity:
             "keys": self.key_presses
         }
     
+    def get_progress(self) -> float:
+        """
+        Returns the percentage of the track that the player has completed.
+        
+        All values returned are in the range [0, 1].
+        """
+        
+        return self.pos[0] / self.gamemap.map_data['length']
+    
     def set_physics(self, data: dict) -> None:
         """
         Set and override the current physics data. This should only be used with server data (or for testing)
