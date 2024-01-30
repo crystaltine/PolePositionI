@@ -114,7 +114,7 @@ class Player:
 value1 = 10
 value2 = 15
 
-# Ensure the result doesn't go below 0
-result = max(20 + value2 * 2, 0)
+# Ensure the result doesn't go below 0 or exceed 100
+result = max(0, min( 90 + 10 * -10, 100))
 
 print(f"The result is: {result}")
