@@ -105,7 +105,7 @@ class GameManager:
         
     @staticmethod
     def draw_road(road_image) -> None:
-        GameManager.screen.blit(road_image, (0, -6*RenderingManager.height/5)) 
+        GameManager.screen.blit(road_image, (0, -6.9*RenderingManager.height/5)) 
     
     @staticmethod
     def draw_static_background():
@@ -316,7 +316,7 @@ class RenderingManager:
         #RenderingManager.roadpaths[RenderingManager.roadpaths_index].iter()
         if road_moving:
             road_image = RenderingManager.roadpaths[RenderingManager.roadpaths_index].current()
-            road_image = pygame.transform.scale_by(road_image, (2.4, 1.82))      
+            road_image = pygame.transform.scale_by(road_image, (2.4, 1.945))      
             GameManager.draw_road(road_image) 
             #pygame.display.update()
             road_image = RenderingManager.roadpaths[RenderingManager.roadpaths_index].next()
@@ -324,10 +324,10 @@ class RenderingManager:
                 roadpaths_index += 1
                 RenderingManager.roadpaths[roadpaths_index].iter()
                 road_image = RenderingManager.roadpaths[RenderingManager.roadpaths_index].current()
-            road_image = pygame.transform.scale_by(road_image, (2.4, 1.82))
+            road_image = pygame.transform.scale_by(road_image, (2.4, 1.945))
         else:
             road_image = RenderingManager.roadpaths[RenderingManager.roadpaths_index].current()
-            road_image = pygame.transform.scale_by(road_image, (2.4, 1.82))      
+            road_image = pygame.transform.scale_by(road_image, (2.4, 1.945))      
             GameManager.draw_road(road_image) 
         
         # For each other entity, draw on screen

@@ -19,8 +19,8 @@ pygame.display.set_caption("Game")
 font = pygame.font.Font('freesansbold.ttf', 32)
 grass = pygame.image.load(os.path.join(os.path.dirname(__file__), 'assets','grass.png')).convert_alpha()
 grass = pygame.transform.scale(grass, (int(width), int(2 * height/3)))
-mtns = pygame.image.load(os.path.join(os.path.dirname(__file__), 'assets','mtns.png')).convert_alpha()
-mtns = pygame.transform.scale(mtns, (width*2, height/5))
+mtns = pygame.image.load(os.path.join(os.path.dirname(__file__), 'assets','mountains_img.png')).convert_alpha()
+#mtns = pygame.transform.scale(mtns, (width*2, height/5))
 road_straight = SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\straight road'), (0, -3*height/5, width, 4*height/3), 12, -1, True, 0.041)
 curved_left = SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\curved left'), (0, -3*height/5, width, 4*height/3), 12, -1, True, 0.041)
 curved_right = SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\curved right'), (0, -3*height/5, width, 4*height/3), 12, -1, True, 0.041)
@@ -56,7 +56,7 @@ roadpaths = [
 roadpaths_index = 0
 roadpaths[roadpaths_index].iter()
 road_image = roadpaths[roadpaths_index].current()
-road_image = pygame.transform.scale_by(road_image, (2.4, 1.82))
+road_image = pygame.transform.scale_by(road_image, (2.4, 1.945))
 
 menu_text = font.render('Start playing asp_3', True, BLACK)
 menu_rect = menu_text.get_rect(center=(640,260))    #does rect take center as parameter     
@@ -69,7 +69,7 @@ game_start_time = start_time.minute + start_time.second*100
 #game state 
 while True:
     screen.blit(grass, (0, 2*height/5))
-    screen.blit(mtns, (0, height/5))
+    screen.blit(mtns, (0, 0)) #height/5
     
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -83,7 +83,7 @@ while True:
                 roadpaths_index += 1
                 if roadpaths_index >= len(roadpaths):
                     roadpaths_index = 0
-    screen.blit(road_image, (0, -6*height/5))        
+    screen.blit(road_image, (0, -6.9*height/5))        
     pygame.display.flip()
     road_image = roadpaths[roadpaths_index].next()
     current_time = datetime.datetime.now()
@@ -92,4 +92,4 @@ while True:
         roadpaths_index += 1
         roadpaths[roadpaths_index].iter()
         road_image = roadpaths[roadpaths_index].current()
-    road_image = pygame.transform.scale_by(road_image, (2.4, 1.82))
+    road_image = pygame.transform.scale_by(road_image, (2.4, 1.945))
