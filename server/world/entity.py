@@ -82,14 +82,13 @@ class Entity:
         #if statement used redundantly to see if only braking is pressed
         if self.key_presses[1] and not self.key_presses[0]:
             self.acc = -10
-        #conditional to simulate drag if neither backwards or forwards is pressed
-        elif not self.key_presses[1] and not self.key_presses[0]:
-            self.acc = -3
         else:
             #when multiplying by a boolean True acts as a 1 and False acts as 0
             #these references to self.key_presses are to deal with forward and backwards being pressed 
-            #at the same time, or none. It ensures correct behavior without many lines added 
-            self.acc = math.sqrt(100*self.key_presses[0] - 100*self.key_presses[1] - total_vel)
+            #at the same time, or none. It ensures correct behavior based on the keys that are being pressed
+            #this also deals with drag as the drag increases as speed does and will set the acceleration when both keys or neither is pressed
+            #it also incorporates speed into our acceleration
+            self.acc = math.sqrt(100*self.key_presses[0] - 100*self.key_presses[1]) - math.sqrt(total_vel)
 
         #Aidan change: making max turning 20 degrees a second and not allowing the user to turn if they are stopped
         #if statement to deal with corner case of not allowing user to turn while not moving, this is to stop users from going backwards
