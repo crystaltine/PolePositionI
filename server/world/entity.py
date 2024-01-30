@@ -99,22 +99,27 @@ class Entity:
         # since rn, the client can still turn in any direction but we're only storing the angle of the track
         
         # TODO - these equation are tweakable (maybe even make deceleration quadratic?)
-        # if w is held down, set x acceleration to -1/(20*vel_x) + 5 <- ensures no acc at v=100m/s
-        # if s is held down, set x acceleration to -1/(5*vel_x) <- ensures no deacc at v=0m/s
-        # if neither or both, set x acceleration to 0
-        
-        if self.key_presses[0] and not self.key_presses[1]:
-            self.acc = -self.vel/20 + 5
-        elif self.key_presses[1] and not self.key_presses[0]:
-            self.acc = -self.vel/5
+        # if w is held down, set x acceleration to 10- sqrt vel <- ensures no acc at v=100m/s
+        # if s is held down, set x acceleration to -10, other handling ensures that velocity will stay between 0 and 100 m/s
+        # if neither or both, set x acceleration to - sqrt vel <- simulates drag and high air resistance at higher speeds
+        if self.key_presses[1] and not self.key_presses[0]:
+            self.acc = -10 
+        elif self.key_presses[0] and not self.key_presses[1]:
+            self.acc = 10 - math.sqrt(total_vel)
         else:
-            self.acc = 0
+            self.acc = -math.sqrt(total_vel)
 
-        # update velocity
-        self.vel += self.acc * delta_time_s
-        
+        # update velocity with with methods to guarantee it's within the ranges of 0-100
+        self.vel = max(0, min(self.vel + self.acc * delta_time_s, 100))
+
+        #adjusting angular accel value to slow turning at higher speeds
+        denominator = 0.4 * self.vel + 2.22 
+        #value that changes how much a person can turn based on speed 
+        angular_accel = 10/denominator + .5 
+
         # update positions
-        relative_angle = self.angle - self.gamemap.angle_at(self.pos[0])
+        #angle change now involves speed with mod 360 to reset angle 
+        relative_angle = (self.angle + angular_accel * delta_time_s - self.gamemap.angle_at(self.pos[0])) % 360
         self.pos[0] += self.vel * math.cos(math.radians(relative_angle)) * delta_time_s
         self.pos[1] += self.vel * math.sin(math.radians(relative_angle)) * delta_time_s
         
