@@ -8,22 +8,12 @@ from elements.button import Button
 from elements.waiting_lobby_player import waiting_lobby_player
 from elements.waiting_room_main_panel import WaitingRoomMainPanel
 
-def waiting_room(details: dict, is_leader = False, connected_players: list = []) -> bool:
+def waiting_room(is_leader = False, connected_players: list = []) -> bool:
     """
     Creates/Mounts the room where the user is sent after creating/joining a room
     
     Just as a note, we are safe to use `GameManager.socket_man` and `GameManager.http_man` here because
     this function is only called AFTER both are successfully initialized and connected.
-    
-    @param `details` - As of Jan. 26th, 1:34AM, `details` should have the following schema: (see `server/CONSTANTS.py`)
-    ```python
-    {
-        "map_name": "fsdfksdj",
-        "preview_file": "fsdfksdj.png",
-        "length": 999,
-        "wr_time": 55,
-    }
-    ``` 
     
     @param `is_leader` - Whether the user is the leader of the room (the one who can start the game). Determines
     if the start button is disabled or not.
@@ -53,18 +43,15 @@ def waiting_room(details: dict, is_leader = False, connected_players: list = [])
     side_panel.fill((0, 0, 0, 128))
     
     # Load the 240x240 map preview
-    map_preview = pygame.image.load(f'./game/assets/lobby/maps/{details["preview_file"]}')
+    map_preview = pygame.image.load(f'./game/assets/lobby/maps/{GameManager.room_details["preview_file"]}')
     side_panel.blit(map_preview, (20, 20))
     
     map_label = FONT_TINY.render("Map:", True, (255, 255, 255))
-    map_text = FONT_MEDIUM.render(details['map_name'], True, (255, 255, 255))
+    map_text = FONT_MEDIUM.render(GameManager.room_details['map_name'], True, (255, 255, 255))
     length_label = FONT_TINY.render("Track length:", True, (255, 255, 255))
-    length_text = FONT_MEDIUM.render(f"{details['length']} m", True, (255, 255, 255))
+    length_text = FONT_MEDIUM.render(f"{GameManager.room_details['length']} m", True, (255, 255, 255))
     record_label = FONT_TINY.render("WR time:", True, (255, 255, 255))
-    record_text = FONT_MEDIUM.render(f"{details['wr_time']} s", True, (255, 255, 255))
-    # TODO - save pb times on client side (in a file), then fetch
-    #pb_label = FONT_TINY.render("PB time:", True, (255, 255, 255))
-    #pb_text = FONT_MEDIUM.render(f"{details['pb_time']} s", True, (255, 255, 255))
+    record_text = FONT_MEDIUM.render(f"{GameManager.room_details['wr_time']} s", True, (255, 255, 255))
     
     LABEL_GAP = 5
     DESC_GAP = 20

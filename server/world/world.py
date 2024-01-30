@@ -65,9 +65,7 @@ class World:
         Creates and places an entity at a certain position. 
         Optionally can supply initial velocity, acceleration, angle, and hitbox radius.
         
-        However, it is recommended to give it a hitbox radius, as the default is no hitbox.
-        
-        Returns the entity.
+        Returns a reference the entity.
         """
         
         e = Entity(name, color, client, pos, vel, acc, angle, hitbox_radius)

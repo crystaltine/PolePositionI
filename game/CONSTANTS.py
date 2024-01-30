@@ -31,12 +31,14 @@ FONT_SIZES = {
     "tiny": 16,
     "small": 20,
     "medium": 26,
-    "large": 32
+    "large": 32,
+    "huge": 50
 }
 FONT_TINY = pygame.font.Font('./game/assets/LemonMilk_MedItalic.otf', FONT_SIZES["tiny"])
 FONT_SMALL = pygame.font.Font('./game/assets/LemonMilk_MedItalic.otf', FONT_SIZES["small"])
 FONT_MEDIUM = pygame.font.Font('./game/assets/LemonMilk_MedItalic.otf', FONT_SIZES["medium"])
 FONT_LARGE = pygame.font.Font('./game/assets/LemonMilk_MedItalic.otf', FONT_SIZES["large"])
+FONT_HUGE = pygame.font.Font('./game/assets/LemonMilk_MedItalic.otf', FONT_SIZES["huge"])
 
 BUTTON_MEDIUM = pygame.image.load("./game/assets/button_medium.png")
 """ 240x60 pixels (w x h)"""
@@ -49,3 +51,7 @@ MAIN_MENU_BOTTOM_RIGHT_TEXT = "Made with Pygame"
 HTTP_URL = 'http://localhost:4000'
 SOCKET_HOST = 'localhost'
 SOCKET_PORT = 3999
+
+# Sounds
+sfx_button_hover = pygame.mixer.Sound('./game/assets/sounds/button_hover.mp3')
+sfx_button_click = pygame.mixer.Sound('./game/assets/sounds/button_click.mp3')

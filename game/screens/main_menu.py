@@ -4,8 +4,8 @@ from typing import Callable, Any
 from tkinter import *
 from tkinter import messagebox, simpledialog
 
-import os, sys
-sys.path.append(os.path.dirname (os.path.dirname (os.path.abspath (__file__))))
+# temp
+from screens.game_end import game_end
 
 from managers import GameManager, HTTPManager
 from screens.waiting_room import waiting_room
@@ -116,10 +116,10 @@ def main_menu() -> bool:
                             print("Room created successfully! Code:", res.get('code'))
                             GameManager.room_id = res.get('code')
                             GameManager.our_username = res.get('player_data').get('username')
-                            GameManager.map_name = res.get('map_data')['map_name']
 
                             # server will return ourselves (since it assigns us a random color)
-                            return waiting_room(res.get('map_data'), True, [res.get('player_data')])
+                            GameManager.room_details = res.get('map_data')
+                            return waiting_room(True, [res.get('player_data')])
                     
                     click_result = onclick_multiplayer_button(_cb)
                     # revert back to original text
@@ -156,9 +156,10 @@ def main_menu() -> bool:
                             print("Room joined successfully! Code:", res.get('code'))
                             GameManager.room_id = res.get('code')
                             GameManager.our_username = res.get('username')
-                            GameManager.map_name = res.get('map_data')['map_name']
                             
-                            return waiting_room(res.get('map_data'), False, res.get('players'))
+                            GameManager.room_details = res.get('map_data')
+                            
+                            return waiting_room(False, res.get('players'))
                     
                     # This returns to the caller of main_menu whether or not to rerun it, or proceed.                    
                     click_result = onclick_multiplayer_button(_cb)
@@ -174,7 +175,48 @@ def main_menu() -> bool:
                         return click_result["callback_result"]
                     
                 elif GameManager.livegametest_button.is_hovering(mouse_pos):
-                    return True
+                    game_end([
+                        {
+                            "username": "some_username",
+                            "color": "red",
+                            "score": "100%"
+                        },
+                        {
+                            "username": "234234",
+                            "color": "blue",
+                            "score": "93%"
+                        },
+                        {
+                            "username": "dream mc yt",
+                            "color": "green",
+                            "score": "79%"
+                        },
+                        {
+                            "username": "owl #4342",
+                            "color": "yellow",
+                            "score": "64%"
+                        },
+                        {
+                            "username": "sup",
+                            "color": "purple",
+                            "score": "45%"
+                        },
+                        {
+                            "username": "idk",
+                            "color": "pink",
+                            "score": "27%"
+                        },
+                        {
+                            "username": "who tf is this",
+                            "color": "white",
+                            "score": "25%"
+                        },
+                        {
+                            "username": "pineapple",
+                            "color": "orange",
+                            "score": "11%"
+                        },
+                    ])
                 
                 elif GameManager.quit_button.is_hovering(mouse_pos):
                     GameManager.quit_game()

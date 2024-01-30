@@ -9,7 +9,6 @@ MAPS = {
         "length": 3500,
         "world_size": (800, 1000),
         "wr_time": 47.23,
-        # TODO - also need to somehow link to a representation of the map, so we can handle physics and stuff.
     } 
 }
 

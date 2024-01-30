@@ -1,5 +1,5 @@
 from pygame import Surface, Color
-from CONSTANTS import FONT_MEDIUM
+from CONSTANTS import *
 
 #From 
 class Button():

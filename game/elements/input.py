@@ -1,5 +1,5 @@
 import pygame
-from CONSTANTS import COLOR_ACTIVE, COLOR_INACTIVE, FONT_MEDIUM, FONT_SIZES
+from CONSTANTS import *
 
 class Input:
     """
@@ -25,11 +25,12 @@ class Input:
         self.active = False
 
     def handle_event(self, event):
-        if event.type == pygame.MOUSEBUTTONDOWN:
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             # If the user clicked on the input_box rect.
             if self.rect.collidepoint(event.pos):
                 # Toggle the active variable.
                 self.active = not self.active
+                sfx_button_click.play()
             else:
                 self.active = False
             # Change the current color of the input box.

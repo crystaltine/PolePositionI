@@ -45,7 +45,15 @@ class GameManager:
     # these will be set when we join/create a room
     room_id: Union[None, str] = None
     our_username: str = None
-    map_name: str = None
+    
+    room_details: dict = {
+        "map_name": "Touch Grass",
+        "preview_file": "touch_grass.png",
+        "length": 3500,
+        "world_size": (800, 1000),
+        "wr_time": 47.23,
+    } 
+    """ Set after joining/creating a room. Used to store game details. """
     
     # when the unix timestamp is this, begin taking keyboard input and sending to server
     # this gets set when the host starts the game
@@ -298,7 +306,7 @@ class RenderingManager:
         }
         """
         
-        map_class = get_map(GameManager.map_name)
+        map_class = get_map(GameManager.room_details['map_name'])
         self.world = World(map_class.world_size, map_class.track_geometry)
         
         for entity in init_entities:
