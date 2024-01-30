@@ -88,7 +88,8 @@ class Entity:
             #at the same time, or none. It ensures correct behavior based on the keys that are being pressed
             #this also deals with drag as the drag increases as speed does and will set the acceleration when both keys or neither is pressed
             #it also incorporates speed into our acceleration
-            self.acc = math.sqrt(100*self.key_presses[0] - 100*self.key_presses[1]) - math.sqrt(total_vel)
+            #adjust acc value to make acceleration quicker
+            self.acc = math.sqrt(100*self.key_presses[0] - 100*self.key_presses[1]) - math.sqrt(total_vel)/2
 
         #Aidan change: making max turning 20 degrees a second and not allowing the user to turn if they are stopped
         #if statement to deal with corner case of not allowing user to turn while not moving, this is to stop users from going backwards
@@ -97,7 +98,8 @@ class Entity:
         else:
             #50 * True or False guarantees that turning has the correct behavior based on which keys are pressed down in any 
             #if none are pressed then it has an angle change of 0, if both then 0, only difference is when one is pressed and not the other
-            denominator = 0.1 * total_vel+ 2.22 
+            #adjusting angular accel value to slow turning at higher speeds
+            denominator = 0.4 * total_vel+ 2.22 
             #value that changes how much a person can turn based on speed 
             angular_accel = 10/denominator + .5
             #same logic above with the acceleration, self.key_presses[2] increases angle and self.key_presses[3] decreases
@@ -106,12 +108,7 @@ class Entity:
         #set angle back down 
         self.angle %= 360
         
-        # use the angle to determine components of acceleration
-        # READ: im getting rid of keypress=accel and just doing keypress=vel for now
-        # self.acc_mag = 2*self.key_presses[0] - 2*self.key_presses[1]
-        # self.acc[0] = self.acc_mag * math.cos(math.radians(self.angle%360))
-        # self.acc[1] = self.acc_mag * math.sin(math.radians(self.angle%360))
-        
+
         #add to total velocity with the acceleration and how long it was pressed for, maybe a change needed since the acceleration doesn't change 
         #until the next tick im pretty sure the conversion is based on just multiplying by the time for all but talk to michael
         total_vel = max(0, min(total_vel + self.acc * delta_time_s, 100))
