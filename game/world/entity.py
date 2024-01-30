@@ -32,7 +32,7 @@ class Entity:
         acc: float = 0,
         angle: float = 0,
         hitbox_radius: float = 0,
-        keys: list[bool] = [False, False, False, False]
+        keys: List[bool] = [False, False, False, False]
         ) -> None:
         
         #instance variables 

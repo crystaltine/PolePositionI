@@ -262,6 +262,22 @@ class GameManager:
         
         GameManager.screen.blit(GameManager.car, (horizontal_pos, vertical_pos))
     
+    def draw_permanent_road(self):
+        """
+        Constantly animates the straight road on 
+        """
+        coords = (0, 400), (WIDTH,400), (WIDTH, HEIGHT), (0, HEIGHT)
+        road_image = RenderingManager.roadpaths[RenderingManager.roadpaths_index].current()
+        road_image = pygame.transform.scale_by(road_image, (2.4, 1.945))      
+        GameManager.draw_road(road_image) 
+        #pygame.display.update()
+        road_image = RenderingManager.roadpaths[RenderingManager.roadpaths_index].next()
+        if road_image is None:
+            roadpaths_index += 1
+            RenderingManager.roadpaths[roadpaths_index].iter()
+            road_image = RenderingManager.roadpaths[RenderingManager.roadpaths_index].current()
+        road_image = pygame.transform.scale_by(road_image, (2.4, 1.945))
+    
     @staticmethod 
     def quit_game():
         """
@@ -362,6 +378,16 @@ class RenderingManager:
         """
         Draws on the screen a single frame based on the current state of the internal physics engine.
         """
+        
+        road_image = RenderingManager.roadpaths[RenderingManager.roadpaths_index].current()
+        road_image = pygame.transform.scale_by(road_image, (2.4, 1.945))      
+        GameManager.draw_road(road_image) 
+        road_image = RenderingManager.roadpaths[RenderingManager.roadpaths_index].next()
+        if road_image is None:
+            roadpaths_index += 1
+            RenderingManager.roadpaths[roadpaths_index].iter()
+            road_image = RenderingManager.roadpaths[RenderingManager.roadpaths_index].current()
+        road_image = pygame.transform.scale_by(road_image, (2.4, 1.945))
         
         deltatime = (time_ns() - self.last_render_time) / 1e9
         self.last_render_time = time_ns()
@@ -842,6 +868,7 @@ class HTTPManager:
         except Exception as e:
             print(f"\x1b[31mError making API call: {e}\x1b[0m")
             return {"success": False, "message": f"An error occured! Please try again. ({e})"}
+
 def init_managers():
     """
     Run on game start
