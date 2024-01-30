@@ -115,7 +115,7 @@ class Entity:
         
         #add to total velocity with the acceleration and how long it was pressed for, maybe a change needed since the acceleration doesn't change 
         #until the next tick im pretty sure the conversion is based on just multiplying by the time for all but talk to michael
-        total_vel = max(total_vel + self.acc * delta_time_s, 0)
+        total_vel = max(0, min(total_vel + self.acc * delta_time_s, 100))
 
         self.vel[0] = total_vel * math.cos(math.radians(self.angle))
         self.vel[1] = total_vel * math.sin(math.radians(self.angle))
