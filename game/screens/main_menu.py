@@ -4,9 +4,6 @@ from typing import Callable, Any
 from tkinter import *
 from tkinter import messagebox, simpledialog
 
-import os, sys
-sys.path.append(os.path.dirname (os.path.dirname (os.path.abspath (__file__))))
-
 from managers import GameManager, HTTPManager
 from screens.waiting_room import waiting_room
 
