@@ -37,7 +37,8 @@ class Entity:
         self.client = client
         self.pos = list(pos)
         self.vel = list(vel)
-        self.acc = list(acc)
+        #maybe an issue changing acceleration from list to value
+        self.acc = acc
         self.angle = angle%360
         self.hitbox_radius = hitbox_radius
         
@@ -78,7 +79,17 @@ class Entity:
         total_vel = math.sqrt(self.vel[0] ** 2 + self.vel[1] ** 2)
 
         # update acceleration, required for calculations below
-        self.acc = math.sqrt(100*self.key_presses[1] - 100*self.key_presses[0] - total_vel)
+        #if statement used redundantly to see if only braking is pressed
+        if self.key_presses[1] and not self.key_presses[0]:
+            self.acc = -10
+        #conditional to simulate drag if neither backwards or forwards is pressed
+        elif not self.key_presses[1] and not self.key_presses[0]:
+            self.acc = -3
+        else:
+            #when multiplying by a boolean True acts as a 1 and False acts as 0
+            #these references to self.key_presses are to deal with forward and backwards being pressed 
+            #at the same time, or none. It ensures correct behavior without many lines added 
+            self.acc = math.sqrt(100*self.key_presses[0] - 100*self.key_presses[1] - total_vel)
 
         #Aidan change: making max turning 20 degrees a second and not allowing the user to turn if they are stopped
         #if statement to deal with corner case of not allowing user to turn while not moving, this is to stop users from going backwards
@@ -90,7 +101,9 @@ class Entity:
             denominator = 0.1 * total_vel+ 2.22 
             #value that changes how much a person can turn based on speed 
             angular_accel = 10/denominator + .5
-            self.angle += (angular_accel*self.key_presses[3] - angular_accel*self.key_presses[2]) * delta_time_s
+            #same logic above with the acceleration, self.key_presses[2] increases angle and self.key_presses[3] decreases
+            #done to handle multiple keys pressed at once 
+            self.angle += (angular_accel*self.key_presses[2] - angular_accel*self.key_presses[3]) * delta_time_s
         #set angle back down 
         self.angle %= 360
         
@@ -102,12 +115,11 @@ class Entity:
         
         #add to total velocity with the acceleration and how long it was pressed for, maybe a change needed since the acceleration doesn't change 
         #until the next tick im pretty sure the conversion is based on just multiplying by the time for all but talk to michael
-        total_vel += self.acc * delta_time_s
+        total_vel = max(total_vel + self.acc * delta_time_s, 0)
 
         self.vel[0] = total_vel * math.cos(math.radians(self.angle))
         self.vel[1] = total_vel * math.sin(math.radians(self.angle))
         
-        # TODO - add some sort of drag/velocity loss when no acceleration
         
         # update position using velocity
         self.pos[0] += self.vel[0] * delta_time_s
