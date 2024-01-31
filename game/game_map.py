@@ -180,3 +180,17 @@ class GameMap:
                 return segment.get_vanishing_point_pos(pos_x)
             
         return WIDTH/2 # default to center of screen if not found
+    
+    def curvesegment_at(self, pos_x: float) -> CurveSegment | None:
+        """
+        Returns the CurveSegment defined at a certain x position.
+        
+        If there is no segment at that position, returns None.
+        """
+        
+        # since there are a small number of segments, a linear search should be fine
+        for segment in self.segments:
+            if pos_x >= segment.start_x and pos_x <= segment.end_x:
+                return segment
+        
+        return None

@@ -33,6 +33,11 @@ For example, if we are driving along a straight track, the angle is 0, so the ac
 However, if the angle is 30 degrees, then the accumulated angle will increase by 15 degrees for every second, if this factor is 0.5.
 """
 
+METERS_PER_ANIMATION_FRAME = 3
+"""
+The number of meters that must be traveled for the road animations to advance by one frame.
+"""
+
 # hex is 4370ff
 SKY_RGB = (67, 112, 255)
 BLACK = (0,0,0)
