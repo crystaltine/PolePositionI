@@ -418,6 +418,7 @@ class RenderingManager:
         # one from x=200,y=520 to x=vanishing_point_loc,y=240
         # one from x=1000,y=520 to x=vanishing_point_loc,y=240
         
+        """
         if road_moving:
             road_image = RenderingManager.roadpaths[RenderingManager.roadpaths_index].current()
             road_image = pygame.transform.scale_by(road_image, (2.4, 1.945))      
@@ -443,13 +444,8 @@ class RenderingManager:
             RenderingManager.roadpaths_index += 1
         elif GameManager.get_our_entity().pos[0] > 2800 and RenderingManager.roadpaths_index == 10:
             RenderingManager.roadpaths_index += 1
-        
-        # pygame.draw.line(GameManager.screen, (0,0,0), (0, HEIGHT), (200, 520), 5)
-        # pygame.draw.line(GameManager.screen, (0,0,0), (WIDTH, HEIGHT), (1000, 520), 5)
-        # pygame.draw.line(GameManager.screen, (0,0,0), (200, 520), (vanishing_point_loc, 240), 5)
-        # pygame.draw.line(GameManager.screen, (0,0,0), (1000, 520), (vanishing_point_loc, 240), 5)
-        
-        # blit the road
+        """
+
         GameManager.draw_road(road_image) 
         
         # TODO - draw entities
