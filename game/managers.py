@@ -328,22 +328,22 @@ class RenderingManager:
         turning_left,
         curved_left, 
         left_centering,
+
         road_straight, 
         turning_right,
         curved_right,
         right_centering,
+
         road_straight,
         turning_left,
         curved_left, 
         left_centering,
+
         road_straight,
         turning_right,
         curved_right,
         right_centering,
-        road_straight,
-        turning_left,
-        curved_left, 
-        left_centering,
+
         road_straight
     ]
     roadpaths_index = 0
