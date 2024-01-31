@@ -11,11 +11,13 @@ Architecture – Michael
 
 The '80s game we remade is Pole Position. The twist is that we added multiplayer functionality to the game. Many different players can all connect to the same lobby and race against each other to see who has the fastest lap.
 
-TODO Design Choices:
+## Design Choices:
+It's mentioned later within the document, but as we started this project we didn't have much of a vision on how we were going to move the project forwards, which must have influenced our decision to create the live game in a way more familiar to us, so while the original game rendered in the game, the background road was hand-drawn frame by frame to create an animation to play in the background as the car went forwards. Because of this it creates a different look from the original game, with an interesting situatition where because of the straightness and better graphics seen today, but higher pixelation found from software made for lower quality art. It's part of what gives our game it's unique vibe, and is fun in it's own way after the almost tearjerking (not in the fun way) work it took to make the frames.
 
 TODO Anything else interesting: 
 
-TODO Instructions for running the game: 
+## Instructions for running the game: 
+While our game is mostly self explanatory once it's running, getting it to fun can be the fun - or difficult - part depending on your mood. You need to have a terminal open, and in there you run the server.py file found within the server folder to get the server running. You'll see a visual confirmation that it's working once you start running the file. Once you're done you can either open another terminal, or open your own Visual Studio Code/adjacent program and run the main.py file found within the game folder. This may take a couple seconds, but then the game screen will appear, and if you are going to be game host, click create game, or if you're joining a game click join game. Both options will prompt you for a username that you have to input, and then you'll appear in a lobby were the join code is visible and ready to be shared. Then once everybody is in the lobby, the lobby host can hit start game and all players have to get ready, get set, and GO!
 
 ## Architecture:
 
