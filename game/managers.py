@@ -386,6 +386,7 @@ class RenderingManager:
         Draws on the screen a single frame based on the current state of the internal physics engine.
         """
         
+
         road_image = RenderingManager.roadpaths[RenderingManager.roadpaths_index].current()
         road_image = pygame.transform.scale_by(road_image, (2.4, 1.945))      
         GameManager.draw_road(road_image) 
@@ -395,6 +396,7 @@ class RenderingManager:
             RenderingManager.roadpaths[roadpaths_index].iter()
             road_image = RenderingManager.roadpaths[RenderingManager.roadpaths_index].current()
         road_image = pygame.transform.scale_by(road_image, (2.4, 1.945))
+
         
         deltatime = (time_ns() - self.last_render_time) / 1e9
         self.last_render_time = time_ns()

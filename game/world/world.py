@@ -1,4 +1,6 @@
 from typing import Dict, List
+from world.entity import Entity
+import math
 
 from world.entity import Entity
 from game_map import GameMap
@@ -58,7 +60,9 @@ class World:
       
     def get_world_data(self) -> list:
         """
+
         Returns a JSON-serializable list of dicts containing all data for every entity in the world.
+
         
         Schema:
         ```typescript
@@ -105,3 +109,4 @@ class World:
         """
         return self.gamemap.map_data
        
+

@@ -107,10 +107,12 @@ class Entity:
         elif self.key_presses[0] and not self.key_presses[1]:
             self.acc = 10 - math.sqrt(total_vel)
         else:
+
             self.acc = -math.sqrt(total_vel)
 
         # update velocity with with methods to guarantee it's within the ranges of 0-100
         self.vel = max(0, min(self.vel + self.acc * delta_time_s, 100))
+
 
         #adjusting angular accel value to slow turning at higher speeds
         denominator = 0.4 * self.vel + 2.22 
@@ -231,3 +233,4 @@ class Entity:
         }, 'crash')
         
         
+

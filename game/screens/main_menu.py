@@ -4,9 +4,9 @@ from typing import Callable, Any
 from tkinter import *
 from tkinter import messagebox, simpledialog
 
+
 # temp
 from screens.game_end import game_end
-
 from managers import GameManager, HTTPManager
 from screens.waiting_room import waiting_room
 

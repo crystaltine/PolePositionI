@@ -29,6 +29,9 @@ right_centering = SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'asset
 turning_left = SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\turning left'), (0, -3*height/5, width, 4*height/3), 8, -1, False, 0.041)
 turning_right = SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\turning right'), (0, -3*height/5, width, 4*height/3), 8, -1, False, 0.041)
 
+#create explosion
+boom = SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\collision explosino'), (0, 0, width, height), 5, -1, False, 0.25)
+
 #all linked animations for the full track
 roadpaths = [
     road_straight, 
@@ -66,6 +69,10 @@ road_state = 0
 start_time = datetime.datetime.now()
 game_start_time = start_time.minute + start_time.second*100
 
+is_boom = False
+boom.iter()
+boom_frame = boom.current()
+
 #game state 
 while True:
     screen.blit(grass, (0, 2*height/5))
@@ -83,9 +90,11 @@ while True:
                 roadpaths_index += 1
                 if roadpaths_index >= len(roadpaths):
                     roadpaths_index = 0
+
     screen.blit(road_image, (0, -6.9*height/5))        
+
     pygame.display.flip()
-    road_image = roadpaths[roadpaths_index].next()
+    road_image = roadpaths[roadpaths_index].next()      
     current_time = datetime.datetime.now()
     game_current_time = current_time.minute + current_time.second*100
     if road_image is None:
