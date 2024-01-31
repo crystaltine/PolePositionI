@@ -1,8 +1,12 @@
 ## Overview
 Developers:
+
 User experience - Sindhura and Camila 
+
 Testing – Angus
+
 Communication – Aidan
+
 Architecture – Michael
 
 The '80s game we remade is Pole Position. The twist is that we added multiplayer functionality to the game. Many different players can all connect to the same lobby and race against each other to see who has the fastest lap.
