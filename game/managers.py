@@ -395,6 +395,19 @@ class RenderingManager:
             roadpaths_index += 1
             RenderingManager.roadpaths[roadpaths_index].iter()
             road_image = RenderingManager.roadpaths[RenderingManager.roadpaths_index].current()
+        if GameManager.get_our_entity().pos[0] == 400:
+            roadpaths_index += 1
+        elif GameManager.get_our_entity().pos[0] == 800:
+            roadpaths_index += 1
+        elif GameManager.get_our_entity().pos[0] == 1200:
+            roadpaths_index += 1
+        elif GameManager.get_our_entity().pos[0] == 2000:
+            roadpaths_index += 1
+        elif GameManager.get_our_entity().pos[0] == 2400:
+            roadpaths_index += 1
+        elif GameManager.get_our_entity().pos[0] == 2800:
+            roadpaths_index += 1
+    
         road_image = pygame.transform.scale_by(road_image, (2.4, 1.945))
 
         
