@@ -105,10 +105,9 @@ class Entity:
         if self.key_presses[1] and not self.key_presses[0]:
             self.acc = -10 
         elif self.key_presses[0] and not self.key_presses[1]:
-            self.acc = 10 - math.sqrt(total_vel)
+            self.acc = 10 - math.sqrt(self.vel)
         else:
-
-            self.acc = -math.sqrt(total_vel)
+            self.acc = -math.sqrt(self.vel)
 
         # update velocity with with methods to guarantee it's within the ranges of 0-100
         self.vel = max(0, min(self.vel + self.acc * delta_time_s, 100))
