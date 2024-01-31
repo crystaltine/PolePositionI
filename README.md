@@ -105,7 +105,17 @@ When `pygame.event.get()` on the client-side contains relevant key presses, the 
 It's mentioned later within the document, but as we started this project we didn't have much of a vision on how we were going to move the project forwards, which must have influenced our decision to create the live game in a way more familiar to us, so while the original game rendered in the game, the background road was hand-drawn frame by frame to create an animation to play in the background as the car went forwards. Because of this it creates a different look from the original game, with an interesting situatition where because of the straightness and better graphics seen today, but higher pixelation found from software made for lower quality art. It's part of what gives our game it's unique vibe, and is fun in it's own way after the almost tearjerking (not in the fun way) work it took to make the frames.
 
 
-# Instructions for running the game: 
+# Playing Instructions
+
+The game requires a Python version of 3.10 or newer.
+
+## TLDR
+- Clone the repository `git clone https://github.com/crystaltine/PolePositionI.git PolePositionI`
+- Open two or more terminals and set all working directories to the cloned repository `cd PolePositionI`
+- Install required libraries (run once in one terminal) `pip install -r requirements.txt`
+- In exactly one terminal, run the server: `python server/server.py`
+- In all others, run the game: `python game/main.py`
+
 While our game is mostly self explanatory once it's running, getting it to fun can be the fun - or difficult - part depending on your mood. You need to have a terminal open, and in there you run the server.py file found within the server folder to get the server running. You'll see a visual confirmation that it's working once you start running the file. Once you're done you can either open another terminal, or open your own Visual Studio Code/adjacent program and run the main.py file found within the game folder. This may take a couple seconds, but then the game screen will appear, and if you are going to be game host, click create game, or if you're joining a game click join game. Both options will prompt you for a username that you have to input, and then you'll appear in a lobby were the join code is visible and ready to be shared. Then once everybody is in the lobby, the lobby host can hit start game and all players have to get ready, get set, and GO!
 
 # User Experience 
@@ -125,4 +135,3 @@ Communication was also a challenge for a long time. In the beginning we didn’t
 There was constant iteration and large changes made during our process. Our physics were constantly changing and integrating into new systems was a regular occurence. The largest change was going from a map for our track,  to changing that to a constant straightline that would curve the track and change the perspective around the car while the car itself behind the scenes was always moving in a straightline. 
 
 The main thing we would do differently next time is having mini deadlines throughout the development process. We needed some last-minute heroics from Michael to get all of our code fully integrated into our final working game and that was entirely avoidable. It’s nice to have a final product but the crunch time push from all of us was tiring and stressful. Multiple smaller deadlines would have pushed all of us to be more efficient with our time and avoid the last-minute finish we had. We could have also communicated better in the beginning of the project. The very beginning of the project was a very crucial time for us to get a clear vision of how we would make our game. Instead of spending a few periods talking as a team and having defined ideas, we didn’t communicate much and that set us back. 
-
