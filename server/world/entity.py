@@ -100,7 +100,8 @@ class Entity:
         delta_time_s = (time_ns() - self.last_update_timestamp) / 1e9
         
         # update angle
-        self.angle += ((self.key_presses[3] - self.key_presses[2]) * 50 * delta_time_s)
+        turn_resistance_factor = (1 - (self.vel/100)**2)
+        self.angle += (self.key_presses[3] - self.key_presses[2]) * 50 * turn_resistance_factor * delta_time_s
         self.angle %= 360
         
         # if w is held down, set x acceleration to 10- sqrt vel <- ensures no acc at v=100m/s

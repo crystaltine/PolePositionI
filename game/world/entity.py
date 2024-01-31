@@ -89,7 +89,8 @@ class Entity:
         delta_time_s = (time_ns() - self.last_update_timestamp) / 1e9
         
         # update angle
-        self.angle += ((self.key_presses[3] - self.key_presses[2]) * 50 * delta_time_s)
+        turn_resistance_factor = (1 - (self.vel/100)**2)
+        self.angle += (self.key_presses[3] - self.key_presses[2]) * 50 * turn_resistance_factor * delta_time_s
         self.angle %= 360
         
         # TODO - these equation are tweakable (maybe even make deceleration quadratic?)

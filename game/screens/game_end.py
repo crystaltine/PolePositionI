@@ -133,6 +133,10 @@ def game_end(leaderboard_data: list) -> None:
                 if exit_button.is_hovering(pygame.mouse.get_pos()):
                     # leave the room
                     GameManager.http_man.leave_room()
+                    
+                    # Reset GameManager
+                    GameManager.reset()
+                    
                     return
                 
         if elapsed > 3:
@@ -142,7 +146,5 @@ def game_end(leaderboard_data: list) -> None:
                 
                 exit_button.changeColor(pygame.mouse.get_pos())
                 exit_button.update(GameManager.screen)
-        
-        
                 
         pygame.display.update()
