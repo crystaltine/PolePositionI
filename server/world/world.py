@@ -4,6 +4,7 @@ import math
 
 from world.entity import Entity
 from game_map import GameMap
+from CONSTANTS import *
 
 def are_colliding(e1: Entity, e2: Entity) -> bool:
     """
@@ -85,6 +86,7 @@ class World:
         if not win_result:
             # check for collisions   
             self.check_entity_collisions()
+            self.check_out_of_bounds()
         
         return win_result
     
@@ -140,22 +142,15 @@ class World:
                     e1.on_entity_collide(e2, 'left', crash_end_timestamp)
                     e2.on_entity_collide(e1, 'right', crash_end_timestamp)
 
-    def out_of_bounds(self) -> None:
+    def check_out_of_bounds(self) -> None:
         """
         Checks if the entities have gone too far off the track 
         
         All entities that have gone too far will be crashed and the info will be sent to client
         """
-        entity_list = list(self.entities.values())
 
-        for entity in entity_list:
-            #with new physics center of track is always going to be 0
-            #x pos is just how far along the track you are and y val is your y pos 
-            #just checks to see how far you deviate from 0 and if too far then crash
-            dist = entity.pos[1]
-            #track is 200 m wide and 0 is the center of it, this gives 30 m of leniency which might be too much of how far off you can go
-            if dist > 55:
-                entity.on_wall_collide()
+        for entity in self.entities.values():
+            entity.check_out_of_bounds()
                     
     def get_world_data(self) -> list:
         """

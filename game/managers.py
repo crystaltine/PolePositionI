@@ -78,6 +78,11 @@ class GameManager:
     Used to determine how to scroll mountains. Gets changed at a rate of `track_angle * ANGLE_ACCUMULATION_FACTOR` per second.
     """
     
+    last_y_pos: float = 0
+    """
+    Used to determine where to draw the explosion (horizontally) on the crash event, since the event sets y-pos back to 0.
+    """
+    
     # main assets
     screen = pygame.display.set_mode([WIDTH,HEIGHT])
     screen.fill(SKY_RGB)
@@ -95,9 +100,7 @@ class GameManager:
 
     #animted explosion
 
-    boom = SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\collision explosino'), (0, 0, WIDTH, HEIGHT), 5, -1, True, 0.25)
-    boom.iter()
-    boom_frame = boom.current()
+    boom = SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\collision explosion'), (0, 0, WIDTH, HEIGHT), 5, -1, True, 0.25)
 
     progressbar_img = pygame.image.load('./game/assets/progress_bar_frame.png')
 
@@ -242,7 +245,7 @@ class GameManager:
         GameManager.quit_button.update(GameManager.screen)
 
     @staticmethod 
-    def draw_car(pos_y: float, angle: float):
+    def draw_car(pos_y: float):
         """
         If currently in a crash, draws an explosion.
         
@@ -259,14 +262,6 @@ class GameManager:
         
         vertical_pos = 4*HEIGHT/5 - GameManager.car.get_height()/2
         
-        # if timestamp < GameManager.crash_end_timestamp, draw explosion
-        if time_ns()/1e9 < GameManager.crash_end_timestamp:
-            # draw explosion at bottom-center of screen
-            horizontal_pos = WIDTH/2 - GameManager.explosion.get_width()/2
-            GameManager.screen.blit(GameManager.boom_frame, (horizontal_pos, vertical_pos))
-            GameManager.boom.next()
-            return
-        
         # calculate the offset
         total_x_range = WIDTH - 40 - GameManager.car.get_width() # 20px padding on each side, plus the width of the car
         total_track_width = GameManager.map_data['width'] + 2*GameManager.map_data['oob_leniency']
@@ -274,30 +269,38 @@ class GameManager:
         
         horizontal_pos = 20 + proportion_of_total_range * total_x_range
         
+        # draw explosion if there is a crash_end timestamp in the future
+        time_until_crash_end = GameManager.crash_end_timestamp - time_ns()/1e9
+        if time_until_crash_end > 0:
+            
+            # recalculate horizontal pos based on last_y_pos
+            proportion_of_total_range = (GameManager.last_y_pos + total_track_width/2) / total_track_width
+            horizontal_pos = 20 + proportion_of_total_range * total_x_range
+            
+            # Crashes should last 5 seconds. We pick which frame to use (0->77) based on how many seconds left
+            frame_index = int(78*(5 - time_until_crash_end)/5)
+            boom_frame = GameManager.boom.images[frame_index].convert_alpha()
+            
+            # scale image by 2x
+            boom_frame = pygame.transform.scale(boom_frame, (boom_frame.get_width()*2, boom_frame.get_height()*2))
+            
+            # draw explosion at bottom-center of screen
+            
+            # we use horizontal pos from the car, but we center the explosion vertically
+            vertical_pos = 450
+            
+            GameManager.screen.blit(boom_frame, (horizontal_pos, vertical_pos))
+            GameManager.boom.next()
+            return
+        
         GameManager.screen.blit(GameManager.car, (horizontal_pos, vertical_pos))
-    
-    def draw_permanent_road(self):
-        """
-        @ TODO - maybe use draw_bottom_road instead?
-        """
-        coords = (0, 400), (WIDTH,400), (WIDTH, HEIGHT), (0, HEIGHT)
-        road_image = RenderingManager.roadpaths[RenderingManager.roadpaths_index].current()
-        road_image = pygame.transform.scale_by(road_image, (2.4, 1.945))      
-        GameManager.draw_road(road_image) 
-        #pygame.display.update()
-        road_image = RenderingManager.roadpaths[RenderingManager.roadpaths_index].next()
-        if road_image is None:
-            roadpaths_index += 1
-            RenderingManager.roadpaths[roadpaths_index].iter()
-            road_image = RenderingManager.roadpaths[RenderingManager.roadpaths_index].current()
-        road_image = pygame.transform.scale_by(road_image, (2.4, 1.945))
     
     @staticmethod 
     def quit_game():
         """
         Exits the game gracefully.
         """
-        print(f"\x1b[35Quitting the game gracefully...\x1b[0m")
+        print(f"\x1b[35mQuitting the game gracefully...\x1b[0m")
         
         # leave the room if we are in one
         if GameManager.room_id is not None:
@@ -393,7 +396,7 @@ class RenderingManager:
         for entity in init_entities:
             self.place_entity(entity)
 
-    def render_frame(self, road_moving:bool):
+    def render_frame(self):
         """
         Draws on the screen a single frame based on the current state of the internal physics engine.
         """
@@ -410,47 +413,12 @@ class RenderingManager:
         
         # add to accumulated angle. Also mult by velocity/100 (at 0 speed we shouldnt be turning)
         GameManager.accumulated_angle += self.world.gamemap.angle_at(us.pos[0]) * ANGLE_ACCUMULATION_FACTOR * deltatime * us.vel/100
-
-        # TODO - draw the road
-        # for now, we just draw four testing lines:
-        # one from bottom left of screen to x=200,y=520
-        # one from bottom right to x=1000,y=520
-        # one from x=200,y=520 to x=vanishing_point_loc,y=240
-        # one from x=1000,y=520 to x=vanishing_point_loc,y=240
         
-        """
-        if road_moving:
-            road_image = RenderingManager.roadpaths[RenderingManager.roadpaths_index].current()
-            road_image = pygame.transform.scale_by(road_image, (2.4, 1.945))      
-            GameManager.draw_road(road_image) 
-            road_image = RenderingManager.roadpaths[RenderingManager.roadpaths_index].next()
-            if road_image is None:
-                RenderingManager.roadpaths_index += 1
-                RenderingManager.roadpaths[RenderingManager.roadpaths_index].iter()
-                road_image = RenderingManager.roadpaths[RenderingManager.roadpaths_index].current()
-        else:
-            road_image = RenderingManager.roadpaths[RenderingManager.roadpaths_index].current()
-            road_image = pygame.transform.scale_by(road_image, (2.4, 1.945))      
-            GameManager.draw_road(road_image) 
-        if GameManager.get_our_entity().pos[0] > 400 and RenderingManager.roadpaths_index == 0:
-            RenderingManager.roadpaths_index += 1
-        elif GameManager.get_our_entity().pos[0] > 800 and RenderingManager.roadpaths_index == 2:
-            RenderingManager.roadpaths_index += 1
-        elif GameManager.get_our_entity().pos[0] > 1200 and RenderingManager.roadpaths_index == 4:
-            RenderingManager.roadpaths_index += 1
-        elif GameManager.get_our_entity().pos[0] > 2000 and RenderingManager.roadpaths_index == 6:
-            RenderingManager.roadpaths_index += 1
-        elif GameManager.get_our_entity().pos[0] > 2400 and RenderingManager.roadpaths_index == 8:
-            RenderingManager.roadpaths_index += 1
-        elif GameManager.get_our_entity().pos[0] > 2800 and RenderingManager.roadpaths_index == 10:
-            RenderingManager.roadpaths_index += 1
-        """
-
         GameManager.draw_road(road_image) 
         
         # TODO - draw entities
             
-        GameManager.draw_car(us.pos[1], us.angle)
+        GameManager.draw_car(us.pos[1])
         sorted_by_dist = sorted(GameManager.get_all_other_entities(), key=lambda e: e.pos[0]**2 + e.pos[1]**2, reverse=True)
         for other in sorted_by_dist:
             size = RenderingManager.get_rendered_size(other)

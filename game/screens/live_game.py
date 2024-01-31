@@ -34,7 +34,9 @@ def live_game() -> bool:
         
     def _crash(crash_data):
         # set our new physics
+        GameManager.last_y_pos = us.pos[1] # save this for the crash animation
         GameManager.crash_end_timestamp = crash_data['crash_end_timestamp']
+        us.crash_end_timestamp = crash_data['crash_end_timestamp']
         us.set_physics(crash_data['new_physics'])
         
     # create new event handler
@@ -48,7 +50,7 @@ def live_game() -> bool:
             return GameManager.live_game_proceed_code == 2 # True if 2, False if 1
         
         GameManager.game_renderer.tick_world()
-        GameManager.game_renderer.render_frame(True)
+        GameManager.game_renderer.render_frame()
         
         for event in pygame.event.get():
             if event == pygame.QUIT:

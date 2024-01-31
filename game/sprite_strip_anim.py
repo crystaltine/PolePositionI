@@ -57,6 +57,9 @@ class SpriteStripAnim(object):
         self.f = self.frames
         return self
     def next(self):
+        """
+        Returns the next image in the sequence. If the end of the sequence is reached, and the loop flag is set, it will start over. If the loop flag is not set, it will return None.
+        """
         self.i += 1
         if self.i >= len(self.images):
             self.i = 0

@@ -52,6 +52,8 @@ class Entity:
         
         self.last_update_timestamp = time_ns()
         
+        self.crash_end_timestamp = 0
+        
         # False = key is not held down, True = key is held down
         # Use this to update acceleration and angle
         # w = +acc, s = -acc, a = +angle, d = -angle
@@ -90,15 +92,17 @@ class Entity:
         Should be run on every server tick (for now, 24tps) - see `../CONSTANTS.py`
         """
         
+        # if we are still in the crash duration, don't update anything
+        if self.crash_end_timestamp > time_ns()/1e9:
+            self.last_update_timestamp = time_ns()
+            return
+        
         delta_time_s = (time_ns() - self.last_update_timestamp) / 1e9
         
         # update angle
-        self.angle += (self.key_presses[3] - self.key_presses[2]) * 50 * delta_time_s
+        self.angle += ((self.key_presses[3] - self.key_presses[2]) * 50 * delta_time_s)
+        self.angle %= 360
         
-        # MAJOR TODO - we need to implement some sort of curvature calculation that accumulates angle, 
-        # since rn, the client can still turn in any direction but we're only storing the angle of the track
-        
-        # TODO - these equation are tweakable (maybe even make deceleration quadratic?)
         # if w is held down, set x acceleration to 10- sqrt vel <- ensures no acc at v=100m/s
         # if s is held down, set x acceleration to -10, other handling ensures that velocity will stay between 0 and 100 m/s
         # if neither or both, set x acceleration to - sqrt vel <- simulates drag and high air resistance at higher speeds
@@ -135,7 +139,11 @@ class Entity:
         If `True`, calls `self.on_wall_collide()`. If `False`, does nothing more.
         """
         
+        if self.crash_end_timestamp > time_ns()/1e9:
+            return False
+        
         if abs(self.pos[1]) > OOB_LENIENCY + TRACK_WIDTH/2:
+            print(f"abs({self.pos[1]}) > {OOB_LENIENCY} + {TRACK_WIDTH/2}")
             self.on_wall_collide()
             return True
         
@@ -193,6 +201,11 @@ class Entity:
         so left spawns at pos[1]=-MAP_WIDTH/5 and right spawns at pos[1]=MAP_WIDTH/5
         """
         
+        # set all keys to False
+        self.key_presses = [False, False, False, False]
+        
+        self.crash_end_timestamp = end_timestamp
+        
         # new physics: set velocity to 0, set acceleration to 0, set angle to track angle, 
         # and set y_pos to what's specified in `spawn_direction`
         
@@ -200,12 +213,19 @@ class Entity:
         new_y_pos = self.gamemap.map_data['width']/5 * y_pos_multiplier
         
         print(f"{self.name} collided with {other.name}!")
+        
+        # set the new physics here
+        self.pos[1] = new_y_pos
+        self.vel = 0
+        self.acc = 0
+        self.angle = self.gamemap.angle_at(self.pos[0])
+        
         self.client.send_data({
             "new_physics": {
-                "pos": [self.pos[0], new_y_pos],
+                "pos": self.pos,
                 "vel": 0,
                 "acc": 0,
-                "angle": self.gamemap.angle_at(self.pos[0]),
+                "angle": self.angle,
                 "hitbox_radius": self.hitbox_radius,
                 "keys": self.key_presses
             }, 
@@ -217,18 +237,28 @@ class Entity:
         Called when this entity collides with world geometry (such as going too far off the track)
         """
         
+        # set all keys to False
+        self.key_presses = [False, False, False, False]
+        
+        self.crash_end_timestamp = time_ns()/1e9 + CRASH_DURATION
         # new physics: set velocity to 0, set acceleration to 0, set angle to track angle, and set y_pos to 0
+        
+        # set the new physics here
+        self.pos[1] = 0
+        self.vel = 0
+        self.acc = 0
+        self.angle = self.gamemap.angle_at(self.pos[0])
         
         self.client.send_data({
             "new_physics": {
-                "pos": [self.pos[0], 0],
+                "pos": self.pos,
                 "vel": 0,
                 "acc": 0,
-                "angle": self.gamemap.angle_at(self.pos[0]),
+                "angle": self.angle,
                 "hitbox_radius": self.hitbox_radius,
                 "keys": self.key_presses
             },
-            "crash_end_timestamp": time_ns()/1e9 + CRASH_DURATION
+            "crash_end_timestamp": self.crash_end_timestamp
         }, 'crash')
         
         

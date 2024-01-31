@@ -113,9 +113,6 @@ def game_end(leaderboard_data: list) -> None:
     """
 
     leaderboard = Leaderboard(leaderboard_data)
-
-    #uncomment once able to run in real game
-    #GameManager.game_renderer.render_frame()
     
     start_timestamp = time.time()
     

@@ -18,7 +18,7 @@ def countdown():
             # After we return out of this, `../main.py` will call `live_game``
             return
 
-        GameManager.game_renderer.render_frame(False)
+        GameManager.game_renderer.render_frame()
         
         # draw the countdown
         text = FONT_LARGE.render(f"{time_left if time_left>0 else 'Go!'}", True, (255, 255, 255))

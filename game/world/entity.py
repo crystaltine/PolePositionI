@@ -46,6 +46,8 @@ class Entity:
         self.hitbox_radius = hitbox_radius
         
         self.last_update_timestamp = time_ns()
+        
+        self.crash_end_timestamp = 0 # only used for the us entity
     
         # False = key is not held down, True = key is held down
         # Use this to update acceleration and angle
@@ -74,10 +76,21 @@ class Entity:
         Should be run on every server tick (for now, 24tps) - see `../CONSTANTS.py`
         """
         
+        # if we are in a crash, don't update
+        time_until_crash_end = self.crash_end_timestamp - time_ns()/1e9
+        if time_until_crash_end > 0:
+            
+            # set all keys to False
+            self.key_presses = [False, False, False, False]
+            
+            self.last_update_timestamp = time_ns()
+            return
+        
         delta_time_s = (time_ns() - self.last_update_timestamp) / 1e9
         
         # update angle
-        self.angle += (self.key_presses[3] - self.key_presses[2]) * 50 * delta_time_s
+        self.angle += ((self.key_presses[3] - self.key_presses[2]) * 50 * delta_time_s)
+        self.angle %= 360
         
         # TODO - these equation are tweakable (maybe even make deceleration quadratic?)
         # if w is held down, set x acceleration to 10- sqrt vel <- ensures no acc at v=100m/s
