@@ -343,22 +343,22 @@ class RenderingManager:
         turning_left,
         curved_left, 
         left_centering,
+
         road_straight, 
         turning_right,
         curved_right,
         right_centering,
+
         road_straight,
         turning_left,
         curved_left, 
         left_centering,
+
         road_straight,
         turning_right,
         curved_right,
         right_centering,
-        road_straight,
-        turning_left,
-        curved_left, 
-        left_centering,
+
         road_straight
     ]
     roadpaths_index = 0
@@ -393,7 +393,7 @@ class RenderingManager:
         for entity in init_entities:
             self.place_entity(entity)
 
-    def render_frame(self):
+    def render_frame(self, road_moving:bool):
         """
         Draws on the screen a single frame based on the current state of the internal physics engine.
         """
@@ -417,6 +417,32 @@ class RenderingManager:
         # one from bottom right to x=1000,y=520
         # one from x=200,y=520 to x=vanishing_point_loc,y=240
         # one from x=1000,y=520 to x=vanishing_point_loc,y=240
+        
+        if road_moving:
+            road_image = RenderingManager.roadpaths[RenderingManager.roadpaths_index].current()
+            road_image = pygame.transform.scale_by(road_image, (2.4, 1.945))      
+            GameManager.draw_road(road_image) 
+            road_image = RenderingManager.roadpaths[RenderingManager.roadpaths_index].next()
+            if road_image is None:
+                RenderingManager.roadpaths_index += 1
+                RenderingManager.roadpaths[RenderingManager.roadpaths_index].iter()
+                road_image = RenderingManager.roadpaths[RenderingManager.roadpaths_index].current()
+        else:
+            road_image = RenderingManager.roadpaths[RenderingManager.roadpaths_index].current()
+            road_image = pygame.transform.scale_by(road_image, (2.4, 1.945))      
+            GameManager.draw_road(road_image) 
+        if GameManager.get_our_entity().pos[0] > 400 and RenderingManager.roadpaths_index == 0:
+            RenderingManager.roadpaths_index += 1
+        elif GameManager.get_our_entity().pos[0] > 800 and RenderingManager.roadpaths_index == 2:
+            RenderingManager.roadpaths_index += 1
+        elif GameManager.get_our_entity().pos[0] > 1200 and RenderingManager.roadpaths_index == 4:
+            RenderingManager.roadpaths_index += 1
+        elif GameManager.get_our_entity().pos[0] > 2000 and RenderingManager.roadpaths_index == 6:
+            RenderingManager.roadpaths_index += 1
+        elif GameManager.get_our_entity().pos[0] > 2400 and RenderingManager.roadpaths_index == 8:
+            RenderingManager.roadpaths_index += 1
+        elif GameManager.get_our_entity().pos[0] > 2800 and RenderingManager.roadpaths_index == 10:
+            RenderingManager.roadpaths_index += 1
         
         # pygame.draw.line(GameManager.screen, (0,0,0), (0, HEIGHT), (200, 520), 5)
         # pygame.draw.line(GameManager.screen, (0,0,0), (WIDTH, HEIGHT), (1000, 520), 5)
