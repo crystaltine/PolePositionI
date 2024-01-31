@@ -2,13 +2,13 @@ import socket
 import typing
 import threading
 import random
+import flask
 from string import ascii_uppercase, digits
 from uuid import uuid4
 
 from socket_wrapper import _send
 import client_room
 from CONSTANTS import HOST, PORT
-import flask
 from mainloop import broadcast_mainloop
 
 app = flask.Flask(__name__)

@@ -11,6 +11,15 @@ MAPS = {
         "width": 100,
         "oob_leniency": 10,
         "wr_time": 47.23,
+    },
+    "Curvy": {
+        "map_name": "Curvy",
+        "map_file": "Curvy.map",
+        "preview_file": "curvy.png",
+        "length": 5000,
+        "width": 120,
+        "oob_leniency": 5,
+        "wr_time": 98.54,
     } 
 }
 
