@@ -154,7 +154,7 @@ class World:
             #just checks to see how far you deviate from 0 and if too far then crash
             dist = entity.pos[1]
             #track is 200 m wide and 0 is the center of it, this gives 30 m of leniency which might be too much of how far off you can go
-            if dist > 130:
+            if dist > 55:
                 entity.on_wall_collide()
                     
     def get_world_data(self) -> list:
