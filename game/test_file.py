@@ -24,10 +24,10 @@ mtns = pygame.image.load(os.path.join(os.path.dirname(__file__), 'assets','mount
 road_straight = SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\straight road'), (0, -3*height/5, width, 4*height/3), 12, -1, True, 0.041)
 curved_left = SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\curved left'), (0, -3*height/5, width, 4*height/3), 12, -1, True, 0.041)
 curved_right = SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\curved right'), (0, -3*height/5, width, 4*height/3), 12, -1, True, 0.041)
-left_centering = SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\left centering'), (0, -3*height/5, width, 4*height/3), 8, -1, False, 0.08)
-right_centering = SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\right centering'), (0, -3*height/5, width, 4*height/3), 8, -1, False, 0.125)
+left_centering = SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\left centering'), (0, -3*height/5, width, 4*height/3), 8, -1, False, 0.041)
+right_centering = SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\right centering'), (0, -3*height/5, width, 4*height/3), 8, -1, False, 0.041)
 turning_left = SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\turning left'), (0, -3*height/5, width, 4*height/3), 8, -1, False, 0.041)
-turning_right = SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\turning right'), (0, -3*height/5, width, 4*height/3), 8, -1, False, 0.125)
+turning_right = SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\turning right'), (0, -3*height/5, width, 4*height/3), 8, -1, False, 0.041)
 
 #create explosion
 boom = SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\collision explosino'), (0, 0, width, height), 5, -1, False, 0.25)
@@ -75,7 +75,7 @@ boom_frame = boom.current()
 
 #game state 
 while True:
-    screen.blit(grass, (0, mtns.get_height())) #2*height/5
+    screen.blit(grass, (0, 2*height/5))
     screen.blit(mtns, (0, 0)) #height/5
     
     for event in pygame.event.get():
@@ -90,16 +90,9 @@ while True:
                 roadpaths_index += 1
                 if roadpaths_index >= len(roadpaths):
                     roadpaths_index = 0
-            if event.key == pygame.K_b:
-                is_boom = True
-    screen.blit(road_image, (0, -6.9*height/5))
-    if boom_frame == None:
-        is_boom = False
-        boom.iter()
-        boom_frame = boom.current()
-    if is_boom:
-        screen.blit(boom_frame, (0, 0))
-        boom_frame = boom.next()
+
+    screen.blit(road_image, (0, -6.9*height/5))        
+
     pygame.display.flip()
     road_image = roadpaths[roadpaths_index].next()      
     current_time = datetime.datetime.now()

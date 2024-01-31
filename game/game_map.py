@@ -1,5 +1,5 @@
 from typing import List
-from CONSTANTS import MAPS
+from CONSTANTS import *
 import random
 
 class CurveSegment:
@@ -39,23 +39,62 @@ class CurveSegment:
             # interpolate between mid_x and end_x
             return self.theta_f * (self.end_x - pos_x) / (self.end_x - self.mid_x)
 
+    def get_vanishing_point_pos(self, pos_x: int) -> int:
+        """
+        Returns the x-position of the vanishing point ON THE SCREEN.
+        
+        For example, if `FOV=100`, `WIDTH=1200` (of screen), and we are at the extreme of the curve (30 degrees), 
+        the vanishing point is calculated as follows:
+        
+        Our FOV extends 50 degrees to the right. 30 degrees (positive=right) means we are 3/5ths of the way from
+        the center of the screen to the right edge. This means the vanishing point should be at 8/10 of the screen width, or 960px.
+        """
+        
+        angle = 0
+        
+        if pos_x < self.start_x or pos_x > self.end_x:
+            return angle # return angle of 0 (straight track)
+        
+        # NOTE postcondition: pos_x in [start_x, end_x]
+        
+        # calculate vanishing point angle
+        if pos_x < self.mid_x:
+            # interpolate between start_x and mid_x
+            angle = self.theta_f * (pos_x - self.start_x) / (self.mid_x - self.start_x) 
+        else:
+            # interpolate between mid_x and end_x
+            angle = self.theta_f * (self.end_x - pos_x) / (self.end_x - self.mid_x)
+            
+        return (0.5 + (angle / FOV_DEGREES) / 2) * WIDTH
+
+    def __str__(self) -> str:
+        return f"CurveSegment(srt={self.start_x}, mid={self.mid_x}, end={self.end_x}, ang={self.theta_f})"
+
 class GameMap:
     """
     Represents a racetrack object and its information, such as length and world record time.
     """
     
-    def __init__(self, map_name: str = None):
+    def __init__(self, map_details: dict):
         """
-        Creates a new GameMap object. If no map name is provided, a random map is picked.
+        Creates a new GameMap object from data received from the server on room creation/join.
+        
+        That data should look like this:
+        ```typescript
+        {
+          map_name: string,
+          map_file: string, // the file inside ./maps, on both the server and client
+          preview_file: string, // the file the client should load as a waiting room preview img
+          length: number,
+          width: number,
+          oob_leniency: number,
+          wr_time: number,
+        }
+        ```
         """
         
-        if map_name is None: map_name = random.choice(list(MAPS.keys()))
-        
-        elif not map_name in MAPS.keys():
-            raise ValueError(f"Map name {map_name} not found in maps list!")
-        
-        self.map_name = map_name
-        self.map_data = MAPS[map_name]
+        self.map_name = map_details['map_name']
+        self.map_data = map_details
         """
         Format:
         ```typescript
@@ -64,12 +103,18 @@ class GameMap:
           map_file: string, // the file inside ./maps, on both the server and client
           preview_file: string, // the file the client should load as a waiting room preview img
           length: number,
+          width: number,
+          oob_leniency: number,
           wr_time: number,
         } 
         ```
         """
         
         self.segments = self.parse_map_file()
+        
+        print(f"\x1b[32GameMap (client): Parsed segments to be the following:\x1b[0m")
+        for segment in self.segments:
+            print(f"\x1b[32m{segment}\x1b[0m")
         
     def parse_map_file(self) -> List[CurveSegment]:
         """
@@ -97,7 +142,7 @@ class GameMap:
         
         segments = []
         
-        with open(f"./server/maps/{self.map_data['map_file']}", "r") as f:
+        with open(f"./game/maps/{self.map_data['map_file']}", "r") as f:
             for line in f.readlines():
                 start_x, mid_x, end_x, theta_f = line.split(",")
                 segments.append(CurveSegment(int(start_x), int(mid_x), int(end_x), int(theta_f)))
@@ -115,5 +160,23 @@ class GameMap:
         for segment in self.segments:
             if pos_x >= segment.start_x and pos_x <= segment.end_x:
                 return segment.angle_at(pos_x)
-            
+    
         return 0
+    
+    def vanishing_point_at(self, pos_x) -> float:
+        """
+        Returns the x-position of the vanishing point ON THE SCREEN.
+        
+        For example, if `FOV=100`, `WIDTH=1200` (of screen), and we are at the extreme of the curve (30 degrees), 
+        the vanishing point is calculated as follows:
+        
+        Our FOV extends 50 degrees to the right. 30 degrees (positive=right) means we are 3/5ths of the way from
+        the center of the screen to the right edge. This means the vanishing point should be at 8/10 of the screen width, or 960px.
+        """
+        
+        # since there are a small number of segments, a linear search should be fine
+        for segment in self.segments:
+            if pos_x >= segment.start_x and pos_x <= segment.end_x:
+                return segment.get_vanishing_point_pos(pos_x)
+            
+        return WIDTH/2 # default to center of screen if not found

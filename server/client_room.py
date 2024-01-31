@@ -8,10 +8,9 @@ import json
 
 from socket_wrapper import _send
 from key_decoder import decode_packet
-from game_map import GameMap
 from world.entity import Entity
 from world.world import World
-from CONSTANTS import CAR_COLORS
+from CONSTANTS import *
 
 class Client:
     """
@@ -31,6 +30,8 @@ class Client:
         self.entity: Entity = None # The entity that this client controls. If not in game, this should be None
         self.hosting: Room = None # If this client is the owner of a room, this field should point to that room 
         
+        self.stop_receiving = False
+        
     def start_recv_thread(self):
         """
         Begins a new thread running recieve loop for the socket.
@@ -40,19 +41,17 @@ class Client:
         All other requests from the client will be HTTP, not socketio-based. <- i think
         
         ^ Therefore, they shoudln't interfere with this loop.
-        
-        @TODO - using threading is definitely inefficient, maybe try asyncio?
         """
     
         def recv_loop():
             while True:
                 
+                if self.stop_receiving: break
+                
                 # the client only sends keypress encodings, which are only 0-7 (representable in 1 byte)
                 data = self.sock.recv(1)
                 if data is None: break
                 
-                # TODO - a ton of 0's come through when we ungracefully shutdown the client
-                # for some reason... fix maybe by changing packet codes to be 1-8, and just ignore 0's?
                 keydata = int.from_bytes(data, 'big')
                 
                 # key data should always be between 0 and 7. If not, ignore
@@ -68,7 +67,7 @@ class Client:
                 else:
                     print(f"\x1b[34mClient \x1b[33m{self.id}\x1b[0m: No entity to update keys on!")
                 
-            print(f"\x1b[34mClient \x1b[33m{self.id}\x1b[0m is disconnected!\x1b[0m")
+            print(f"\x1b[34mStopped receiving from Client \x1b[33m{self.id}\x1b[0m!\x1b[0m")
             
         print(f"\x1b[34mClient \x1b[33m{self.id}\x1b[0m: Starting recv loop...")
         
@@ -80,6 +79,7 @@ class Client:
             self.sock = None
             
             # TODO - delete this client from the room
+            del self
         
     def send_data(self, data, event_name: str = None) -> bool:
         """
@@ -90,8 +90,14 @@ class Client:
         
         Returns `True` if the socket is still open and the message was sent, `False` if otherwise.
         
-        @TODO - instead of checking types, require data to be `ReadableBuffer`
+        if `event_name` is specified, then the message will be sent as an event, and the data must be JSON-serializable.
         """
+        
+        if event_name:
+            # is event, so just pass through
+            _send(self.sock, data, event_name=event_name)
+            return
+        
         try:
             
             # Handle list[float] case, which will be the main use of this function (sending a packet)
@@ -134,18 +140,16 @@ class Room:
         self.id = id
         self.host = host
         self.started = False
-        
-        # Pick a random map.
-        self.map = GameMap()
+        self.ended = False
         
         # Create the world
-        self.world = World(self.map.map_data["world_size"]) # TODO - define track geometry
+        self.world = World()
         
         # Add all clients to the world
         # testing: put them at (100, 100), (100, 150), (100, 200), and so on.
         # also they should have hitbox radius 2.5
         for i, client in enumerate(self.clients.values()):
-            e = self.world.create_entity(client["username"], client["color"], client["client_obj"], (0 + (-20 * i), 0), hitbox_radius=2.5)
+            e = self.world.create_entity(client["username"], client["color"], client["client_obj"], [0 + (-20 * i), 0], hitbox_radius=2.5)
             client["client_obj"].entity = e
 
     def start_game(self):
@@ -166,7 +170,7 @@ class Room:
             # see game/screens/waiting_room.py - game-init and leave events dont need extra data.
             client['client_obj'].send_data({
                 "start_timestamp": start_time,
-                "init_world_data": self.world.get_all_data() # list of init physics data for each entity
+                "init_world_data": self.world.get_world_data() # list of init physics data for each entity
             }, "game-init")
         
         print(f"Start game: Starting in approx {start_time - time.time()} seconds...")
@@ -212,7 +216,9 @@ class Room:
             }, "player-join")
             
         # add the new client to the world
-        e = self.world.create_entity(new_client_username, self.clients[client.id]['color'], client, (0, -20*len(self.clients)), hitbox_radius=2.5)
+        # TODO - make spawning more fair lol - track is only 50m wide on each side.
+        # maybe make it so that the people that spawn closer to the edge spawn with higher x-coord?
+        e = self.world.create_entity(new_client_username, self.clients[client.id]['color'], client, [0, -20*len(self.clients)], hitbox_radius=2.5)
         client.entity = e
             
         return { "username": new_client_username, "color": self.clients[client.id]['color'] }
@@ -238,7 +244,7 @@ class Room:
         # We can try testing this out later, for now just be safe and set to None
         # del self.clients[client.id]
         self.clients.pop(client.id)
-        
+
         # send the 'player-leave' event to all other clients in the room, with the client's username
         for client_id in self.clients:
             self.clients[client_id]['client_obj'].send_data({
@@ -258,20 +264,30 @@ class Room:
         # All dc'ed clients removed, send back new len
         return len(self.clients)
         
-    def update_if_started(self) -> bool:
+    def update_if_started(self) -> None:
         """
         If the game is started, updates the physics of the world.
         
         If game not started yet, do nothing.
-        
-        Returns whether or not updates were made.
         """
         
-        if not self.started: return False
+        if (not self.started) or self.ended: return
         
-        self.world.update()
-        return True
-    
+        game_result = self.world.update()
+        
+        if game_result:
+            # game has ended, perform game-end logic
+            self.ended = True # stop updating physics and flag this room as ended
+            print(f"\x1b[32mRoom {self.id}'s game has ended!\x1b[0m")
+            
+            # stop sending packets to each client
+            for client in self.clients.values():
+                client["client_obj"].stop_receiving = True
+            
+            # the game-end event should have already been sent to all clients.
+            # clients will leave the room from the game-end screen.
+            # we don't have to do anything else.
+            
     def broadcast_physics(self) -> None:
         """
         If game not started yet, do nothing.
@@ -284,9 +300,9 @@ class Room:
         Returns whether or not data was sent.
         """
         
-        current_world_data = self.world.get_all_data()
+        current_world_data = self.world.get_world_data()
         
-        if not self.started: return False
+        if not self.started or self.ended: return
         for client in self.clients.values():
             # pre-encode data
             client["client_obj"].send_data(json.dumps(current_world_data).encode('utf-8'))

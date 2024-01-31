@@ -11,11 +11,8 @@ def start_program():
     (Main menu or connecting... screen)
     """
     
-    init_managers()
-    
     # see docstring for main_menu and other comments in that file for an explanation
     # tldr - main menu will return False if we should stay on it, and True if we should proceed to the next screen
-    
     main_menu_result = main_menu()
     while not main_menu_result:
         main_menu_result = main_menu()
@@ -24,12 +21,12 @@ def start_program():
     countdown()
     live_game_result = live_game()
     
-    if live_game_result == 2: # this is a code to move to the end screen
+    if live_game_result: # this is a code to move to the end screen
         game_end(GameManager.leaderboard_data)
 
-    GameManager.socket_man.stop_listening()
-    del GameManager.game_renderer.world
+    del GameManager.game_renderer
 
 if __name__ == "__main__":
+    init_managers()
     while True:
         start_program()

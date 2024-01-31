@@ -1,6 +1,4 @@
 import pygame
-import sys
-from time import time
 
 from managers import GameManager, RenderingManager
 from CONSTANTS import BUTTON_MEDIUM, FONT_TINY, FONT_MEDIUM, FONT_LARGE, FONT_SIZES
@@ -8,22 +6,12 @@ from elements.button import Button
 from elements.waiting_lobby_player import waiting_lobby_player
 from elements.waiting_room_main_panel import WaitingRoomMainPanel
 
-def waiting_room(details: dict, is_leader = False, connected_players: list = []) -> bool:
+def waiting_room(is_leader = False, connected_players: list = []) -> bool:
     """
     Creates/Mounts the room where the user is sent after creating/joining a room
     
     Just as a note, we are safe to use `GameManager.socket_man` and `GameManager.http_man` here because
     this function is only called AFTER both are successfully initialized and connected.
-    
-    @param `details` - As of Jan. 26th, 1:34AM, `details` should have the following schema: (see `server/CONSTANTS.py`)
-    ```python
-    {
-        "map_name": "fsdfksdj",
-        "preview_file": "fsdfksdj.png",
-        "length": 999,
-        "wr_time": 55,
-    }
-    ``` 
     
     @param `is_leader` - Whether the user is the leader of the room (the one who can start the game). Determines
     if the start button is disabled or not.
@@ -53,18 +41,15 @@ def waiting_room(details: dict, is_leader = False, connected_players: list = [])
     side_panel.fill((0, 0, 0, 128))
     
     # Load the 240x240 map preview
-    map_preview = pygame.image.load(f'./game/assets/lobby/maps/{details["preview_file"]}')
+    map_preview = pygame.image.load(f'./game/assets/lobby/maps/{GameManager.map_data["preview_file"]}')
     side_panel.blit(map_preview, (20, 20))
     
     map_label = FONT_TINY.render("Map:", True, (255, 255, 255))
-    map_text = FONT_MEDIUM.render(details['map_name'], True, (255, 255, 255))
+    map_text = FONT_MEDIUM.render(GameManager.map_data['map_name'], True, (255, 255, 255))
     length_label = FONT_TINY.render("Track length:", True, (255, 255, 255))
-    length_text = FONT_MEDIUM.render(f"{details['length']} m", True, (255, 255, 255))
+    length_text = FONT_MEDIUM.render(f"{GameManager.map_data['length']} m", True, (255, 255, 255))
     record_label = FONT_TINY.render("WR time:", True, (255, 255, 255))
-    record_text = FONT_MEDIUM.render(f"{details['wr_time']} s", True, (255, 255, 255))
-    # TODO - save pb times on client side (in a file), then fetch
-    #pb_label = FONT_TINY.render("PB time:", True, (255, 255, 255))
-    #pb_text = FONT_MEDIUM.render(f"{details['pb_time']} s", True, (255, 255, 255))
+    record_text = FONT_MEDIUM.render(f"{GameManager.map_data['wr_time']} s", True, (255, 255, 255))
     
     LABEL_GAP = 5
     DESC_GAP = 20
@@ -93,11 +78,11 @@ def waiting_room(details: dict, is_leader = False, connected_players: list = [])
     
     def _init_start(data): 
         print(f"Initializing Live Game: The consensus start timestamp is \x1b[33m{data['start_timestamp']}\x1b[0m")
-        GameManager.waiting_room_game_started = True
         GameManager.start_timestamp = data['start_timestamp']
         
         # Create our RenderingManager (game is about to start)
         GameManager.game_renderer = RenderingManager(data['init_world_data'])
+        GameManager.waiting_room_game_started = True
         
     def _leave(_):
         GameManager.socket_man.stop_listening()
@@ -139,7 +124,7 @@ def waiting_room(details: dict, is_leader = False, connected_players: list = [])
                 if start_button.is_hovering(pygame.mouse.get_pos()):
                     # start button won't be hovering ever if it is disabled
                     # so we don't need to check if it is disabled again here.
-                    # plus, server rejects all unauthorized start requests (TODO maybe)
+                    # plus, server rejects all unauthorized start requests
                     GameManager.http_man.start_game(GameManager.room_id)
                 elif leave_button.is_hovering(pygame.mouse.get_pos()):
                     GameManager.http_man.leave_room()
