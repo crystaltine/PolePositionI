@@ -8,7 +8,7 @@ import threading
 import os
 from time import time_ns
 from typing import Union, Dict, List, Callable, Any, TYPE_CHECKING
-from sprite_strip_anim import SpriteStripAnim
+from sprite_strip_anim import RoadAnimator, SpriteStripAnim
 
 from CONSTANTS import *
 from elements.button import Button
@@ -140,7 +140,14 @@ class GameManager:
         
     @staticmethod
     def draw_road(road_image) -> None:
-        GameManager.screen.blit(road_image, (0, -6.9*RenderingManager.height/5)) 
+        """
+        Draws the road image on screen.
+        
+        The road sprite should be HEIGHT-240px tall, and span the whole width.
+        
+        Thus, it it blitted at (0, 240)
+        """
+        GameManager.screen.blit(road_image, (0, 240))
     
     @staticmethod
     def draw_static_background():
@@ -271,7 +278,7 @@ class GameManager:
     
     def draw_permanent_road(self):
         """
-        Constantly animates the straight road on 
+        @ TODO - maybe use draw_bottom_road instead?
         """
         coords = (0, 400), (WIDTH,400), (WIDTH, HEIGHT), (0, HEIGHT)
         road_image = RenderingManager.roadpaths[RenderingManager.roadpaths_index].current()
@@ -314,10 +321,15 @@ class RenderingManager:
     @TODO - we should probably destroy this object when the game ends (once we implement game end logic)
     """
 
-    width = 1200 #2.4
-    height = 720 #1.6
+    orig_width = 500
+    orig_height = 450
 
-    road_straight = SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\straight road'), (0, -3*height/5, width, 4*height/3), 12, -1, True, 0.041)
+    width = 1200 
+    height = 240 
+    
+    sprite_fp = lambda name: os.path.join(os.path.dirname(__file__), 'assets\\road frames\\' + name)
+
+    road_straight = SpriteStripAnim(sprite_fp("straight road"), (0, 0, orig_width, orig_height), 12, None, True, 0.041)
     curved_left = SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\curved left'), (0, -3*height/5, width, 4*height/3), 12, -1, True, 0.041)
     curved_right = SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\curved right'), (0, -3*height/5, width, 4*height/3), 12, -1, True, 0.041)
     left_centering = SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\left centering'), (0, -3*height/5, width, 4*height/3), 8, -1, False, 0.041)
@@ -375,7 +387,7 @@ class RenderingManager:
         ```
         """
         self.world = World(GameManager.map_data)
-        
+        self.road_animator = RoadAnimator(self.world.gamemap)
         self.last_render_time = time_ns()
         
         for entity in init_entities:
@@ -385,30 +397,19 @@ class RenderingManager:
         """
         Draws on the screen a single frame based on the current state of the internal physics engine.
         """
-        
-
-        road_image = RenderingManager.roadpaths[RenderingManager.roadpaths_index].current()
-        road_image = pygame.transform.scale_by(road_image, (2.4, 1.945))      
-        GameManager.draw_road(road_image) 
-        road_image = RenderingManager.roadpaths[RenderingManager.roadpaths_index].next()
-        if road_image is None:
-            roadpaths_index += 1
-            RenderingManager.roadpaths[roadpaths_index].iter()
-            road_image = RenderingManager.roadpaths[RenderingManager.roadpaths_index].current()
-        road_image = pygame.transform.scale_by(road_image, (2.4, 1.945))
-
-        
-        deltatime = (time_ns() - self.last_render_time) / 1e9
-        self.last_render_time = time_ns()
-        
         us = GameManager.get_our_entity()
         
         GameManager.draw_dynamic_background()
         
-        vanishing_point_loc = self.world.gamemap.vanishing_point_at(us.pos[0])
+        road_image = self.road_animator.get_next(us.pos[0])
         
-        # add to accumulated angle
-        GameManager.accumulated_angle += self.world.gamemap.angle_at(us.pos[0]) * ANGLE_ACCUMULATION_FACTOR * deltatime
+        deltatime = (time_ns() - self.last_render_time) / 1e9
+        self.last_render_time = time_ns()
+        
+        # vanishing_point_loc = self.world.gamemap.vanishing_point_at(us.pos[0])
+        
+        # add to accumulated angle. Also mult by velocity/100 (at 0 speed we shouldnt be turning)
+        GameManager.accumulated_angle += self.world.gamemap.angle_at(us.pos[0]) * ANGLE_ACCUMULATION_FACTOR * deltatime * us.vel/100
 
         # TODO - draw the road
         # for now, we just draw four testing lines:
@@ -417,10 +418,13 @@ class RenderingManager:
         # one from x=200,y=520 to x=vanishing_point_loc,y=240
         # one from x=1000,y=520 to x=vanishing_point_loc,y=240
         
-        pygame.draw.line(GameManager.screen, (0,0,0), (0, HEIGHT), (200, 520), 5)
-        pygame.draw.line(GameManager.screen, (0,0,0), (WIDTH, HEIGHT), (1000, 520), 5)
-        pygame.draw.line(GameManager.screen, (0,0,0), (200, 520), (vanishing_point_loc, 240), 5)
-        pygame.draw.line(GameManager.screen, (0,0,0), (1000, 520), (vanishing_point_loc, 240), 5)
+        # pygame.draw.line(GameManager.screen, (0,0,0), (0, HEIGHT), (200, 520), 5)
+        # pygame.draw.line(GameManager.screen, (0,0,0), (WIDTH, HEIGHT), (1000, 520), 5)
+        # pygame.draw.line(GameManager.screen, (0,0,0), (200, 520), (vanishing_point_loc, 240), 5)
+        # pygame.draw.line(GameManager.screen, (0,0,0), (1000, 520), (vanishing_point_loc, 240), 5)
+        
+        # blit the road
+        GameManager.draw_road(road_image) 
         
         # TODO - draw entities
             

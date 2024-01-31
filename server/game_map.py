@@ -104,7 +104,7 @@ class GameMap:
                 
         return segments      
         
-    def angle_at(self, pos_x) -> float:
+    def angle_at(self, pos_x: float) -> float:
         """
         Returns the angle of the track at a certain x position.
         
