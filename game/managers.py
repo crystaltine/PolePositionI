@@ -437,6 +437,18 @@ class RenderingManager:
         # TODO - draw entities
             
         GameManager.draw_car(us.pos[1], us.angle)
+        sorted_by_dist = sorted(GameManager.get_all_other_entities(), key=lambda e: e.pos[0]**2 + e.pos[1]**2, reverse=True)
+        for other in sorted_by_dist:
+            size = RenderingManager.get_rendered_size(other)
+            if size < 30:
+                continue
+            total_x_range = WIDTH - 40 - GameManager.car.get_width() # 20px padding on each side, plus the width of the car
+            total_track_width = GameManager.map_data['width'] + 2*GameManager.map_data['oob_leniency']
+            proportion_of_total_range = (other.pos[1] + total_track_width/2) / total_track_width
+            horizontal_pos = 20 + proportion_of_total_range * total_x_range
+            pos = (horizontal_pos, (4*HEIGHT/5 - GameManager.car.get_height()/2) - (other.pos[0] - us.pos[0]))
+            RenderingManager.draw_entity(size, pos, other.color)
+        
         
     def tick_world(self):
         """
@@ -590,6 +602,7 @@ class RenderingManager:
         
         # print(f"Drawing entity at {pos} with size {size} and color {color}")
         pygame.draw.circle(GameManager.screen, color, pos, size)
+        
         
 class SocketManager:
     """
