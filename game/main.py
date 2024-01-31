@@ -24,8 +24,6 @@ def start_program():
     if live_game_result: # this is a code to move to the end screen
         game_end(GameManager.leaderboard_data)
 
-    GameManager.game_renderer.world = None
-
 if __name__ == "__main__":
     init_managers()
     while True:

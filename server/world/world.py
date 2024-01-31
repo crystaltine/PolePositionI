@@ -32,8 +32,9 @@ class World:
         
         If no map name is provided, a random map is picked.
         """
+        
         self.gamemap = GameMap(map_name)
-        self.entities: Dict[str, Entity] = {}
+        self.entities: Dict[str, Entity] = {}        
         """ a map from client_ids to entity objects """
         
     def create_entity(

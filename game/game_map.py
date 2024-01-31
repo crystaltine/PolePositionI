@@ -112,7 +112,7 @@ class GameMap:
         
         self.segments = self.parse_map_file()
         
-        print(f"\x1b[32GameMap (client): Parsed segments to be the following:\x1b[0m")
+        print(f"\x1b[32mGameMap (client): Parsed segments to be the following:\x1b[0m")
         for segment in self.segments:
             print(f"\x1b[32m{segment}\x1b[0m")
         

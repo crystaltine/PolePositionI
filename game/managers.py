@@ -320,8 +320,6 @@ class RenderingManager:
     based on the data the server sends us (every minute)
     
     We keep an internal physics engine for smoother animations, although server data overrides this.
-    
-    @TODO - we should probably destroy this object when the game ends (once we implement game end logic)
     """
 
     orig_width = 500
@@ -389,6 +387,9 @@ class RenderingManager:
         }
         ```
         """
+        
+        print(f"\x1b[35mCreating RenderingManager with {len(init_entities)} entities\x1b[0m")
+        
         self.world = World(GameManager.map_data)
         self.road_animator = RoadAnimator(self.world.gamemap)
         self.last_render_time = time_ns()
