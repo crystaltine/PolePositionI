@@ -38,6 +38,7 @@ def live_game() -> bool:
         GameManager.crash_end_timestamp = crash_data['crash_end_timestamp']
         us.crash_end_timestamp = crash_data['crash_end_timestamp']
         us.set_physics(crash_data['new_physics'])
+        crash_sound.play()
         
     # create new event handler
     GameManager.socket_man.on('leave', _leave)
@@ -55,6 +56,7 @@ def live_game() -> bool:
         for event in pygame.event.get():
             if event == pygame.QUIT:
                 GameManager.quit_game()
+
                 
             GameManager.socket_man.handle_game_keypresses(event)
         
