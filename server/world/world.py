@@ -46,7 +46,7 @@ class World:
         vel: float = 0,
         acc: float = 0,
         angle: float = 0,
-        hitbox_radius: float = 2.5
+        hitbox_radius: float = 5
         ) -> Entity:
         """
         Creates and places an entity at a certain position. 
@@ -169,7 +169,8 @@ class World:
               acc: number,
               angle: number, // in degrees
               hitbox_radius: number,
-              keys: [forward: bool, backward: bool, left: bool, right: bool]
+              keys: [forward: bool, backward: bool, left: bool, right: bool],
+              is_crashed: bool
             }
           },
           ...
@@ -183,19 +184,27 @@ class World:
             "physics": e.get_physics_data()
         } for e in self.entities.values()]
         
-    def get_map_data(self) -> dict:
+    def get_map_data(self, field: str = None) -> dict:
         """
         Returns data about the loaded map on this world.
+        
+        If `field` is provided, returns only that field.
         
         This data is of the schema:
         ```typescript
         {
           map_name: string,
           map_file: string, // the file inside ./maps, on both the server and client
-          preview_file: string, // the file the client should load as a waiting room preview img
+          preview_file: string, // the file the client should load as a waiting room preview img,
+          backdrop_file: string, // the file the client should load as a game backdrop img,
           length: number,
-          wr_time: number,
+          width: number,
+          oob_leniency: number,
         } 
         ```
         """
+        
+        if not field is None:
+            return self.gamemap.map_data[field]
+                
         return self.gamemap.map_data

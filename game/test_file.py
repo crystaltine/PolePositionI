@@ -1,7 +1,7 @@
 import pygame
 import sys
 #from requests_handler import capture_keypress_loop
-from sprite_strip_anim import SpriteStripAnim
+from animator import SpriteStripAnim
 import os
 import datetime
 
@@ -19,8 +19,8 @@ pygame.display.set_caption("Game")
 font = pygame.font.Font('freesansbold.ttf', 32)
 grass = pygame.image.load(os.path.join(os.path.dirname(__file__), 'assets','grass.png')).convert_alpha()
 grass = pygame.transform.scale(grass, (int(width), int(2 * height/3)))
-mtns = pygame.image.load(os.path.join(os.path.dirname(__file__), 'assets','mountains_img.png')).convert_alpha()
-#mtns = pygame.transform.scale(mtns, (width*2, height/5))
+backdrop = pygame.image.load(os.path.join(os.path.dirname(__file__), 'assets','mountains_img.png')).convert_alpha()
+#backdrop = pygame.transform.scale(backdrop, (width*2, height/5))
 road_straight = SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\straight road'), (0, -3*height/5, width, 4*height/3), 12, -1, True, 0.041)
 curved_left = SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\curved left'), (0, -3*height/5, width, 4*height/3), 12, -1, True, 0.041)
 curved_right = SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\curved right'), (0, -3*height/5, width, 4*height/3), 12, -1, True, 0.041)
@@ -76,7 +76,7 @@ boom_frame = boom.current()
 #game state 
 while True:
     screen.blit(grass, (0, 2*height/5))
-    screen.blit(mtns, (0, 0)) #height/5
+    screen.blit(backdrop, (0, 0)) #height/5
     
     for event in pygame.event.get():
         if event.type == pygame.QUIT:

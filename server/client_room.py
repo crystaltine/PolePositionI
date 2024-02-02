@@ -2,7 +2,7 @@ import array
 from typing import List
 from socket import socket
 import time
-from sched import scheduler
+from random import shuffle
 import threading
 import json
 
@@ -145,11 +145,24 @@ class Room:
         # Create the world
         self.world = World()
         
+        map_width_one_side = self.world.get_map_data("width")/2
+        self.spawn_locations = [
+            [90, -3*map_width_one_side/4],
+            [60, -2*map_width_one_side/4],
+            [30, -map_width_one_side/4],
+            [0, 0],
+            [30, map_width_one_side/4],
+            [60, 2*map_width_one_side/4],
+            [90, 3*map_width_one_side/4],
+            [120, 4*map_width_one_side/4]
+        ] 
+        shuffle(self.spawn_locations) # shuffle the spawning locs. First player gets [-1], then [-2], etc. (pop)
+        
         # Add all clients to the world
         # testing: put them at (100, 100), (100, 150), (100, 200), and so on.
-        # also they should have hitbox radius 2.5
+        # also they should have hitbox radius 10
         for i, client in enumerate(self.clients.values()):
-            e = self.world.create_entity(client["username"], client["color"], client["client_obj"], [0 + (-20 * i), 0], hitbox_radius=2.5)
+            e = self.world.create_entity(client["username"], client["color"], client["client_obj"], self.spawn_locations.pop(), hitbox_radius=5)
             client["client_obj"].entity = e
 
     def start_game(self):
@@ -216,14 +229,17 @@ class Room:
             }, "player-join")
             
         # add the new client to the world
-        # TODO - make spawning more fair lol - track is only 50m wide on each side.
-        # maybe make it so that the people that spawn closer to the edge spawn with higher x-coord?
-        e = self.world.create_entity(new_client_username, self.clients[client.id]['color'], client, [0, -20*len(self.clients)], hitbox_radius=2.5)
+        e = self.world.create_entity(new_client_username, self.clients[client.id]['color'], client, self.spawn_locations.pop(), hitbox_radius=5)
         client.entity = e
             
         return { "username": new_client_username, "color": self.clients[client.id]['color'] }
         
     def remove_client(self, client: Client):
+        
+        # Get that entity's location. (if game already started, then pos will be different, but at that point spawn loc doesnt matter)
+        loc = client.entity.pos
+        # add their spawn location back into the pool
+        self.spawn_locations.append(loc)
         
         # Delete the related entity from the world
         self.world.destroy_entity(client.id)

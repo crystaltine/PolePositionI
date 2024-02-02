@@ -66,8 +66,6 @@ def draw_ending_sidebar(seconds_since_screen_mounted: float) -> None:
     map_text = FONT_MEDIUM.render(GameManager.map_data['map_name'], True, (255, 255, 255))
     length_label = FONT_TINY.render("Track length:", True, (255, 255, 255))
     length_text = FONT_MEDIUM.render(f"{GameManager.map_data['length']} m", True, (255, 255, 255))
-    record_label = FONT_TINY.render("WR time:", True, (255, 255, 255))
-    record_text = FONT_MEDIUM.render(f"{GameManager.map_data['wr_time']} s", True, (255, 255, 255))
     
     LABEL_GAP = 5
     DESC_GAP = 20
@@ -77,9 +75,6 @@ def draw_ending_sidebar(seconds_since_screen_mounted: float) -> None:
     
     side_panel.blit(length_label, (20, 280 + FONT_SIZES["tiny"] + LABEL_GAP + FONT_SIZES["medium"] + DESC_GAP)) # gap of 10px between text objects
     side_panel.blit(length_text, (20, 280 + 2*FONT_SIZES["tiny"] + 2*LABEL_GAP + FONT_SIZES["medium"] + DESC_GAP))
-    
-    side_panel.blit(record_label, (20, 280 + 2*FONT_SIZES["tiny"] + 2*LABEL_GAP + 2*FONT_SIZES["medium"] + 2*DESC_GAP))
-    side_panel.blit(record_text, (20, 280 + 3*FONT_SIZES["tiny"] + 3*LABEL_GAP + 2*FONT_SIZES["medium"] + 2*DESC_GAP))
     
     #side_panel.blit(pb_label, (20, 280 + 3*FONT_SIZES["tiny"] + 3*LABEL_GAP + 3*FONT_SIZES["medium"] + 3*DESC_GAP))
     #side_panel.blit(pb_text, (20, 280 + 4*FONT_SIZES["tiny"] + 4*LABEL_GAP + 3*FONT_SIZES["medium"] + 3*DESC_GAP))

@@ -38,7 +38,7 @@ Rooms are created when a client requests to create a room. Each room has a uniqu
 - The host leaves the room in the waiting lobby
 - The game ends and all members have left
 
-When a host client clicks the "Start Game" button, an HTTP requests is made to the `/startgame` endpoint which marks the `Room` object that the client is hosting to `started=True`. Once this happens, a timestamp is broadcast to all clients marked by the `game-init` event (see events section). Clients are then instructed to proceed to a countdown screen. Once this start timestamp is reached, the client program will begin rendering world data and listening for keypresses to send to the server.
+When a host client clicks the "Start Game" button, an HTTP request is made to the `/startgame` endpoint which marks the `Room` object that the client is hosting to `started=True`. Once this happens, a timestamp is broadcast to all clients marked by the `game-init` event (see events section). Clients are then instructed to proceed to a countdown screen. Once this start timestamp is reached, the client program will begin rendering world data and listening for keypresses to send to the server.
 
 ### Physics
 Most importantly, all physics are handled on the server side. While the client does have matching a matching physics engine, all data on the client side is overwritten by server-side physics upon receiving a packet, which are broadcasted from the server **every 0.25 seconds**. This is to prevent cheating and to ensure that all clients are in sync. The server also handles all collisions and out-of-bounds penalties. When a client crashes, the server sends a `crash` event to the client, which triggers a crash animation and sets new physics.
@@ -103,7 +103,6 @@ When `pygame.event.get()` on the client-side contains relevant key presses, the 
 
 # Design Choices:
 It's mentioned later within the document, but as we started this project we didn't have much of a vision on how we were going to move the project forwards, which must have influenced our decision to create the live game in a way more familiar to us, so while the original game rendered in the game, the background road was hand-drawn frame by frame to create an animation to play in the background as the car went forwards. Because of this it creates a different look from the original game, with an interesting situatition where because of the straightness and better graphics seen today, but higher pixelation found from software made for lower quality art. It's part of what gives our game it's unique vibe, and is fun in it's own way after the almost tearjerking (not in the fun way) work it took to make the frames.
-
 
 # Playing Instructions
 

@@ -213,7 +213,6 @@ def accept_socket():
         # since the client SHOULD NOT HAVE BEGUN THE EVENT LISTENER YET. (it happens immediately after recv. this)
         conn.send(client_id.encode('utf-8'))
         
-        # TODO - if invalid, kick them or something/ask for a new username
         cli.username = username
 
 def apprun(host, port):

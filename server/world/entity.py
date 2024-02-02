@@ -100,9 +100,16 @@ class Entity:
         delta_time_s = (time_ns() - self.last_update_timestamp) / 1e9
         
         # update angle
-        turn_resistance_factor = (1 - (self.vel/100)**2)
+        # formula for turn resistance: factor = -(0.01*vel-1)**2 + 1 (0x at vel=0, 1x at vel=100, 0x at vel=200)
+        turn_resistance_factor = -(0.01*self.vel-1)**2 + 1
         self.angle += (self.key_presses[3] - self.key_presses[2]) * 50 * turn_resistance_factor * delta_time_s
         self.angle %= 360
+        
+        # clamp angle to 270-360 and 0-90 only
+        if self.angle>=180 and self.angle<270:
+            self.angle = 270
+        elif self.angle<180 and self.angle>90:
+            self.angle = 90
         
         # if w is held down, set x acceleration to 10- sqrt vel <- ensures no acc at v=100m/s
         # if s is held down, set x acceleration to -10, other handling ensures that velocity will stay between 0 and 100 m/s
@@ -179,7 +186,8 @@ class Entity:
           acc: number,
           angle: number, // in degrees
           hitbox_radius: number,
-          keys: [forward: bool, backward: bool, left: bool, right: bool]
+          keys: [forward: bool, backward: bool, left: bool, right: bool],
+          is_crashed: bool,
         },
         ```
         """
@@ -190,7 +198,8 @@ class Entity:
             "acc": self.acc,
             "angle": self.angle%360,
             "hitbox_radius": self.hitbox_radius,
-            "keys": self.key_presses
+            "keys": self.key_presses,
+            "is_crashed": self.crash_end_timestamp > time_ns()/1e9
         }
         
     def on_entity_collide(self, other: 'Entity', spawn_direction: str, end_timestamp: float) -> None:
@@ -228,7 +237,8 @@ class Entity:
                 "acc": 0,
                 "angle": self.angle,
                 "hitbox_radius": self.hitbox_radius,
-                "keys": self.key_presses
+                "keys": self.key_presses,
+                "is_crashed": True
             }, 
             "crash_end_timestamp": end_timestamp
         }, 'crash')
@@ -257,10 +267,8 @@ class Entity:
                 "acc": 0,
                 "angle": self.angle,
                 "hitbox_radius": self.hitbox_radius,
-                "keys": self.key_presses
+                "keys": self.key_presses,
+                "is_crashed": True
             },
             "crash_end_timestamp": self.crash_end_timestamp
         }, 'crash')
-        
-        
-

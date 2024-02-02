@@ -38,6 +38,8 @@ METERS_PER_ANIMATION_FRAME = 3
 The number of meters that must be traveled for the road animations to advance by one frame.
 """
 
+ROAD_FRAMES_DIR = "assets/road_frames/"
+
 # hex is 4370ff
 SKY_RGB = (67, 112, 255)
 BLACK = (0,0,0)
@@ -69,6 +71,12 @@ MAIN_MENU_BOTTOM_RIGHT_TEXT = "Made with Pygame"
 HTTP_URL = 'http://localhost:4000'
 SOCKET_HOST = 'localhost'
 SOCKET_PORT = 3999
+
+
+CARS = {
+    color: pygame.image.load(f'./game/assets/cars/{color}.png') 
+    for color in ["red", "orange", "yellow", "green", "blue", "purple", "pink", "white"]
+}
 
 # Sounds
 sfx_button_hover = pygame.mixer.Sound('./game/assets/sounds/button_hover.mp3')

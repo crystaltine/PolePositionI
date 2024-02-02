@@ -32,7 +32,8 @@ class Entity:
         acc: float = 0,
         angle: float = 0,
         hitbox_radius: float = 0,
-        keys: List[bool] = [False, False, False, False]
+        keys: List[bool] = [False, False, False, False],
+        is_crashed: bool = False
         ) -> None:
         
         #instance variables 
@@ -46,6 +47,8 @@ class Entity:
         self.hitbox_radius = hitbox_radius
         
         self.last_update_timestamp = time_ns()
+        
+        self.is_crashed = is_crashed # used to render explosion animation for enemies
         
         self.crash_end_timestamp = 0 # only used for the us entity
     
@@ -89,11 +92,16 @@ class Entity:
         delta_time_s = (time_ns() - self.last_update_timestamp) / 1e9
         
         # update angle
-        turn_resistance_factor = (1 - (self.vel/100)**2)
+        turn_resistance_factor = -(0.01*self.vel-1)**2 + 1
         self.angle += (self.key_presses[3] - self.key_presses[2]) * 50 * turn_resistance_factor * delta_time_s
         self.angle %= 360
         
-        # TODO - these equation are tweakable (maybe even make deceleration quadratic?)
+        # clamp angle to 270-360 and 0-90 only
+        if self.angle>=180 and self.angle<270:
+            self.angle = 270
+        elif self.angle<180 and self.angle>90:
+            self.angle = 90
+        
         # if w is held down, set x acceleration to 10- sqrt vel <- ensures no acc at v=100m/s
         # if s is held down, set x acceleration to -10, other handling ensures that velocity will stay between 0 and 100 m/s
         # if neither or both, set x acceleration to - sqrt vel <- simulates drag and high air resistance at higher speeds
@@ -131,7 +139,8 @@ class Entity:
           acc: number,
           angle: number, // in degrees
           hitbox_radius: number,
-          keys: [forward: bool, backward: bool, left: bool, right: bool]
+          keys: [forward: bool, backward: bool, left: bool, right: bool],
+          is_crashed: bool
         },
         ```
         """
@@ -142,7 +151,8 @@ class Entity:
             "acc": self.acc,
             "angle": self.angle%360,
             "hitbox_radius": self.hitbox_radius,
-            "keys": self.key_presses
+            "keys": self.key_presses,
+            "is_crashed": self.is_crashed
         }
     
     def get_progress(self) -> float:
@@ -167,7 +177,8 @@ class Entity:
           acc: number,
           angle: number, // in degrees
           hitbox_radius: number,
-          keys: [forward: bool, backward: bool, left: bool, right: bool]
+          keys: [forward: bool, backward: bool, left: bool, right: bool],
+          is_crashed: bool
         },
         ```
         """
@@ -178,5 +189,6 @@ class Entity:
         self.angle = data["angle"]%360
         self.hitbox_radius = data["hitbox_radius"]
         self.key_presses = data["keys"]
+        self.is_crashed = data["is_crashed"]
         
         self.last_update_timestamp = time_ns()
