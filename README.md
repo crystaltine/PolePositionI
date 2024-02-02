@@ -7,6 +7,10 @@ Developers:
 - Architecture, Rendering, UI Design – Michael
 
 # Architecture
+
+## General Diagram (WIP)
+![image](https://github.com/crystaltine/PolePositionI/assets/114899328/7a4ec8e6-d8cc-499f-af58-331868909d9f)
+
 The main idea for our version of Pole Position is the addition of **live multiplayer**. For our complete game system, this means we have two branches - a client side, responsible for rendering interfaces and handling all user inputs, and a server side, which deals with the game logic and communication between clients.
 
 The nature of storing so many different connections and handling a variety of events means our branches heavily leverage OOP.
