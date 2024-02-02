@@ -73,3 +73,5 @@ SOCKET_PORT = 3999
 # Sounds
 sfx_button_hover = pygame.mixer.Sound('./game/assets/sounds/button_hover.mp3')
 sfx_button_click = pygame.mixer.Sound('./game/assets/sounds/button_click.mp3')
+rev_sound = pygame.mixer.Sound('./game/assets/sounds/rev_engine.mp3')
+crash_sound = pygame.mixer.Sound('./game/assets/sounds/crash.mp3')
