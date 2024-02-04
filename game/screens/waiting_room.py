@@ -1,11 +1,12 @@
 import pygame
-
+from pygame import mixer
 from managers import GameManager, RenderingManager
 from CONSTANTS import BUTTON_MEDIUM, FONT_TINY, FONT_MEDIUM, FONT_LARGE, FONT_SIZES
 from elements.button import Button
 from elements.waiting_lobby_player import waiting_lobby_player
 from elements.waiting_room_main_panel import WaitingRoomMainPanel
 
+pygame.mixer.init()
 def waiting_room(is_leader = False, connected_players: list = []) -> bool:
     """
     Creates/Mounts the room where the user is sent after creating/joining a room
@@ -62,6 +63,22 @@ def waiting_room(is_leader = False, connected_players: list = []) -> bool:
     
     side_panel.blit(record_label, (20, 280 + 2*FONT_SIZES["tiny"] + 2*LABEL_GAP + 2*FONT_SIZES["medium"] + 2*DESC_GAP))
     side_panel.blit(record_text, (20, 280 + 3*FONT_SIZES["tiny"] + 3*LABEL_GAP + 2*FONT_SIZES["medium"] + 2*DESC_GAP))
+
+    # pygame.mixer.init()
+    pygame.mixer.music.load("./game/assets/sounds/intro.mp3")
+    pygame.mixer.music.play(0) # repeat once
+    pygame.mixer.music.unload()
+    
+    
+    
+    
+    #pygame.mixer.music.queue("test2.wav")   # queue music after intro 
+    
+    #stop 
+    # clock = pygame.time.Clock()
+    # clock.tick(10)
+    # while pygame.mixer.music.get_busy():
+    #     pygame.event.poll()
     
     #side_panel.blit(pb_label, (20, 280 + 3*FONT_SIZES["tiny"] + 3*LABEL_GAP + 3*FONT_SIZES["medium"] + 3*DESC_GAP))
     #side_panel.blit(pb_text, (20, 280 + 4*FONT_SIZES["tiny"] + 4*LABEL_GAP + 3*FONT_SIZES["medium"] + 3*DESC_GAP))
@@ -93,6 +110,11 @@ def waiting_room(is_leader = False, connected_players: list = []) -> bool:
     GameManager.socket_man.on('leave', _leave) # kicked, manually left, disbanded, etc.
     
     while True:
+            
+
+        # if GameManager.waiting_room_leave_game: 
+        #     pygame.mixer.music.load('./game/assets/sounds/music.mp3')
+        #     pygame.mixer.music.play(-1)  
         
         if GameManager.waiting_room_game_started:
             return True
@@ -113,7 +135,7 @@ def waiting_room(is_leader = False, connected_players: list = []) -> bool:
         start_button.update(GameManager.screen)    
         
         leave_button.changeColor(pygame.mouse.get_pos())
-        leave_button.update(GameManager.screen)
+        leave_button.update(GameManager.screen)      
         
         for event in pygame.event.get():
             

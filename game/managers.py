@@ -28,7 +28,8 @@ class GameManager:
     Implements functions that allow for general display and game management.
     """
     
-    game_renderer: Union[None, 'RenderingManager'] = None # of type `renderer.Renderer`
+    game_renderer = None # of type `renderer.Renderer`
+    #: Union[None, 'RenderingManager']
     """ Used for live game. Is `None` until set by `./screens/waiting_room.py` on the `game-init` event. """
     
     # used solely for waiting room event callbacks. See game/screens/waiting_room.py for more info.
@@ -42,7 +43,8 @@ class GameManager:
     """ Set once game-end event is received. """
     
     # these will be set when we join/create a room
-    room_id: Union[None, str] = None
+    room_id = None
+    #removed type hint - : Union[None, str]
     our_username: str = None
     
     map_data: dict = None
@@ -66,11 +68,13 @@ class GameManager:
     
     # when the unix timestamp is this, begin taking keyboard input and sending to server
     # this gets set when the host starts the game
-    start_timestamp: Union[None, float] = None
+    start_timestamp = None
+    #: Union[None, float]
     
     # Initiate connections with server
     socket_man: 'SocketManager' = None
-    http_man: Union[None, 'HTTPManager'] = None
+    http_man = None
+    #: Union[None, 'HTTPManager']
     """ Will be set externally """
     
     accumulated_angle: float = 0.0
@@ -542,7 +546,8 @@ class RenderingManager:
         return round(30000/(2*dist+100) + 300)
         
     @staticmethod
-    def angle_offset(other: 'Entity') -> Union[int, None]:
+    def angle_offset(other: 'Entity'):
+        #-> Union[int, None]
         """
         ### See `../RENDERER_NOTES.png`
         
@@ -595,12 +600,14 @@ class SocketManager:
         """
     
         self._listen_stopped = True
-        self.registered_events: Dict[str, Callable[[Dict], Any]] = {}
+        self.registered_events = {}
+        #: Dict[str, Callable[[Dict], Any]]
         """ Should be a dict mapping event names to callback functions. """
         
         return
     
-    def connect(self, username: str) -> Union[str, None]:
+    def connect(self, username: str):
+        #-> Union[str, None]
         """
         Creates a socket connection with the server. **Because this contains `socket.recv` calls, it WILL BLOCK THE MAIN THREAD.**
         
@@ -690,7 +697,7 @@ class SocketManager:
         ```typescript
         [
           {
-            username: string,
+            username: string,f
             color: string,
             physics: {
               pos: [number, number],
@@ -709,7 +716,7 @@ class SocketManager:
         print(f"\x1b[35mPACKET RECV: \x1b[33m{len(world_data)}\x1b[0m playerdata packets included")
         GameManager.game_renderer.set_physics(world_data)
                 
-    def on(self, event_name, callback: Callable[[Dict | List], Any]) -> None:
+    def on(self, event_name, callback) -> None:
         """
         Registers a callback function to be called when the specified event is received from the server.
         

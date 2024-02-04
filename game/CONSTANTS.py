@@ -68,3 +68,10 @@ SOCKET_PORT = 3999
 # Sounds
 sfx_button_hover = pygame.mixer.Sound('./game/assets/sounds/button_hover.mp3')
 sfx_button_click = pygame.mixer.Sound('./game/assets/sounds/button_click.mp3')
+
+# SFX_CAR_VROOM = pygame.mixer.Sound('./game/assets/sounds/carVroom.mp3')
+SFX_INTRO = pygame.mixer.Sound('./game/assets/sounds/intro.mp3')
+SFX_SUCCESS = pygame.mixer.Sound('./game/assets/sounds/success.mp3')
+SFX_BEEP = pygame.mixer.Sound("./game/assets/sounds/beep-22.mp3")
+
+#CAR_VROOM audio file not working - weird file type - how to convert?
