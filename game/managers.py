@@ -578,7 +578,6 @@ class RenderingManager:
         return curvature_offset + y_pos_offset * y_pos_offset_distance_scale
 
     @staticmethod
-<<<<<<< HEAD
     def angle_offset(other: 'Entity'):
         #-> Union[int, None]
         """
@@ -607,10 +606,7 @@ class RenderingManager:
         return radians % (2*math.pi) - math.pi
     
     @staticmethod
-    def draw_entity(size: int, pos: tuple[int, int], color: str) -> None:
-=======
     def draw_entity(size: int, pos: tuple[int, int], color: str, crash_progress: float = None):
->>>>>>> c578b7851c7ae4e2c196c938cf5e9f1867c01b2e
         """
         Draws an entity on the screen, given a size, offset, and color.
         

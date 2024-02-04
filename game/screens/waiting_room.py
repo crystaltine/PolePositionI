@@ -58,29 +58,27 @@ def waiting_room(is_leader = False, connected_players: list = []) -> bool:
     
     side_panel.blit(length_label, (20, 280 + FONT_SIZES["tiny"] + LABEL_GAP + FONT_SIZES["medium"] + DESC_GAP)) # gap of 10px between text objects
     side_panel.blit(length_text, (20, 280 + 2*FONT_SIZES["tiny"] + 2*LABEL_GAP + FONT_SIZES["medium"] + DESC_GAP))
-    
-<<<<<<< HEAD
-    side_panel.blit(record_label, (20, 280 + 2*FONT_SIZES["tiny"] + 2*LABEL_GAP + 2*FONT_SIZES["medium"] + 2*DESC_GAP))
-    side_panel.blit(record_text, (20, 280 + 3*FONT_SIZES["tiny"] + 3*LABEL_GAP + 2*FONT_SIZES["medium"] + 2*DESC_GAP))
+#   <<<<<<< HEAD
+#     side_panel.blit(record_label, (20, 280 + 2*FONT_SIZES["tiny"] + 2*LABEL_GAP + 2*FONT_SIZES["medium"] + 2*DESC_GAP))
+#     side_panel.blit(record_text, (20, 280 + 3*FONT_SIZES["tiny"] + 3*LABEL_GAP + 2*FONT_SIZES["medium"] + 2*DESC_GAP))
 
-    # pygame.mixer.init()
-    pygame.mixer.music.load("./game/assets/sounds/intro.mp3")
-    pygame.mixer.music.play(0) # repeat once
-    pygame.mixer.music.unload()
+#     # pygame.mixer.init()
+#     pygame.mixer.music.load("./game/assets/sounds/intro.mp3")
+#     pygame.mixer.music.play(0) # repeat once
+#     pygame.mixer.music.unload()
     
     
     
     
-    #pygame.mixer.music.queue("test2.wav")   # queue music after intro 
+#     #pygame.mixer.music.queue("test2.wav")   # queue music after intro 
     
-    #stop 
-    # clock = pygame.time.Clock()
-    # clock.tick(10)
-    # while pygame.mixer.music.get_busy():
-    #     pygame.event.poll()
+#     #stop 
+#     # clock = pygame.time.Clock()
+#     # clock.tick(10)
+#     # while pygame.mixer.music.get_busy():
+#     #     pygame.event.poll()
     
-=======
->>>>>>> c578b7851c7ae4e2c196c938cf5e9f1867c01b2e
+# =======  
     #side_panel.blit(pb_label, (20, 280 + 3*FONT_SIZES["tiny"] + 3*LABEL_GAP + 3*FONT_SIZES["medium"] + 3*DESC_GAP))
     #side_panel.blit(pb_text, (20, 280 + 4*FONT_SIZES["tiny"] + 4*LABEL_GAP + 3*FONT_SIZES["medium"] + 3*DESC_GAP))
     
