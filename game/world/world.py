@@ -31,8 +31,9 @@ class World:
         vel: float = 0,
         acc: float = 0,
         angle: float = 0,
-        hitbox_radius: float = 0,
-        keys: list[bool] = [False, False, False, False]
+        hitbox_radius: float = 5,
+        keys: list[bool] = [False, False, False, False],
+        is_crashed: bool = False
         ) -> Entity:
         """
         Creates and places an entity at a certain position. 
@@ -41,7 +42,7 @@ class World:
         Returns a reference the entity.
         """
         
-        e = Entity(name, color, self.gamemap, pos, vel, acc, angle, hitbox_radius, keys)
+        e = Entity(name, color, self.gamemap, pos, vel, acc, angle, hitbox_radius, keys, is_crashed)
         self.entities[name] = e
         
     def destroy_entity(self, name: str) -> None:
@@ -76,7 +77,8 @@ class World:
               acc: number,
               angle: number, // in degrees
               hitbox_radius: number,
-              keys: [forward: bool, backward: bool, left: bool, right: bool]
+              keys: [forward: bool, backward: bool, left: bool, right: bool],
+          is_crashed: bool
             }
           },
           ...
@@ -103,7 +105,6 @@ class World:
           width: number,
           oob_leniency: number,
           length: number,
-          wr_time: number,
         } 
         ```
         """

@@ -88,7 +88,6 @@ class GameMap:
           length: number,
           width: number,
           oob_leniency: number,
-          wr_time: number,
         }
         ```
         """
@@ -105,14 +104,13 @@ class GameMap:
           length: number,
           width: number,
           oob_leniency: number,
-          wr_time: number,
         } 
         ```
         """
         
         self.segments = self.parse_map_file()
         
-        print(f"\x1b[32GameMap (client): Parsed segments to be the following:\x1b[0m")
+        print(f"\x1b[32mGameMap (client): Parsed segments to be the following:\x1b[0m")
         for segment in self.segments:
             print(f"\x1b[32m{segment}\x1b[0m")
         
@@ -149,19 +147,49 @@ class GameMap:
                 
         return segments      
         
-    def angle_at(self, pos_x) -> float:
+    def angle_at(self, x_pos: float) -> int:
         """
-        Returns the angle of the track at a certain x position.
+        Returns the angle at the current x-position based on the map. 
         
-        Searches through CurveSegments to find the correct one, then return the angle at that position.
+        For example, if the road is currently straight at `x_pos`, this will return `0`.
+        If we are beginning to enter a left curve, this will return something like `-10`.
+        If we are at the climax of a left curve, this will return a more extreme negative number (say, `-45`) based on the curve's angle (defined by the map).
+        
+        ### Here's how this calculation is made:
+        - The map is made of `CurveSegments`, each of which have a `theta_f` field that determines their maximum curvature.
+        - `CurveSegments have a ramp-up and ramp-down period, where the curvature changes linearly.
+        - `We will take the `q1` and `q3` points of the curve, which are the averages of start-mid and mid-end of a curve respectively. A diagram is below:
+        
+        `S-------Q1-------M---Q3---E`
+        
+        - For the period between `S` and `Q1`, the angle is calculated linearly from `0` to `theta_f`.
+        - For the period between `Q1` and `Q3`, the angle is constant at `theta_f`.
+        - For the period between `Q3` and `E`, the angle is calculated linearly from `theta_f` to `0`.
         """
         
-        # since there are a small number of segments, a linear search should be fine
-        for segment in self.segments:
-            if pos_x >= segment.start_x and pos_x <= segment.end_x:
-                return segment.angle_at(pos_x)
+        curr_curvesegment = self.curvesegment_at(x_pos)
+        
+        if curr_curvesegment is None:
+            # No curvature
+            return 0
     
-        return 0
+        curvesegment_rampup_length = curr_curvesegment.mid_x - curr_curvesegment.start_x
+        curvesegment_rampdown_length = curr_curvesegment.end_x - curr_curvesegment.mid_x
+        
+        start = curr_curvesegment.start_x
+        q1 = curr_curvesegment.mid_x - curvesegment_rampup_length/2
+        q3 = curr_curvesegment.mid_x + curvesegment_rampdown_length/2
+        end = curr_curvesegment.end_x
+
+        if x_pos > start and x_pos < q1:
+            self.curve_percentage = (x_pos - start) / (q1 - start)
+            return curr_curvesegment.theta_f * self.curve_percentage
+        elif x_pos > q1 and x_pos < q3:
+            # just return the full angle
+            return curr_curvesegment.theta_f
+        elif x_pos > q3 and x_pos < end:
+            self.curve_percentage = (x_pos - q3) / (end - q3)
+            return curr_curvesegment.theta_f * (1 - self.curve_percentage)
     
     def vanishing_point_at(self, pos_x) -> float:
         """
@@ -180,3 +208,17 @@ class GameMap:
                 return segment.get_vanishing_point_pos(pos_x)
             
         return WIDTH/2 # default to center of screen if not found
+    
+    def curvesegment_at(self, pos_x: float) -> CurveSegment | None:
+        """
+        Returns the CurveSegment defined at a certain x position.
+        
+        If there is no segment at that position, returns None.
+        """
+        
+        # since there are a small number of segments, a linear search should be fine
+        for segment in self.segments:
+            if pos_x >= segment.start_x and pos_x <= segment.end_x:
+                return segment
+        
+        return None

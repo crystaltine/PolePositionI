@@ -4,11 +4,9 @@ from typing import Callable, Any
 from tkinter import *
 from tkinter import messagebox, simpledialog
 
-
-# temp
-from screens.game_end import game_end
 from managers import GameManager, HTTPManager
 from screens.waiting_room import waiting_room
+from CONSTANTS import *
 
 GameManager.reset()
 
@@ -120,6 +118,8 @@ def main_menu() -> bool:
                             print("Room created successfully! Code:", res.get('code'))
                             GameManager.room_id = res.get('code')
                             GameManager.our_username = res.get('player_data').get('username')
+                            GameManager.car = CARS[res.get('player_data').get('color')]
+                            GameManager.set_backdrop(res.get('map_data').get('backdrop_file'))
 
                             # server will return ourselves (since it assigns us a random color)
                             GameManager.map_data = res.get('map_data')
@@ -141,7 +141,7 @@ def main_menu() -> bool:
                     
                 elif GameManager.join_game_button.is_hovering(mouse_pos):
                     
-                    GameManager.join_game_button.display_text = "Connecting..."
+                    GameManager.join_game_button.display_text = "Joining..."
                     GameManager.join_game_button.update_text(GameManager.screen)
                     pygame.display.update()
 
@@ -160,6 +160,8 @@ def main_menu() -> bool:
                             print("Room joined successfully! Code:", res.get('code'))
                             GameManager.room_id = res.get('code')
                             GameManager.our_username = res.get('username')
+                            GameManager.car = CARS[res.get('color')]
+                            GameManager.set_backdrop(res.get('map_data').get('backdrop_file'))
                             
                             GameManager.map_data = res.get('map_data')
                             
@@ -178,50 +180,6 @@ def main_menu() -> bool:
                     if click_result["callback_result"] is not None:
                         return click_result["callback_result"]
                     
-                elif GameManager.livegametest_button.is_hovering(mouse_pos):
-                    game_end([
-                        {
-                            "username": "some_username",
-                            "color": "red",
-                            "score": "100%"
-                        },
-                        {
-                            "username": "234234",
-                            "color": "blue",
-                            "score": "93%"
-                        },
-                        {
-                            "username": "dream mc yt",
-                            "color": "green",
-                            "score": "79%"
-                        },
-                        {
-                            "username": "owl #4342",
-                            "color": "yellow",
-                            "score": "64%"
-                        },
-                        {
-                            "username": "sup",
-                            "color": "purple",
-                            "score": "45%"
-                        },
-                        {
-                            "username": "idk",
-                            "color": "pink",
-                            "score": "27%"
-                        },
-                        {
-                            "username": "who tf is this",
-                            "color": "white",
-                            "score": "25%"
-                        },
-                        {
-                            "username": "pineapple",
-                            "color": "orange",
-                            "score": "11%"
-                        },
-                    ])
-                
                 elif GameManager.quit_button.is_hovering(mouse_pos):
                     GameManager.quit_game()
                     

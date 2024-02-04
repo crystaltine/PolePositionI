@@ -8,7 +8,7 @@ import threading
 import os
 from time import time_ns
 from typing import Union, Dict, List, Callable, Any, TYPE_CHECKING
-from sprite_strip_anim import SpriteStripAnim
+from animator import RoadAnimator, SpriteStripAnim
 
 from CONSTANTS import *
 from elements.button import Button
@@ -58,7 +58,6 @@ class GameManager:
       length: number,
       width: number,
       oob_leniency: number,
-      wr_time: number,
     } 
     ```
     """
@@ -82,6 +81,11 @@ class GameManager:
     Used to determine how to scroll mountains. Gets changed at a rate of `track_angle * ANGLE_ACCUMULATION_FACTOR` per second.
     """
     
+    last_y_pos: float = 0
+    """
+    Used to determine where to draw the explosion (horizontally) on the crash event, since the event sets y-pos back to 0.
+    """
+    
     # main assets
     screen = pygame.display.set_mode([WIDTH,HEIGHT])
     screen.fill(SKY_RGB)
@@ -89,19 +93,22 @@ class GameManager:
     grass = pygame.image.load('./game/assets/grass.png')
     grass = pygame.transform.scale(grass, (int(WIDTH), int(2 * HEIGHT/3)))
     
-    mtns = pygame.image.load('./game/assets/mountains_img.png')
+    backdrop = pygame.image.load(f'./game/assets/backdrops/Default.png')
+    def set_backdrop(map_name: str) -> None:
+        """
+        Sets the backdrop image based on the map name.
+        The map name should be `PascalCase` (e.g. `Curvy`, `TouchGrass`)
+        """
+        GameManager.backdrop = pygame.image.load(f'./game/assets/backdrops/{map_name}')
     
     logo_img = pygame.image.load('./game/assets/logo.png')
 
-    car = pygame.image.load('./game/assets/atariPolePosition-carStraight.png')
     
-    explosion = pygame.image.load('./game/assets/explosion.png') # 200w x 100h image
+    car = None
+    """This will be set once we join/create a room and obtain a car color."""
 
     #animted explosion
-
-    boom = SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\collision explosino'), (0, 0, WIDTH, HEIGHT), 5, -1, True, 0.25)
-    boom.iter()
-    boom_frame = boom.current()
+    boom = SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\collision explosion'), (0, 0, WIDTH, HEIGHT), 5, -1, True, 0.25)
 
     progressbar_img = pygame.image.load('./game/assets/progress_bar_frame.png')
 
@@ -111,8 +118,7 @@ class GameManager:
     join_game_input = Input(x=340, y=480, w=240, h=60, text="")
     join_game_button = Button(pos=(600, 480), display_text="JOIN GAME", base_color="#ffffff", hovering_color="#96faff", image=BUTTON_MEDIUM)
 
-    livegametest_button = Button(pos=(340,560), display_text="Testing", base_color="#ffffff", hovering_color="#96faff", image=BUTTON_MEDIUM)
-    quit_button = Button(pos=(600,560), display_text="QUIT", base_color="#ffffff", hovering_color="#ff9696", image=BUTTON_MEDIUM)
+    quit_button = Button(pos=(340,560), display_text="QUIT", base_color="#ffffff", hovering_color="#ff9696", image=BUTTON_LARGE)
     
     # main menu extra text
     text_bottom_left = FONT_TINY.render(MAIN_MENU_BOTTOM_LEFT_TEXT, True, (0, 0, 0))
@@ -138,13 +144,27 @@ class GameManager:
     
     @staticmethod
     def reset() -> None:
+        """
+        Resets variables used for game lifecycle, to be avaiable for new games.
+        """
         GameManager.waiting_room_game_started = False
         GameManager.waiting_room_leave_game = False
         GameManager.live_game_proceed_code = 0
+        GameManager.start_timestamp = None
+        GameManager.accumulated_angle = 0.0
+        GameManager.room_id = None
+        GameManager.last_y_pos = 0
         
     @staticmethod
     def draw_road(road_image) -> None:
-        GameManager.screen.blit(road_image, (0, -6.9*RenderingManager.height/5)) 
+        """
+        Draws the road image on screen.
+        
+        The road sprite should be HEIGHT-240px tall, and span the whole width.
+        
+        Thus, it it blitted at (0, 240)
+        """
+        GameManager.screen.blit(road_image, (0, 240))
     
     @staticmethod
     def draw_static_background():
@@ -153,7 +173,7 @@ class GameManager:
         """
         
         GameManager.screen.blit(GameManager.grass, (0, HEIGHT - GameManager.grass.get_height()))
-        GameManager.screen.blit(GameManager.mtns, (0, 0))
+        GameManager.screen.blit(GameManager.backdrop, (0, 0))
         
     @staticmethod
     def draw_dynamic_background():
@@ -173,13 +193,13 @@ class GameManager:
         crop_pos_on_img = round(angle*12), 0
         size_of_crop = WIDTH, HEIGHT - GameManager.grass.get_height()
         
-        GameManager.screen.blit(GameManager.mtns, (0, 0), (*crop_pos_on_img, *size_of_crop))
+        GameManager.screen.blit(GameManager.backdrop, (0, 0), (*crop_pos_on_img, *size_of_crop))
         
         if angle > 360-math.degrees(FOV):
             # we ran past the right side of the png.
             # so, in addition to the x=0 blit, we need to do an x= 12*(360-angle) blit
             # we can actually omit the size, since it can just overflow off the screen
-            GameManager.screen.blit(GameManager.mtns, (round(12*(360-angle)), 0))        
+            GameManager.screen.blit(GameManager.backdrop, (round(12*(360-angle)), 0))        
             
         # and then always draw the grass
         GameManager.screen.blit(GameManager.grass, (0, HEIGHT - GameManager.grass.get_height()))
@@ -221,7 +241,6 @@ class GameManager:
         - create_game_button
         - join_game_input
         - join_game_button
-        - livegametest_button
         - quit_button
         """
         GameManager.create_game_button.changeColor(pygame.mouse.get_pos())
@@ -232,14 +251,11 @@ class GameManager:
         GameManager.join_game_button.changeColor(pygame.mouse.get_pos())
         GameManager.join_game_button.update(GameManager.screen)
         
-        GameManager.livegametest_button.changeColor(pygame.mouse.get_pos())
-        GameManager.livegametest_button.update(GameManager.screen)
-        
         GameManager.quit_button.changeColor(pygame.mouse.get_pos())
         GameManager.quit_button.update(GameManager.screen)
 
     @staticmethod 
-    def draw_car(pos_y: float, angle: float):
+    def draw_car(pos_y: float):
         """
         If currently in a crash, draws an explosion.
         
@@ -256,14 +272,6 @@ class GameManager:
         
         vertical_pos = 4*HEIGHT/5 - GameManager.car.get_height()/2
         
-        # if timestamp < GameManager.crash_end_timestamp, draw explosion
-        if time_ns()/1e9 < GameManager.crash_end_timestamp:
-            # draw explosion at bottom-center of screen
-            horizontal_pos = WIDTH/2 - GameManager.explosion.get_width()/2
-            GameManager.screen.blit(GameManager.boom_frame, (horizontal_pos, vertical_pos))
-            GameManager.boom.next()
-            return
-        
         # calculate the offset
         total_x_range = WIDTH - 40 - GameManager.car.get_width() # 20px padding on each side, plus the width of the car
         total_track_width = GameManager.map_data['width'] + 2*GameManager.map_data['oob_leniency']
@@ -271,30 +279,38 @@ class GameManager:
         
         horizontal_pos = 20 + proportion_of_total_range * total_x_range
         
+        # draw explosion if there is a crash_end timestamp in the future
+        time_until_crash_end = GameManager.crash_end_timestamp - time_ns()/1e9
+        if time_until_crash_end > 0:
+            
+            # recalculate horizontal pos based on last_y_pos
+            proportion_of_total_range = (GameManager.last_y_pos + total_track_width/2) / total_track_width
+            horizontal_pos = 20 + proportion_of_total_range * total_x_range
+            
+            # Crashes should last 5 seconds. We pick which frame to use (0->77) based on how many seconds left
+            frame_index = int(78*(5 - time_until_crash_end)/5)
+            boom_frame = GameManager.boom.images[frame_index].convert_alpha()
+            
+            # scale image by 2x
+            boom_frame = pygame.transform.scale(boom_frame, (boom_frame.get_width()*2, boom_frame.get_height()*2))
+            
+            # draw explosion at bottom-center of screen
+            
+            # we use horizontal pos from the car, but we center the explosion vertically
+            vertical_pos = 450
+            
+            GameManager.screen.blit(boom_frame, (horizontal_pos, vertical_pos))
+            GameManager.boom.next()
+            return
+        
         GameManager.screen.blit(GameManager.car, (horizontal_pos, vertical_pos))
-    
-    def draw_permanent_road(self):
-        """
-        Constantly animates the straight road on 
-        """
-        coords = (0, 400), (WIDTH,400), (WIDTH, HEIGHT), (0, HEIGHT)
-        road_image = RenderingManager.roadpaths[RenderingManager.roadpaths_index].current()
-        road_image = pygame.transform.scale_by(road_image, (2.4, 1.945))      
-        GameManager.draw_road(road_image) 
-        #pygame.display.update()
-        road_image = RenderingManager.roadpaths[RenderingManager.roadpaths_index].next()
-        if road_image is None:
-            roadpaths_index += 1
-            RenderingManager.roadpaths[roadpaths_index].iter()
-            road_image = RenderingManager.roadpaths[RenderingManager.roadpaths_index].current()
-        road_image = pygame.transform.scale_by(road_image, (2.4, 1.945))
     
     @staticmethod 
     def quit_game():
         """
         Exits the game gracefully.
         """
-        print(f"\x1b[35Quitting the game gracefully...\x1b[0m")
+        print(f"\x1b[35mQuitting the game gracefully...\x1b[0m")
         
         # leave the room if we are in one
         if GameManager.room_id is not None:
@@ -314,47 +330,13 @@ class RenderingManager:
     based on the data the server sends us (every minute)
     
     We keep an internal physics engine for smoother animations, although server data overrides this.
-    
-    @TODO - we should probably destroy this object when the game ends (once we implement game end logic)
     """
 
-    width = 1200 #2.4
-    height = 720 #1.6
+    orig_width = 500
+    orig_height = 450
 
-    road_straight = SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\straight road'), (0, -3*height/5, width, 4*height/3), 12, -1, True, 0.041)
-    curved_left = SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\curved left'), (0, -3*height/5, width, 4*height/3), 12, -1, True, 0.041)
-    curved_right = SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\curved right'), (0, -3*height/5, width, 4*height/3), 12, -1, True, 0.041)
-    left_centering = SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\left centering'), (0, -3*height/5, width, 4*height/3), 8, -1, False, 0.041)
-    right_centering = SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\right centering'), (0, -3*height/5, width, 4*height/3), 8, -1, False, 0.041)
-    turning_left = SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\turning left'), (0, -3*height/5, width, 4*height/3), 8, -1, False, 0.041)
-    turning_right = SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\road frames\\turning right'), (0, -3*height/5, width, 4*height/3), 8, -1, False, 0.041)
-
-    #all linked animations for the full track
-    roadpaths = [
-        road_straight, 
-        turning_left,
-        curved_left, 
-        left_centering,
-        road_straight, 
-        turning_right,
-        curved_right,
-        right_centering,
-        road_straight,
-        turning_left,
-        curved_left, 
-        left_centering,
-        road_straight,
-        turning_right,
-        curved_right,
-        right_centering,
-        road_straight,
-        turning_left,
-        curved_left, 
-        left_centering,
-        road_straight
-    ]
-    roadpaths_index = 0
-
+    width = 1200 
+    height = 240 
     
     def __init__(self, init_entities: list = []) -> None:
         """
@@ -373,13 +355,17 @@ class RenderingManager:
             acc: number,
             angle: number, // in degrees
             hitbox_radius: number,
-            keys: [forward: bool, backward: bool, left: bool, right: bool]
+            keys: [forward: bool, backward: bool, left: bool, right: bool],
+          is_crashed: bool
           }
         }
         ```
         """
-        self.world = World(GameManager.map_data)
         
+        print(f"\x1b[35mCreating RenderingManager with {len(init_entities)} entities\x1b[0m")
+        
+        self.world = World(GameManager.map_data)
+        self.road_animator = RoadAnimator(self.world.gamemap)
         self.last_render_time = time_ns()
         
         for entity in init_entities:
@@ -389,46 +375,26 @@ class RenderingManager:
         """
         Draws on the screen a single frame based on the current state of the internal physics engine.
         """
-        
-
-        road_image = RenderingManager.roadpaths[RenderingManager.roadpaths_index].current()
-        road_image = pygame.transform.scale_by(road_image, (2.4, 1.945))      
-        GameManager.draw_road(road_image) 
-        road_image = RenderingManager.roadpaths[RenderingManager.roadpaths_index].next()
-        if road_image is None:
-            roadpaths_index += 1
-            RenderingManager.roadpaths[roadpaths_index].iter()
-            road_image = RenderingManager.roadpaths[RenderingManager.roadpaths_index].current()
-        road_image = pygame.transform.scale_by(road_image, (2.4, 1.945))
-
-        
-        deltatime = (time_ns() - self.last_render_time) / 1e9
-        self.last_render_time = time_ns()
-        
         us = GameManager.get_our_entity()
         
         GameManager.draw_dynamic_background()
         
-        vanishing_point_loc = self.world.gamemap.vanishing_point_at(us.pos[0])
+        road_image = self.road_animator.get_next(us.pos[0])
         
-        # add to accumulated angle
-        GameManager.accumulated_angle += self.world.gamemap.angle_at(us.pos[0]) * ANGLE_ACCUMULATION_FACTOR * deltatime
-
-        # TODO - draw the road
-        # for now, we just draw four testing lines:
-        # one from bottom left of screen to x=200,y=520
-        # one from bottom right to x=1000,y=520
-        # one from x=200,y=520 to x=vanishing_point_loc,y=240
-        # one from x=1000,y=520 to x=vanishing_point_loc,y=240
+        deltatime = (time_ns() - self.last_render_time) / 1e9
+        self.last_render_time = time_ns()
         
-        pygame.draw.line(GameManager.screen, (0,0,0), (0, HEIGHT), (200, 520), 5)
-        pygame.draw.line(GameManager.screen, (0,0,0), (WIDTH, HEIGHT), (1000, 520), 5)
-        pygame.draw.line(GameManager.screen, (0,0,0), (200, 520), (vanishing_point_loc, 240), 5)
-        pygame.draw.line(GameManager.screen, (0,0,0), (1000, 520), (vanishing_point_loc, 240), 5)
+        # vanishing_point_loc = self.world.gamemap.vanishing_point_at(us.pos[0])
         
-        # TODO - draw entities
-            
-        GameManager.draw_car(us.pos[1], us.angle)
+        # add to accumulated angle. Also mult by velocity/100 (at 0 speed we shouldnt be turning)
+        GameManager.accumulated_angle += self.world.gamemap.angle_at(us.pos[0]) * ANGLE_ACCUMULATION_FACTOR * deltatime * us.vel/100
+        
+        GameManager.draw_road(road_image) 
+        
+        # draw entities
+        self.draw_all_other_entities(us)
+        
+        GameManager.draw_car(us.pos[1])
         
     def tick_world(self):
         """
@@ -492,7 +458,8 @@ class RenderingManager:
               acc: number,
               angle: number, // in degrees
               hitbox_radius: number,
-              keys: [forward: bool, backward: bool, left: bool, right: bool]
+              keys: [forward: bool, backward: bool, left: bool, right: bool],
+          is_crashed: bool
             }
           },
           ...
@@ -505,28 +472,60 @@ class RenderingManager:
         # for each object in that list, update the corresponding entity.
         for entity_data in data:
             self.world.entities[entity_data['username']].set_physics(entity_data['physics'])
+        
+    def draw_all_other_entities(self, us: 'Entity'):
+        sorted_by_dist = sorted(GameManager.get_all_other_entities(), key=lambda e: (e.pos[0] - us.pos[0])**2)
+        for other in sorted_by_dist:
+            
+            # if other is behind us, don't draw it
+            if other.pos[0] < us.pos[0] - 20: # some arbitrary fov expansion
+                continue
+            
+            size = RenderingManager.get_rendered_size(us, other)
+            if size < 10:
+                continue
+            
+            offset = self.get_entity_center_offset(us, other)
+            
+            horizontal_pos = WIDTH / 2 + offset
+            vertical_pos = RenderingManager.get_y_pos(other)
+            
+            if vertical_pos is None:
+                continue # if the entity is behind us, don't draw it
+            
+            # if they are crashed, pass in the percentage of the crash animation this entity has left
+            crash_progress = None
+            if other.is_crashed:
+                time_until_crash_end = other.crash_end_timestamp - time_ns()/1e9
+                if time_until_crash_end > 0:
+                    crash_progress = 1 - time_until_crash_end/5
+        
+            RenderingManager.draw_entity(size, (horizontal_pos, vertical_pos), other.color, crash_progress)
             
     @staticmethod
-    def get_rendered_size(other: 'Entity') -> int:
+    def get_rendered_size(us: 'Entity', other: 'Entity') -> int:
         """
-        ### See `../RENDERER_NOTES.png`
+        Returns a size in px for the entity based on how far away and at what angle it is from us.
         
-        Returns a size in px for the eneity based on how far away and at what angle it is from us.
+        Calculation formula:
+        `size = max(0, 300-(3/2)*dist)`
+        
+        ### Note: With this formula (and the `if size < 30` check in `render_frame`), 
+        # entities will not be rendered if they are more than 255m away.
         """
         
-        us = GameManager.get_our_entity()
+        dist = other.pos[0] - us.pos[0]
         
-        dist = math.sqrt((other.pos[0] - us.pos[0])**2 + (other.pos[1] - us.pos[1])**2)
-        theta = (math.asin(other.hitbox_radius / (dist + other.hitbox_radius)))
-        width_on_screen = (WIDTH/2) * 2*theta/(FOV/2) # 2 and 4 are static (do not adjust)
-        
-        # print(f"\x1b[34mget_rendered_size\x1b[0m: dist={dist}, theta={theta} size={width_on_screen}")
+        # theta = (math.asin(other.hitbox_radius / (dist + other.hitbox_radius))) # For old system
+         
+        width_on_screen = max(0, 300-(3/2)*dist)
         return round(width_on_screen)
         
     @staticmethod
-    def get_y_pos(other: 'Entity') -> int:
+    def get_y_pos(other: 'Entity') -> int | None:
         """
         Returns a y-position on the screen based on an entity's distance from us.
+        If the entity is behind us, returns None (don't draw it)
         
         The idea is that farther away entities should be drawn higher up (lower y-value)
         because they are closer to the horizon.
@@ -537,15 +536,49 @@ class RenderingManager:
         ### The function used for this calculation
         (can be changed - i just picked a random asymptotic decay from 600->300 in desmos)
         
-        y_coord = `30000/(dist+100) + 300`
+        y_coord = `50000/(9*dist+100) + 220`
         """    
         
         us = GameManager.get_our_entity()
         
-        dist = math.sqrt((other.pos[0] - us.pos[0])**2 + (other.pos[1] - us.pos[1])**2)
-        return round(30000/(2*dist+100) + 300)
+        dist = other.pos[0] - us.pos[0]
+        if dist < 0: return None # if behind us, don't draw (draw at bottom of screen)
+        return round(50000/(9*dist+100) + 220)
+
+    def get_entity_center_offset(self, us: 'Entity', other: 'Entity') -> int:
+        """
+        @see - https://www.desmos.com/calculator/gtp9vomuej (equations for rendering math)
         
+        Returns how far from the center of the screen (in pixels)
+        an enemy entity should be placed, taking into account the apparent curvature of the road and the entity's y-pos (horizontal)
+        
+        For example, if the road ahead is straight, entities are rendered directly in front of us.
+        If the road is curving to the right, entities are rendered more to the right side.
+        """
+        
+        #################### OFFSET BASED ON ENEMY Y-POS ####################
+        track_width = self.world.gamemap.map_data['width']
+        
+        # how far right/left to place them based on their y-pos (horizontal pos)
+        y_pos_offset = other.pos[1] * (2*WIDTH/3)/(track_width) 
+        
+        # because of one vanishing-point perspective, this offset diminishes as we get farther away
+        # The equation below provides approx. scale 1 when close, approx. scale 0.5 at 166.7m, scale 0 at 333.3m.
+        # However, we should not render entities that are >300m away.
+        enemy_x_dist = other.pos[0] - us.pos[0]
+        y_pos_offset_distance_scale = max(0.01, -0.01 * enemy_x_dist + 1) 
+        ######################################################################
+        
+        ################### OFFSET BASED ON ROAD CURVATURE ###################
+        curvature_offset = self.world.gamemap.angle_at(us.pos[0]) * (0.005 * enemy_x_dist)**2 
+        ######################################################################
+        
+        print(f"color={other.color} curv={curvature_offset} + y_pos={y_pos_offset}*y_pos scale={y_pos_offset_distance_scale}")
+        
+        return curvature_offset + y_pos_offset * y_pos_offset_distance_scale
+
     @staticmethod
+<<<<<<< HEAD
     def angle_offset(other: 'Entity'):
         #-> Union[int, None]
         """
@@ -575,14 +608,36 @@ class RenderingManager:
     
     @staticmethod
     def draw_entity(size: int, pos: tuple[int, int], color: str) -> None:
+=======
+    def draw_entity(size: int, pos: tuple[int, int], color: str, crash_progress: float = None):
+>>>>>>> c578b7851c7ae4e2c196c938cf5e9f1867c01b2e
         """
         Draws an entity on the screen, given a size, offset, and color.
         
-        Currently, all it draws is a circle. (TODO - implement 3d models/rotating sprites)
+        Renders a crash animation if the `crash_progress` param is given.
         """
         
-        # print(f"Drawing entity at {pos} with size {size} and color {color}")
-        pygame.draw.circle(GameManager.screen, color, pos, size)
+        if crash_progress is not None:
+            # Crashes should last 5 seconds. We pick which frame to use (0->77) based on how many seconds left
+            frame_index = int(78*(5 - 5*crash_progress)/5)
+            boom_frame = GameManager.boom.images[frame_index].convert_alpha()
+            
+            # scale image by 2x, and also by the given size
+            boom_frame = pygame.transform.scale(boom_frame, (2*size, 2*size))
+            
+            # draw explosion at the calculated pos
+            GameManager.screen.blit(boom_frame, pos)
+            GameManager.boom.next()
+            return
+        
+        car_image = CARS[color]
+        
+        height_to_width_ratio = car_image.get_height() / car_image.get_width()
+        scaled_entity = pygame.transform.scale(car_image, (size, round(size * height_to_width_ratio)))
+        
+        pos = (pos[0] - scaled_entity.get_width()/2, pos[1] - scaled_entity.get_height()/2) # center
+        
+        GameManager.screen.blit(scaled_entity, pos)        
         
 class SocketManager:
     """
@@ -713,7 +768,6 @@ class SocketManager:
         ```
         """
         
-        print(f"\x1b[35mPACKET RECV: \x1b[33m{len(world_data)}\x1b[0m playerdata packets included")
         GameManager.game_renderer.set_physics(world_data)
                 
     def on(self, event_name, callback) -> None:
@@ -777,7 +831,6 @@ class SocketManager:
         Each packet should have a payload size of 3 bits.
         """
         keydata = keyid | (keydown << 2)
-        print(f"Creating&sending packet with keyid={keyid}, keydown={keydown}")
         self.socket.send(keydata.to_bytes(1, 'big'))
     
 class HTTPManager:

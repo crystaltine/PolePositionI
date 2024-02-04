@@ -33,6 +33,13 @@ For example, if we are driving along a straight track, the angle is 0, so the ac
 However, if the angle is 30 degrees, then the accumulated angle will increase by 15 degrees for every second, if this factor is 0.5.
 """
 
+METERS_PER_ANIMATION_FRAME = 3
+"""
+The number of meters that must be traveled for the road animations to advance by one frame.
+"""
+
+ROAD_FRAMES_DIR = "assets/road_frames/"
+
 # hex is 4370ff
 SKY_RGB = (67, 112, 255)
 BLACK = (0,0,0)
@@ -65,6 +72,12 @@ HTTP_URL = 'http://localhost:4000'
 SOCKET_HOST = 'localhost'
 SOCKET_PORT = 3999
 
+
+CARS = {
+    color: pygame.image.load(f'./game/assets/cars/{color}.png') 
+    for color in ["red", "orange", "yellow", "green", "blue", "purple", "pink", "white"]
+}
+
 # Sounds
 sfx_button_hover = pygame.mixer.Sound('./game/assets/sounds/button_hover.mp3')
 sfx_button_click = pygame.mixer.Sound('./game/assets/sounds/button_click.mp3')
@@ -75,3 +88,5 @@ SFX_SUCCESS = pygame.mixer.Sound('./game/assets/sounds/success.mp3')
 SFX_BEEP = pygame.mixer.Sound("./game/assets/sounds/beep-22.mp3")
 
 #CAR_VROOM audio file not working - weird file type - how to convert?
+rev_sound = pygame.mixer.Sound('./game/assets/sounds/rev_engine.mp3')
+crash_sound = pygame.mixer.Sound('./game/assets/sounds/crash.mp3')

@@ -46,5 +46,5 @@ def broadcast_mainloop(id_to_room: Dict[str, Room], id_to_client: Dict[str, Clie
                     # DEBUG: print short physics info
                     for client in room.clients.values():
                         c: Client = client["client_obj"]
-                        print(f"\t{c.id}:\x1b[33m p=[{c.entity.pos[0]:.3f},{c.entity.pos[1]:.3f}] v={c.entity.vel:.3f} a={c.entity.acc:.3f}, theta={c.entity.angle:.3f}\x1b[0m")
+                        print(f"\t{c.entity.color}:\x1b[33m p=[{c.entity.pos[0]:.3f},{c.entity.pos[1]:.3f}] v={c.entity.vel:.3f} a={c.entity.acc:.3f}, theta={c.entity.angle:.3f}\x1b[0m")
                             

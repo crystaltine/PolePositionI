@@ -34,8 +34,11 @@ def live_game() -> bool:
         
     def _crash(crash_data):
         # set our new physics
+        GameManager.last_y_pos = us.pos[1] # save this for the crash animation
         GameManager.crash_end_timestamp = crash_data['crash_end_timestamp']
+        us.crash_end_timestamp = crash_data['crash_end_timestamp']
         us.set_physics(crash_data['new_physics'])
+        crash_sound.play()
         
     # create new event handler
     GameManager.socket_man.on('leave', _leave)
@@ -53,25 +56,22 @@ def live_game() -> bool:
         for event in pygame.event.get():
             if event == pygame.QUIT:
                 GameManager.quit_game()
+
                 
             GameManager.socket_man.handle_game_keypresses(event)
-            
+        
+        # Speed text
         velocity_mph = us.vel * 2.237
         speedometer_text = FONT_LARGE.render(f"{velocity_mph:.1f} mph", True, (255, 255, 255))
         GameManager.screen.blit(speedometer_text, (20, 20))
         
-        # let's have an 800px progress bar. with 20px padding on right, the starting x-coord should be 1200-820 = 380
+        # 800px, right-aligned progress bar
         pbar_frame_x, pbar_frame_y = 380, 8
         pbar_fill_x, pbar_fill_y = pbar_frame_x, 20
         
         # the texture itself is 1026px wide. pbar should be 43px tall, but frame has a bit of decoration spanning 12px at the top.
         progressbar_filled_width = us.get_progress() * 800
         pygame.draw.rect(GameManager.screen, (248, 195, 24), pygame.Rect((pbar_fill_x, pbar_fill_y), (progressbar_filled_width, 43)))
-        
-        # position_text = FONT_MEDIUM.render(f"{us.pos[0]:.1f}m", True, (255, 255, 255))
-        # position_text_padding = (43 - position_text.get_height()) // 2 # put the position text left justified in the progress bar frame
-        
-        # GameManager.progressbar_img.blit(position_text, (position_text_padding, position_text_padding+12))
         GameManager.screen.blit(GameManager.progressbar_img, (pbar_frame_x, pbar_frame_y))
         
         pygame.display.update()

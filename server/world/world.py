@@ -4,6 +4,7 @@ import math
 
 from world.entity import Entity
 from game_map import GameMap
+from CONSTANTS import *
 
 def are_colliding(e1: Entity, e2: Entity) -> bool:
     """
@@ -31,8 +32,9 @@ class World:
         
         If no map name is provided, a random map is picked.
         """
+        
         self.gamemap = GameMap(map_name)
-        self.entities: Dict[str, Entity] = {}
+        self.entities: Dict[str, Entity] = {}        
         """ a map from client_ids to entity objects """
         
     def create_entity(
@@ -44,7 +46,7 @@ class World:
         vel: float = 0,
         acc: float = 0,
         angle: float = 0,
-        hitbox_radius: float = 2.5
+        hitbox_radius: float = 5
         ) -> Entity:
         """
         Creates and places an entity at a certain position. 
@@ -85,6 +87,7 @@ class World:
         if not win_result:
             # check for collisions   
             self.check_entity_collisions()
+            self.check_out_of_bounds()
         
         return win_result
     
@@ -139,6 +142,16 @@ class World:
                     crash_end_timestamp = time_ns()/1e9 + CRASH_DURATION
                     e1.on_entity_collide(e2, 'left', crash_end_timestamp)
                     e2.on_entity_collide(e1, 'right', crash_end_timestamp)
+
+    def check_out_of_bounds(self) -> None:
+        """
+        Checks if the entities have gone too far off the track 
+        
+        All entities that have gone too far will be crashed and the info will be sent to client
+        """
+
+        for entity in self.entities.values():
+            entity.check_out_of_bounds()
                     
     def get_world_data(self) -> list:
         """
@@ -156,7 +169,8 @@ class World:
               acc: number,
               angle: number, // in degrees
               hitbox_radius: number,
-              keys: [forward: bool, backward: bool, left: bool, right: bool]
+              keys: [forward: bool, backward: bool, left: bool, right: bool],
+              is_crashed: bool
             }
           },
           ...
@@ -170,19 +184,27 @@ class World:
             "physics": e.get_physics_data()
         } for e in self.entities.values()]
         
-    def get_map_data(self) -> dict:
+    def get_map_data(self, field: str = None) -> dict:
         """
         Returns data about the loaded map on this world.
+        
+        If `field` is provided, returns only that field.
         
         This data is of the schema:
         ```typescript
         {
           map_name: string,
           map_file: string, // the file inside ./maps, on both the server and client
-          preview_file: string, // the file the client should load as a waiting room preview img
+          preview_file: string, // the file the client should load as a waiting room preview img,
+          backdrop_file: string, // the file the client should load as a game backdrop img,
           length: number,
-          wr_time: number,
+          width: number,
+          oob_leniency: number,
         } 
         ```
         """
+        
+        if not field is None:
+            return self.gamemap.map_data[field]
+                
         return self.gamemap.map_data

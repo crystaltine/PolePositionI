@@ -7,10 +7,19 @@ MAPS = {
         "map_name": "Touch Grass",
         "map_file": "TouchGrass.map",
         "preview_file": "touch_grass.png",
+        "backdrop_file": "TouchGrass.png",
         "length": 3500,
         "width": 100,
         "oob_leniency": 10,
-        "wr_time": 47.23,
+    },
+    "Curvy": {
+        "map_name": "Curvy",
+        "map_file": "Curvy.map",
+        "preview_file": "curvy.png",
+        "backdrop_file": "Curvy.png",
+        "length": 5000,
+        "width": 120,
+        "oob_leniency": 5,
     } 
 }
 
