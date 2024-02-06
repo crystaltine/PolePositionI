@@ -190,5 +190,4 @@ class Entity:
         self.hitbox_radius = data["hitbox_radius"]
         self.key_presses = data["keys"]
         self.is_crashed = data["is_crashed"]
-        
         self.last_update_timestamp = time_ns()

@@ -1,10 +1,9 @@
-from socket_wrapper import _send
 from socket import socket
-from time import sleep
+from time import sleep, time_ns
 from client_room import Room, Client
 from typing import Dict
 
-from CONSTANTS import HOST, PORT, TICK_SPEED, TICKS_PER_BROADCAST
+from CONSTANTS import TICK_SPEED, TICKS_PER_BROADCAST
 
 def broadcast_mainloop(id_to_room: Dict[str, Room], id_to_client: Dict[str, Client]) -> None:
     """
@@ -31,12 +30,14 @@ def broadcast_mainloop(id_to_room: Dict[str, Room], id_to_client: Dict[str, Clie
         if counter == TICKS_PER_BROADCAST:
             counter = 0
             
-            # FOR EACH ROOM, DO STUFF!!!
+            marked_disbanded = []
             for room in id_to_room.values():
                 
                 num_connected = room.num_connected()
                 if num_connected == 0:
-                    print(f"\x1b[31mNot broadcasting to room {room.id} because it has no connected clients.\x1b[0m")
+                    print(f"\x1b[31mDisbanding room {room.id} because it has no connected clients.\x1b[0m")
+                    # disband room
+                    marked_disbanded.append(room.id)
                 else:
                     print(f"\x1b[35m{room.id}\x1b[0m: {num_connected} players, started={room.started}, ended={room.ended}")
                     
@@ -46,5 +47,10 @@ def broadcast_mainloop(id_to_room: Dict[str, Room], id_to_client: Dict[str, Clie
                     # DEBUG: print short physics info
                     for client in room.clients.values():
                         c: Client = client["client_obj"]
-                        print(f"\t{c.entity.color}:\x1b[33m p=[{c.entity.pos[0]:.3f},{c.entity.pos[1]:.3f}] v={c.entity.vel:.3f} a={c.entity.acc:.3f}, theta={c.entity.angle:.3f}\x1b[0m")
-                            
+                        print(f"\t{c.entity.color}:\x1b[33m p=[{c.entity.pos[0]:.3f},{c.entity.pos[1]:.3f}] v={c.entity.vel:.3f} a={c.entity.acc:.3f}, theta={c.entity.angle:.3f}, is_crashed={c.entity.crash_end_timestamp > time_ns()/1e9}\x1b[0m")
+            
+            # disband rooms
+            for room_id in marked_disbanded:
+                del id_to_room[room_id]
+                print(f"\x1b[31mDisbanded (deleted) empty room {room_id}.\x1b[0m")
+                                   

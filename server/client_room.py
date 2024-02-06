@@ -41,45 +41,44 @@ class Client:
         All other requests from the client will be HTTP, not socketio-based. <- i think
         
         ^ Therefore, they shoudln't interfere with this loop.
-        """
-    
-        def recv_loop():
-            while True:
-                
-                if self.stop_receiving: break
-                
-                # the client only sends keypress encodings, which are only 0-7 (representable in 1 byte)
-                data = self.sock.recv(1)
-                if data is None: break
-                
-                keydata = int.from_bytes(data, 'big')
-                
-                # key data should always be between 0 and 7. If not, ignore
-                if keydata < 0 or keydata > 7: 
-                    print(f"\x1b[34mClient \x1b[33m{self.id}\x1b[0m: Ignoring ineligible packet \x1b[33m{keydata}\x1b[0m")
-                    continue
-                
-                # Update keys
-                print(f"\x1b[34mClient \x1b[33m{self.id}\x1b[0m: Updating keys with code \x1b[33m{keydata}\x1b[0m")
-                
-                if not self.entity is None: 
-                    self.entity.update_keys(*decode_packet(keydata))
-                else:
-                    print(f"\x1b[34mClient \x1b[33m{self.id}\x1b[0m: No entity to update keys on!")
-                
-            print(f"\x1b[34mStopped receiving from Client \x1b[33m{self.id}\x1b[0m!\x1b[0m")
+        """        
             
         print(f"\x1b[34mClient \x1b[33m{self.id}\x1b[0m: Starting recv loop...")
-        
-        try:
-            threading.Thread(target=recv_loop).start()
-        except ConnectionAbortedError:
-            print(f"\x1b[34mClient \x1b[33m{self.id}\x1b[0m: Connection aborted!\x1b[0m")
-            self.sock.close()
-            self.sock = None
+        threading.Thread(target=self.recv_loop).start()
+     
+    def recv_loop(self):
+        while True:
             
-            # TODO - delete this client from the room
-            del self
+            if self.stop_receiving: break
+            
+            # the client only sends keypress encodings, which are only 0-7 (representable in 1 byte)
+            data = None
+            try:
+                data = self.sock.recv(1)
+            except (ConnectionAbortedError, ConnectionResetError):
+                print(f"\x1b[34mClient\x1b[33m {self.id}\x1b[31m: Connection aborted!\x1b[0m")
+                self.sock.close()
+                self.sock = None
+                
+                print(f"\x1b[34mStopped receiving from Client \x1b[33m{self.id}\x1b[0m!\x1b[0m") 
+                del self
+                
+            if data is None: break
+            
+            keydata = int.from_bytes(data, 'big')
+            
+            # key data should always be between 0 and 7. If not, ignore
+            if keydata < 0 or keydata > 7: 
+                print(f"\x1b[34mClient \x1b[33m{self.id}\x1b[0m: Ignoring ineligible packet \x1b[33m{keydata}\x1b[0m")
+                continue
+            
+            # Update keys
+            print(f"\x1b[34mClient \x1b[33m{self.id}\x1b[0m: Updating keys with code \x1b[33m{keydata}\x1b[0m")
+            
+            if not self.entity is None: 
+                self.entity.update_keys(*decode_packet(keydata))
+            else:
+                print(f"\x1b[34mClient \x1b[33m{self.id}\x1b[0m: No entity to update keys on!")
         
     def send_data(self, data, event_name: str = None) -> bool:
         """
@@ -93,23 +92,16 @@ class Client:
         if `event_name` is specified, then the message will be sent as an event, and the data must be JSON-serializable.
         """
         
-        if event_name:
-            # is event, so just pass through
-            _send(self.sock, data, event_name=event_name)
-            return
-        
-        try:
-            
-            # Handle list[float] case, which will be the main use of this function (sending a packet)
-            if type(data) == list:
-                _send(self.sock, array.array("f", data)) # no 'event' param, which causes `sock.send` to label the payload as a packet
-                return True
-            
-            _send(self.sock, data, event_name=event_name)
-            return True
-        
-        except (ConnectionAbortedError, ConnectionResetError):
+        if not hasattr(self, "sock") or self.sock is None:
+            print(f"\x1b[31mClient \x1b[33m{self.id}\x1b[31m: No socket to send data to!\x1b[0m")
             return False
+
+        # Handle list[float] case, which will be the main use of this function (sending a packet)
+        if type(data) == list and event_name is None:
+            return _send(self.sock, array.array("f", data)) # no 'event' param, which causes `sock.send` to label the payload as a packet
+        
+        # other cases
+        return _send(self.sock, data, event_name=event_name)
         
     def __str__(self) -> str:
         return f"(Client\x1b[0m id=\x1b[33m{self.id}\x1b[0m, room=\x1b[33m{self.room_id}\x1b[0m)"
@@ -181,10 +173,14 @@ class Room:
         
         for client in self.clients.values():
             # see game/screens/waiting_room.py - game-init and leave events dont need extra data.
-            client['client_obj'].send_data({
+            send_result = client['client_obj'].send_data({
                 "start_timestamp": start_time,
                 "init_world_data": self.world.get_world_data() # list of init physics data for each entity
             }, "game-init")
+            
+            # if not send result, remove client from room
+            if not send_result:
+                self.remove_client(client['client_obj'])
         
         print(f"Start game: Starting in approx {start_time - time.time()} seconds...")
         
@@ -223,10 +219,14 @@ class Room:
         # send the 'player-join' event to all other clients in the room, with the new client's username and color
         for client_id in self.clients:
             if client_id == client.id: continue
-            self.clients[client_id]['client_obj'].send_data({
+            send_result = self.clients[client_id]['client_obj'].send_data({
                 "username": new_client_username,
                 "color": self.clients[client.id]['color']
             }, "player-join")
+            
+            # if not send result, remove client from room
+            if not send_result:
+                self.remove_client(client)
             
         # add the new client to the world
         e = self.world.create_entity(new_client_username, self.clients[client.id]['color'], client, self.spawn_locations.pop(), hitbox_radius=5)
@@ -255,6 +255,8 @@ class Room:
         # see game/screens/waiting_room.py - game-init and leave events dont need extra data.
         client.send_data({}, "leave")
         
+        # we dont actually care if the client is still connected or not, they get removed anyway
+        
         # remove them from the room
         # note - the `Client` object shouldn't be destroyed because of Python's garbage collector maintaining a nonzero reference count
         # We can try testing this out later, for now just be safe and set to None
@@ -273,9 +275,22 @@ class Room:
         
         This also performs internal checks to see which clients are still connected. All disconnected sockets will be removed.
         """
+        
+        marked_for_deletion = []
+        
         for c in self.clients.values():
+            
+            # if no sock attribute, remove (it was probably deleted by another check)
+            if not hasattr(c["client_obj"], "sock") or c["client_obj"].sock is None:
+                marked_for_deletion.append(c["client_obj"])
+                continue
+            
             if c["client_obj"].sock.fileno() == -1:
-                self.remove_client(c["client_obj"])
+                marked_for_deletion.append(c["client_obj"])
+        
+        # remove all marked clients
+        for c in marked_for_deletion:
+            self.remove_client(c)
         
         # All dc'ed clients removed, send back new len
         return len(self.clients)
@@ -321,7 +336,10 @@ class Room:
         if not self.started or self.ended: return
         for client in self.clients.values():
             # pre-encode data
-            client["client_obj"].send_data(json.dumps(current_world_data).encode('utf-8'))
+            send_result = client["client_obj"].send_data(json.dumps(current_world_data).encode('utf-8'))
+            
+            if not send_result:
+                self.remove_client(client["client_obj"])
 
     def broadcast_event(self, payload: dict, event_name: str):
         """

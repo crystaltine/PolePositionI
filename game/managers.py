@@ -8,9 +8,11 @@ import threading
 import os
 from time import time_ns
 from typing import Union, Dict, List, Callable, Any, TYPE_CHECKING
-from animator import RoadAnimator, SpriteStripAnim
+from tkinter import *
+from tkinter import messagebox, simpledialog
 
 from CONSTANTS import *
+from animator import RoadAnimator, SpriteStripAnim
 from elements.button import Button
 from elements.input import Input
 from world.world import World
@@ -28,7 +30,10 @@ class GameManager:
     Implements functions that allow for general display and game management.
     """
     
-    game_renderer = None # of type `renderer.Renderer`
+    tk_root = Tk()
+    tk_root.withdraw()
+    
+    game_renderer: 'RenderingManager' = None # of type `renderer.Renderer`
     #: Union[None, 'RenderingManager']
     """ Used for live game. Is `None` until set by `./screens/waiting_room.py` on the `game-init` event. """
     
@@ -493,15 +498,8 @@ class RenderingManager:
             
             if vertical_pos is None:
                 continue # if the entity is behind us, don't draw it
-            
-            # if they are crashed, pass in the percentage of the crash animation this entity has left
-            crash_progress = None
-            if other.is_crashed:
-                time_until_crash_end = other.crash_end_timestamp - time_ns()/1e9
-                if time_until_crash_end > 0:
-                    crash_progress = 1 - time_until_crash_end/5
         
-            RenderingManager.draw_entity(size, (horizontal_pos, vertical_pos), other.color, crash_progress)
+            RenderingManager.draw_entity(size, (horizontal_pos, vertical_pos), other.color, other.is_crashed)
             
     @staticmethod
     def get_rendered_size(us: 'Entity', other: 'Entity') -> int:
@@ -509,17 +507,17 @@ class RenderingManager:
         Returns a size in px for the entity based on how far away and at what angle it is from us.
         
         Calculation formula:
-        `size = max(0, 300-(3/2)*dist)`
+        `size = 300 e^(-0.0015*dist)
         
         ### Note: With this formula (and the `if size < 30` check in `render_frame`), 
-        # entities will not be rendered if they are more than 255m away.
+        # entities will not be rendered if they are more than 300m away (0 size).
         """
         
         dist = other.pos[0] - us.pos[0]
         
         # theta = (math.asin(other.hitbox_radius / (dist + other.hitbox_radius))) # For old system
          
-        width_on_screen = max(0, 300-(3/2)*dist)
+        width_on_screen = min(400, 300 * math.exp(-0.015*dist)) if dist < 300 else 0
         return round(width_on_screen)
         
     @staticmethod
@@ -567,14 +565,16 @@ class RenderingManager:
         # The equation below provides approx. scale 1 when close, approx. scale 0.5 at 166.7m, scale 0 at 333.3m.
         # However, we should not render entities that are >300m away.
         enemy_x_dist = other.pos[0] - us.pos[0]
-        y_pos_offset_distance_scale = max(0.01, -0.01 * enemy_x_dist + 1) 
+        
+        y_pos_offset_distance_scale = max(0.01, 0.3+0.7*math.exp(-0.00005 * enemy_x_dist**2)) if enemy_x_dist > 0 else 1 # if behind us, don't squeeze back into middle
+        
         ######################################################################
         
         ################### OFFSET BASED ON ROAD CURVATURE ###################
-        curvature_offset = self.world.gamemap.angle_at(us.pos[0]) * (0.005 * enemy_x_dist)**2 
+        curvature_offset = self.world.gamemap.angle_at(us.pos[0]) * (0.03 * enemy_x_dist)**1.2 
         ######################################################################
         
-        print(f"color={other.color} curv={curvature_offset} + y_pos={y_pos_offset}*y_pos scale={y_pos_offset_distance_scale}")
+        # print(f"color={other.color} curv={curvature_offset} + y_pos={y_pos_offset}*y_pos scale={y_pos_offset_distance_scale}")
         
         return curvature_offset + y_pos_offset * y_pos_offset_distance_scale
 
@@ -607,17 +607,16 @@ class RenderingManager:
         return radians % (2*math.pi) - math.pi
     
     @staticmethod
-    def draw_entity(size: int, pos: tuple[int, int], color: str, crash_progress: float = None):
+    def draw_entity(size: int, pos: tuple[int, int], color: str, is_crashed: bool = False):
         """
         Draws an entity on the screen, given a size, offset, and color.
         
         Renders a crash animation if the `crash_progress` param is given.
         """
         
-        if crash_progress is not None:
-            # Crashes should last 5 seconds. We pick which frame to use (0->77) based on how many seconds left
-            frame_index = int(78*(5 - 5*crash_progress)/5)
-            boom_frame = GameManager.boom.images[frame_index].convert_alpha()
+        if is_crashed:
+            # just draw 20th frame
+            boom_frame = GameManager.boom.images[19].convert_alpha()
             
             # scale image by 2x, and also by the given size
             boom_frame = pygame.transform.scale(boom_frame, (2*size, 2*size))
@@ -731,6 +730,11 @@ class SocketManager:
                         print(f"\x1b[2mIgnoring Unhandled event \x1b[0m\x1b[33m{event_name}\x1b[0m")
             except (ConnectionAbortedError, ConnectionResetError) as e:
                 print(f"\x1b[31mConnection to server disrupted!\x1b[0m")
+                
+                # show a popup using tkinter
+                GameManager.tk_root.withdraw()
+                messagebox.showerror("Connection Error", "The connection to the server was disrupted. You might want to restart the game.")
+                
                         
         self.listen_thread = threading.Thread(target=listen_inner)
         self.listen_thread.start()
