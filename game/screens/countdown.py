@@ -10,6 +10,8 @@ def countdown():
     until the timestamp in `GameManager.start_timestamp` is reached.
     """
 
+    last_beep_timestamp = 0
+
     while True:
         
         time_left = int(GameManager.start_timestamp - time.time())
@@ -21,14 +23,9 @@ def countdown():
         GameManager.game_renderer.render_frame()
         
         #play beeping sound effect for countdown
-        vol_high = 0.7
-        vol_low = 0.3
-        if ((0 < time_left <= 5) and (time_left%2 ==1)) :  
+        if time.time_ns() - last_beep_timestamp > 1e9:
+            last_beep_timestamp = time.time_ns()
             pygame.mixer.Sound.play(SFX_BEEP)
-            for i in range (1):
-                pygame.mixer.Sound.set_volume(SFX_BEEP, (vol_low if i == 1 else vol_high))
-            
-
             
         # draw the countdown
         text = FONT_LARGE.render(f"{time_left if time_left>0 else 'Go!'}", True, (255, 255, 255))

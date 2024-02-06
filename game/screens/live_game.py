@@ -1,4 +1,3 @@
-import pygame
 from typing import Callable, Any
 
 from managers import GameManager
@@ -22,7 +21,6 @@ def live_game() -> bool:
     
     So after this function runs, just return to the main menu. (the game_end screen also returns when user clicks "back to main menu")
     """
-    
     us = GameManager.get_our_entity()
     
     def _leave(_):
@@ -31,6 +29,9 @@ def live_game() -> bool:
     def _proceed(data):
         GameManager.leaderboard_data = data
         GameManager.live_game_proceed_code = 2
+        
+        # play the end sound
+        SFX_ENDING.play()
         
     def _crash(crash_data):
         # set our new physics
@@ -56,14 +57,16 @@ def live_game() -> bool:
         for event in pygame.event.get():
             if event == pygame.QUIT:
                 GameManager.quit_game()
-
                 
             GameManager.socket_man.handle_game_keypresses(event)
         
         # Speed text
-        velocity_mph = us.vel * 2.237
+        velocity_mph = ms_to_mph(us.vel)
         speedometer_text = FONT_LARGE.render(f"{velocity_mph:.1f} mph", True, (255, 255, 255))
         GameManager.screen.blit(speedometer_text, (20, 20))
+        
+        # make the rev sound louder as we go faster
+        rev_sound.set_volume(0.6+0.002*us.vel) # 60% at 0mph, 100% at 200mph, linear
         
         # 800px, right-aligned progress bar
         pbar_frame_x, pbar_frame_y = 380, 8

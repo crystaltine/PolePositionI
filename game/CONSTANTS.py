@@ -42,6 +42,8 @@ ROAD_FRAMES_DIR = "assets/road_frames/"
 FRAMES_PER_ANGLE = 4
 """ The number of road textures we have drawn for every angle. """
 
+ms_to_mph = lambda meters_per_second: meters_per_second * 2.237
+
 # hex is 4370ff
 SKY_RGB = (67, 112, 255)
 BLACK = (0,0,0)
@@ -85,7 +87,7 @@ sfx_button_hover = pygame.mixer.Sound('./game/assets/sounds/button_hover.mp3')
 sfx_button_click = pygame.mixer.Sound('./game/assets/sounds/button_click.mp3')
 
 # SFX_CAR_VROOM = pygame.mixer.Sound('./game/assets/sounds/carVroom.mp3')
-SFX_INTRO = pygame.mixer.Sound('./game/assets/sounds/intro.mp3')
+SFX_ENDING = pygame.mixer.Sound('./game/assets/sounds/ending.mp3')
 SFX_SUCCESS = pygame.mixer.Sound('./game/assets/sounds/success.mp3')
 SFX_BEEP = pygame.mixer.Sound("./game/assets/sounds/beep-22.mp3")
 

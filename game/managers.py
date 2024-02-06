@@ -114,7 +114,7 @@ class GameManager:
     """This will be set once we join/create a room and obtain a car color."""
 
     #animted explosion
-    boom = SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets\\collision explosion'), (0, 0, WIDTH, HEIGHT), 5, -1, True, 0.25)
+    boom = SpriteStripAnim(os.path.join(os.path.dirname(__file__), 'assets/explosion'), (0, 0, WIDTH, HEIGHT), 5, -1, True, 0.25)
 
     progressbar_img = pygame.image.load('./game/assets/progress_bar_frame.png')
 
