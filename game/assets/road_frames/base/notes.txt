@@ -1,0 +1,4 @@
+These are the pre-transformed versions of all the road textures.
+
+# important:
+I forgot to change the red/white linings between frames here. They should be fixed for each texture in actual usage, though.

@@ -88,6 +88,7 @@ class GameManager:
     
     # main assets
     screen = pygame.display.set_mode([WIDTH,HEIGHT])
+    pygame.display.set_caption("Pole Position I")
     screen.fill(SKY_RGB)
 
     grass = pygame.image.load('./game/assets/grass.png')

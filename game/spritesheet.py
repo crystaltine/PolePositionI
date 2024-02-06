@@ -17,6 +17,11 @@ class spritesheet(object):
     def __init__(self, foldername):
         self.frames = []
         for file in os.listdir(foldername):
+            
+            # check if file ext is .png
+            if not file.endswith(".png"):
+                continue
+            
             file_path = os.path.join(foldername, file)
             self.frames.append(pygame.image.load(file_path).convert_alpha())
     # Load a specific image from a specific rectangle

@@ -126,7 +126,7 @@ class RoadAnimator:
         # check if we've moved enough to advance to the next frame
         if x_pos > self.last_frame_x_pos + METERS_PER_ANIMATION_FRAME:
             # move to the next image
-            self.frame_in_use = (self.frame_in_use + 1) % 2
+            self.frame_in_use = (self.frame_in_use + 1) % FRAMES_PER_ANGLE
             self.last_frame_x_pos = x_pos
         
         img = sprite.frames[self.frame_in_use]
