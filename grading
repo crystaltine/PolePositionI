@@ -1,0 +1,121 @@
+Project 3
+-------------------------------------------------------------------------------
+
+PolePositionI
+
+I did a bunch of extra sleuthing to come up with semi-reasonable numbers for
+lines of code (see comment to Michael below), but I still view them as
+approximations.
+
+Contributor Code Docu Asst Adj. Score
+----------- ---- ---- ---- ---- -----
+Camila       140    2   73   -1 17.5/20 B+
+Aidan        168   15        -1 17.5/20 B+
+Michael     4110  123   98   -1 17.5/20 B+
+Angus         38             -2 16.5/20 B
+Sindhura                 8   -2 16.5/20 B
+
+As an additional metric, here's how many times each contributor touched a code
+file in a commit. Take this with a grain of salt as well, touching a file could
+mean many different things, though I did filter out deletion of files. I see it
+as an upper bound of coding activity.
+
+Camila       62
+Aidan        51
+Michael     356
+Angus        34
+Sindhura     15
+
+I spent a long time trying to figure out how to assign grades for you. The
+project came out well in the end, and you should all feel proud of having been
+part of it. But the contributions are much too lopsided--something went wrong
+here. On one hand I could say Michael gets an A for doing all the work, and
+everyone else gets some bad grade. But the project is so lopsided that I think
+all of you share some responsibility, and I don't want to heap too much blame
+on any one person.
+
+Michael, you're clearly a very proficient coder. I want you to think about the
+next growth step for you: bringing everyone else along. Take responsibility not
+just for the technical work, but also for group dynamics.
+
+Everyone else, you should take a close look at your actual contributions
+(e.g. lines of code in the final game), and ask yourselves how you could
+self-advocate sooner to make sure you have a significant role in the
+project.
+
+For me, I am taking to heart that I need to give more structure around teamwork
+and milestones.
+
+Here's what to think about for the next project. Clearly you need to put more
+effort into communicating earlier, communicating often, and creating shared
+goals. How can you do that? If it's not happening naturally, what could each of
+you do to make sure the right conversation take place? For the avid coders
+among you, how do you pull yourself out of your happy place to think about how
+the team is doing?
+
+When you're on a team, every member is responsible for the well-being of the
+team.
+
+-------------------------------------------------------------------------------
+
+Rubric:
+1. Baseline:   15
+2. Creativity: +1.5     good original idea, client/server communication
+3. Design:     +1       nice road graphics, explosions
+4. Clean code: +1       readable code, good internal documentation
+5. Document:   +1       detailed description, good retrospective
+   Discount:   -1       for having five people in your group
+   Total:      18.5
+
+-------------------------------------------------------------------------------
+
+Comments:
+
+* The client/server aspect of the game is a nice twist, and you managed to get
+  it to work!
+
+* The road animation ended up looking pretty smooth! Definitely gives you the
+  feeling you're driving down a road. Nicely done.
+
+* The multi-frame explosion could get more polished, but it still adds a lot.
+
+* I like the solution you came up with in the end for handling maps. Splitting
+  the map into a visual for the user and a completely separate list of curves
+  works well in practice.
+
+* Michael, you moved a bunch of files from test_server to server in a way that
+  made it hard to trace them in the git log. Ask me sometime how to move files
+  in a way that preserves history.
+  commit that removed files: 351a3
+  commit that added   files: ab40a
+
+* The code is well structured and easy to read. Good job keeping functions
+  small and well commented.
+
+* The python docstrings are a nice touch.
+
+-------------------------------------------------------------------------------
+
+Generic fine print:
+a. "Code" shows the approximate lines of code contributed. This is just a line
+   count of "git blame" and shouldn't be taken too seriously. Still, in many
+   cases it gives quick sniff test of who did how much work.
+b. "Docu" is the same thing applied to the documentation if it is in markdown.
+c. "Adj." is a credit adjustment for contributors who did significantly more or
+   less than than average contributor. Credit adjustments sum to 0.
+d. "Score" is the final score, taken by adding the lines from the rubric and
+   the credit adjustment.
+
+1. "Baseline" means all requirements are met. This gives you a C if it's all you
+   have.
+2. "Creativity" is a measure of how much tought and energy you put into going
+   beyond the minimum requirements.
+   Points can be deducted here if some requirements are missing.
+3. "Design" gives extra points for the look of the UI and overall usability.
+   Points can be deducted here if there are errors or crashes.
+4. "Clean code" indicates how easy the code is to read. Good code consists of
+   short functions with clear names, organized in a coherent way.
+   Points can be deducted here if code is redundant or especially messy.
+5. "Document" gives extra points if the documentation is especially clear or
+   comprehensive.
+   Points can be deducted here if the documentation is missing or insufficient.
