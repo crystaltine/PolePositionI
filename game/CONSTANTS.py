@@ -49,3 +49,11 @@ MAIN_MENU_BOTTOM_RIGHT_TEXT = "Made with Pygame"
 HTTP_URL = 'http://localhost:4000'
 SOCKET_HOST = 'localhost'
 SOCKET_PORT = 3999
+
+"""TODO intergrate with MAPS constant, remove hardcode
+index 0 direction of turn, -1 left, 1 right
+index 1 pos of start turn
+index 2 pos of end turn
+"""
+LIST_OF_TURNS = [[1, 50, 105], [-1, 150, 250], [1, 99999, 9999999]]
+

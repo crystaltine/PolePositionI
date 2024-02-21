@@ -13,7 +13,9 @@ MAPS = {
     } 
 }
 
+
 DRAG_MULTIPLIER = 0.75
 """ The amount that velocity is multiplied by every second. """
 
 CAR_COLORS = set(["red", "orange", "yellow", "green", "blue", "purple", "pink", "white"])
+

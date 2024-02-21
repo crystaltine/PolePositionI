@@ -75,7 +75,7 @@ class Entity:
         # self.acc[1] = self.acc_mag * math.sin(math.radians(self.angle%360))
 
         # update velocity
-        vel_mag = 10*self.key_presses[1] - 10*self.key_presses[0]
+        vel_mag = 10*self.key_presses[0] - 10*self.key_presses[1]
         self.vel[0] = vel_mag * math.cos(math.radians(self.angle%360))
         self.vel[1] = vel_mag * math.sin(math.radians(self.angle%360))
         

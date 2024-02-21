@@ -33,6 +33,10 @@ class GameManager:
     waiting_room_game_started = False
     waiting_room_leave_game = False
     
+    #Currently assumes the map has at least one turn TODO: Don't use global
+    next_turn_index = 0
+    
+
     # used to determine when to break out of the live game loop
     live_game_quit = False
     
@@ -50,6 +54,8 @@ class GameManager:
     http_man: Union[None, 'HTTPManager'] = None
     """ Will be set externally """
     
+    
+
     # main assets
     screen = pygame.display.set_mode([WIDTH,HEIGHT])
     screen.fill(SKY_RGB)
@@ -63,6 +69,87 @@ class GameManager:
 
     car = pygame.image.load('./game/assets/atariPolePosition-carStraight.png')
 
+    curved_left_0 = pygame.image.load('./game/assets/road_frames/curved_left/0.png')
+    curved_left_1 = pygame.image.load('./game/assets/road_frames/curved_left/1.png')
+    curved_left_2 = pygame.image.load('./game/assets/road_frames/curved_left/2.png')
+    curved_left_3 = pygame.image.load('./game/assets/road_frames/curved_left/3.png')
+    curved_left_4 = pygame.image.load('./game/assets/road_frames/curved_left/4.png')
+    curved_left_5 = pygame.image.load('./game/assets/road_frames/curved_left/5.png')
+    curved_left_6 = pygame.image.load('./game/assets/road_frames/curved_left/6.png')
+    curved_left_7 = pygame.image.load('./game/assets/road_frames/curved_left/7.png')
+    curved_left_8 = pygame.image.load('./game/assets/road_frames/curved_left/8.png')
+    curved_left_9 = pygame.image.load('./game/assets/road_frames/curved_left/9.png')
+    curved_left_10 = pygame.image.load('./game/assets/road_frames/curved_left/10.png')
+    curved_left_11 = pygame.image.load('./game/assets/road_frames/curved_left/11.png')
+    curved_left_frames = [curved_left_0, curved_left_1, curved_left_2, curved_left_3, curved_left_4, curved_left_5, curved_left_6, curved_left_7, curved_left_8, curved_left_9, curved_left_10, curved_left_11]
+    
+    curved_right_0 = pygame.image.load('./game/assets/road_frames/curved_right/0.png')
+    curved_right_1 = pygame.image.load('./game/assets/road_frames/curved_right/1.png')
+    curved_right_2 = pygame.image.load('./game/assets/road_frames/curved_right/2.png')
+    curved_right_3 = pygame.image.load('./game/assets/road_frames/curved_right/3.png')
+    curved_right_4 = pygame.image.load('./game/assets/road_frames/curved_right/4.png')
+    curved_right_5 = pygame.image.load('./game/assets/road_frames/curved_right/5.png')
+    curved_right_6 = pygame.image.load('./game/assets/road_frames/curved_right/6.png')
+    curved_right_7 = pygame.image.load('./game/assets/road_frames/curved_right/7.png')
+    curved_right_8 = pygame.image.load('./game/assets/road_frames/curved_right/8.png')
+    curved_right_9 = pygame.image.load('./game/assets/road_frames/curved_right/9.png')
+    curved_right_10 = pygame.image.load('./game/assets/road_frames/curved_right/10.png')
+    curved_right_11 = pygame.image.load('./game/assets/road_frames/curved_right/11.png')
+    curved_right_frames = [curved_right_0, curved_right_1, curved_right_2, curved_right_3, curved_right_4, curved_right_5, curved_right_6, curved_right_7, curved_right_8, curved_right_9, curved_right_10, curved_right_11]
+
+    straight_road_0 = pygame.image.load('./game/assets/road_frames/straight_road/0.png')
+    straight_road_1 = pygame.image.load('./game/assets/road_frames/straight_road/1.png')
+    straight_road_2 = pygame.image.load('./game/assets/road_frames/straight_road/2.png')
+    straight_road_3 = pygame.image.load('./game/assets/road_frames/straight_road/3.png')
+    straight_road_4 = pygame.image.load('./game/assets/road_frames/straight_road/4.png')
+    straight_road_5 = pygame.image.load('./game/assets/road_frames/straight_road/5.png')
+    straight_road_6 = pygame.image.load('./game/assets/road_frames/straight_road/6.png')
+    straight_road_7 = pygame.image.load('./game/assets/road_frames/straight_road/7.png')
+    straight_road_8 = pygame.image.load('./game/assets/road_frames/straight_road/8.png')
+    straight_road_9 = pygame.image.load('./game/assets/road_frames/straight_road/9.png')
+    straight_road_10 = pygame.image.load('./game/assets/road_frames/straight_road/10.png')
+    straight_road_11 = pygame.image.load('./game/assets/road_frames/straight_road/11.png')
+    straight_road_frames = [straight_road_0, straight_road_1, straight_road_2, straight_road_3, straight_road_4, straight_road_5, straight_road_6, straight_road_7, straight_road_8, straight_road_9, straight_road_10, straight_road_11]
+
+    left_centering_0 = pygame.image.load('./game/assets/road_frames/left_centering/0.png')
+    left_centering_1 = pygame.image.load('./game/assets/road_frames/left_centering/1.png')
+    left_centering_2 = pygame.image.load('./game/assets/road_frames/left_centering/2.png')
+    left_centering_3 = pygame.image.load('./game/assets/road_frames/left_centering/3.png')
+    left_centering_4 = pygame.image.load('./game/assets/road_frames/left_centering/4.png')
+    left_centering_5 = pygame.image.load('./game/assets/road_frames/left_centering/5.png')
+    left_centering_6 = pygame.image.load('./game/assets/road_frames/left_centering/6.png')
+    left_centering_7 = pygame.image.load('./game/assets/road_frames/left_centering/7.png')
+    left_centering_frames = [left_centering_0, left_centering_1, left_centering_2, left_centering_3, left_centering_4, left_centering_5, left_centering_6, left_centering_7]
+
+    right_centering_0 = pygame.image.load('./game/assets/road_frames/right_centering/0.png')
+    right_centering_1 = pygame.image.load('./game/assets/road_frames/right_centering/1.png')
+    right_centering_2 = pygame.image.load('./game/assets/road_frames/right_centering/2.png')
+    right_centering_3 = pygame.image.load('./game/assets/road_frames/right_centering/3.png')
+    right_centering_4 = pygame.image.load('./game/assets/road_frames/right_centering/4.png')
+    right_centering_5 = pygame.image.load('./game/assets/road_frames/right_centering/5.png')
+    right_centering_6 = pygame.image.load('./game/assets/road_frames/right_centering/6.png')
+    right_centering_7 = pygame.image.load('./game/assets/road_frames/right_centering/7.png')
+    right_centering_frames = [right_centering_0, right_centering_1, right_centering_2, right_centering_3, right_centering_4, right_centering_5, right_centering_6, right_centering_7]
+
+    turning_left_0 = pygame.image.load('./game/assets/road_frames/turning_left/0.png')
+    turning_left_1 = pygame.image.load('./game/assets/road_frames/turning_left/1.png')
+    turning_left_2 = pygame.image.load('./game/assets/road_frames/turning_left/2.png')
+    turning_left_3 = pygame.image.load('./game/assets/road_frames/turning_left/3.png')
+    turning_left_4 = pygame.image.load('./game/assets/road_frames/turning_left/4.png')
+    turning_left_5 = pygame.image.load('./game/assets/road_frames/turning_left/5.png')
+    turning_left_6 = pygame.image.load('./game/assets/road_frames/turning_left/6.png')
+    turning_left_7 = pygame.image.load('./game/assets/road_frames/turning_left/7.png')
+    turning_left_frames = [turning_left_0, turning_left_1, turning_left_2, turning_left_3, turning_left_4, turning_left_5, turning_left_6, turning_left_7]
+
+    turning_right_0 = pygame.image.load('./game/assets/road_frames/turning_right/0.png')
+    turning_right_1 = pygame.image.load('./game/assets/road_frames/turning_right/1.png')
+    turning_right_2 = pygame.image.load('./game/assets/road_frames/turning_right/2.png')
+    turning_right_3 = pygame.image.load('./game/assets/road_frames/turning_right/3.png')
+    turning_right_4 = pygame.image.load('./game/assets/road_frames/turning_right/4.png')
+    turning_right_5 = pygame.image.load('./game/assets/road_frames/turning_right/5.png')
+    turning_right_6 = pygame.image.load('./game/assets/road_frames/turning_right/6.png')
+    turning_right_7 = pygame.image.load('./game/assets/road_frames/turning_right/7.png')
+    turning_right_frames = [turning_right_0, turning_right_1, turning_right_2, turning_right_3, turning_right_4, turning_right_5, turning_right_6, turning_right_7]
     # Buttons
     create_game_button = Button(pos=(340,400), display_text="CREATE GAME", base_color="#ffffff", hovering_color="#96faff", image=BUTTON_LARGE)
 
@@ -104,7 +191,7 @@ class GameManager:
         
         GameManager.screen.blit(GameManager.grass, (0, HEIGHT - GameManager.grass.get_height()))
         GameManager.screen.blit(GameManager.mtns, (0, 0))
-        
+    
     @staticmethod
     def draw_dynamic_background(angle: int):
         """
@@ -199,6 +286,9 @@ class GameManager:
         """
         GameManager.screen.blit(c:=GameManager.car, ((WIDTH/2 - c.get_width()/2) - sideways_pos * 4, 4*HEIGHT/5 - c.get_height()/2))
     
+
+
+    
     @staticmethod 
     def quit_game():
         """
@@ -227,6 +317,7 @@ class RenderingManager:
     
     @TODO - we should probably destroy this object when the game ends (once we implement game end logic)
     """
+
     
     def __init__(self, init_entities: list = []) -> None:
         """
@@ -252,6 +343,7 @@ class RenderingManager:
         map_class = get_map(GameManager.map_name)
         self.world = World(map_class.world_size, map_class.track_geometry)
         
+        
         for entity in init_entities:
             self.place_entity(entity)
 
@@ -260,6 +352,7 @@ class RenderingManager:
         """
         Draws on the screen a single frame based on the current state of the internal physics engine.
         """
+        
         
         GameManager.draw_dynamic_background(GameManager.get_our_entity().angle%360)
         
@@ -271,10 +364,46 @@ class RenderingManager:
             size = RenderingManager.get_rendered_size(other)
             pos = (WIDTH/2 + RenderingManager.angle_offset(other), RenderingManager.get_y_pos(other))
             RenderingManager.draw_entity(size, pos, other.color)
-            
+
+        RenderingManager.render_road(GameManager.get_our_entity().pos[0])
+    
         GameManager.draw_car(GameManager.get_our_entity().pos[1]) # draw our own car on top of everything else
 
         pygame.display.update()
+    
+    @staticmethod
+    def render_road(vert_pos):
+        #Turn has ended
+        if LIST_OF_TURNS[GameManager.next_turn_index][2] + 8 < vert_pos:
+            current_frame = math.floor(vert_pos/1.8) % 12
+            GameManager.next_turn_index += 1
+            GameManager.screen.blit(GameManager.straight_road_frames[current_frame], (300, 240))
+        #Turn is ending 
+        elif LIST_OF_TURNS[GameManager.next_turn_index][2] < vert_pos:
+            current_frame = math.floor(vert_pos/1.8) % 8
+            if LIST_OF_TURNS[GameManager.next_turn_index][0] == 1:
+                GameManager.screen.blit(GameManager.right_centering_frames[current_frame], (300, 240))
+            else:
+                GameManager.screen.blit(GameManager.left_centering_frames[current_frame], (300, 240))
+        #In the middle of a turn
+        elif LIST_OF_TURNS[GameManager.next_turn_index][1] < vert_pos:
+            current_frame = math.floor(vert_pos/1.8) % 12
+            if LIST_OF_TURNS[GameManager.next_turn_index][0] == 1:
+                GameManager.screen.blit(GameManager.curved_right_frames[current_frame], (300, 240))
+            else:
+                GameManager.screen.blit(GameManager.curved_left_frames[current_frame], (300, 240))
+        #Turn is starting
+        elif LIST_OF_TURNS[GameManager.next_turn_index][1] - 8 < vert_pos:
+            current_frame = math.floor(vert_pos/1.8) % 8
+            if LIST_OF_TURNS[GameManager.next_turn_index][0] == 1:
+                GameManager.screen.blit(GameManager.turning_right_frames[current_frame], (300, 240))
+            else:
+                GameManager.screen.blit(GameManager.turning_left_frames[current_frame], (300, 240))
+        #Not reached turn yet
+        else:
+            current_frame = math.floor(vert_pos/1.8) % 12
+            GameManager.screen.blit(GameManager.straight_road_frames[current_frame], (300, 240))
+
         
     def tick_world(self):
         """
@@ -284,6 +413,8 @@ class RenderingManager:
         """
         
         self.world.update()
+
+ 
     
     def place_entity(self, entity_data: dict) -> bool:
         """
